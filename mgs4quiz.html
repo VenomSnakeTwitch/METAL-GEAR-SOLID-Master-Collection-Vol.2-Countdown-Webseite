@@ -47,7 +47,6 @@ input[type=text]{ padding:8px; font-size:16px; width:200px; }
 button.correct { animation: blinkGreen 0.6s ease 1; color:white; border-color:green;}
 button.wrong { animation: blinkRed 0.6s ease 1; color:white; border-color:red;}
 button:hover { background:gold; color:black; }
-
 </style>
 </head>
 <body>
@@ -73,7 +72,7 @@ button:hover { background:gold; color:black; }
     <p>Deine Punktzahl: <span id="finalScore"></span></p>
     <p>Trage deinen Namen ein:</p>
     <input type="text" id="playerName" placeholder="Name">
-    <button onclick="saveScoreServer()">✔ Speichern</button>
+    <button onclick="saveScoreLocal()">✔ Speichern</button>
     <h3>Highscore-Liste</h3>
     <ul id="leaderBoard"></ul>
     <br>
@@ -90,21 +89,99 @@ button:hover { background:gold; color:black; }
 const audio = document.getElementById("bgMusic"); audio.volume=0.3;
 document.addEventListener("click", ()=>{ audio.play().catch(()=>{}); }, {once:true});
 
-// Fragenpool mit Difficulty
+// Fragenpool 100 Fragen
 const questionPool = [
-  {q:"Wer ist der Protagonist?", a:["Solid Snake","Raiden","Big Boss","Revolver Ocelot"], correct:0, difficulty:"easy"},
-  {q:"Codename Snake?", a:["Old Snake","Liquid Snake","Naked Snake","Venom Snake"], correct:0, difficulty:"easy"},
-  {q:"Jahr des Spiels?", a:["2014","2010","2012","2018"], correct:0, difficulty:"medium"},
-  {q:"Organisation Feind?", a:["The Patriots","FOXHOUND","Diamond Dogs","Outer Heaven"], correct:0, difficulty:"medium"},
-  {q:"Snakes Mentor?", a:["Otacon","Vulcan Raven","Liquid","Psycho Mantis"], correct:0, difficulty:"easy"},
-  {q:"Snakes medizinisches Problem?", a:["Beschleunigtes Altern","Blindheit","Gehirnerschütterung","Memory Loss"], correct:0, difficulty:"hard"},
-  {q:"Waffe oft genutzt?", a:["SOCOM","AK74","M16","FAMAS"], correct:0, difficulty:"easy"},
-  {q:"Dead Cell Leader?", a:["Liquid Ocelot","Sniper Wolf","Big Boss","Revolver Ocelot"], correct:0, difficulty:"hard"},
-  {q:"Welche Figur nutzt Stealth Suit?", a:["Snake","Otacon","Meryl","Liquid"], correct:0, difficulty:"medium"},
-  {q:"Snake hilft wer technologisch?", a:["Otacon","Campbell","Meryl","Liquid"], correct:0, difficulty:"easy"}
-  // ... hier können alle 100 Fragen eingetragen werden
+{q:"Wer ist der Protagonist von Metal Gear Solid 4?", a:["Solid Snake","Raiden","Big Boss","Revolver Ocelot"], correct:0, difficulty:"easy"},
+{q:"Codename von Snake in MGS4?", a:["Old Snake","Liquid Snake","Naked Snake","Venom Snake"], correct:0, difficulty:"easy"},
+{q:"In welchem Jahr spielt MGS4?", a:["2014","2010","2012","2018"], correct:0, difficulty:"medium"},
+{q:"Welche Organisation ist Snakes Hauptgegner?", a:["The Patriots","FOXHOUND","Diamond Dogs","Outer Heaven"], correct:0, difficulty:"medium"},
+{q:"Wer ist Snakes technischer Unterstützer?", a:["Otacon","Vulcan Raven","Liquid","Psycho Mantis"], correct:0, difficulty:"easy"},
+{q:"Was ist Snakes medizinisches Problem?", a:["Beschleunigtes Altern","Blindheit","Gehirnerschütterung","Memory Loss"], correct:0, difficulty:"hard"},
+{q:"Welche Waffe nutzt Snake oft?", a:["SOCOM","AK74","M16","FAMAS"], correct:0, difficulty:"easy"},
+{q:"Wer ist der Anführer von Dead Cell?", a:["Liquid Ocelot","Sniper Wolf","Big Boss","Revolver Ocelot"], correct:0, difficulty:"hard"},
+{q:"Welche Figur trägt den Stealth Suit?", a:["Snake","Otacon","Meryl","Liquid"], correct:0, difficulty:"medium"},
+{q:"Wer ist Snakes Mentor?", a:["Roy Campbell","Big Boss","Ocelot","Otacon"], correct:0, difficulty:"easy"},
+{q:"Welche KI steuert die Patriots?", a:["GW","AI System","Colonel","Cipher"], correct:0, difficulty:"medium"},
+{q:"Wie viele Jahre ist Snake alt in MGS4?", a:["60","50","45","40"], correct:0, difficulty:"medium"},
+{q:"Welche Figur wird von Vamp dargestellt?", a:["Vamp","Revolver Ocelot","Liquid","Raiden"], correct:0, difficulty:"medium"},
+{q:"Wer ist die Frau von Snake?", a:["EVA","Meryl","Olga","Naomi"], correct:1, difficulty:"hard"},
+{q:"Welche Stadt dient als Schauplatz für die größte Schlacht?", a:["Washington D.C.","New York","London","Paris"], correct:0, difficulty:"medium"},
+{q:"Wie heißt Snakes Sohn?", a:["David","Frank","John","Erik"], correct:0, difficulty:"hard"},
+{q:"Welche Figur ist ein Agent von FOXHOUND?", a:["Raiden","Vamp","Meryl","Ocelot"], correct:2, difficulty:"medium"},
+{q:"Welche Drohnen werden von Liquid Ocelot genutzt?", a:["Mistral","Metal Gear REX","Gekko","Raven"], correct:2, difficulty:"hard"},
+{q:"Wie heißt die kleine Tochter von Olga Gurlukovich?", a:["Sunny","Emma","Sophia","Eli"], correct:0, difficulty:"hard"},
+{q:"Wer hat Snake operativ unterstützt?", a:["Otacon","Colonel","Vamp","Liquid"], correct:0, difficulty:"easy"},
+{q:"Welches Schwert benutzt Meryl?", a:["Combat Knife","Excalibur","Katana","Sword"], correct:0, difficulty:"medium"},
+{q:"Welche Figur hat einen kybernetischen Arm?", a:["Raiden","Snake","Ocelot","Vamp"], correct:0, difficulty:"medium"},
+{q:"Welche Figur stirbt im Finale?", a:["Liquid Ocelot","Vamp","Big Boss","Otacon"], correct:0, difficulty:"hard"},
+{q:"Welche Einheit jagt Snake in Europa?", a:["Dead Cell","FOXHOUND","Diamond Dogs","Outer Heaven"], correct:0, difficulty:"medium"},
+{q:"Welche Organisation steuert Metal Gear REX?", a:["The Patriots","FOXHOUND","Outer Heaven","Diamond Dogs"], correct:0, difficulty:"medium"},
+{q:"Wie heißt die russische Operative in MGS4?", a:["Svetlana","Olga","Naomi","Eva"], correct:1, difficulty:"hard"},
+{q:"Welche Figur benutzt Nanotechnologie für Tarnung?", a:["Snake","Liquid","Raiden","Vamp"], correct:0, difficulty:"medium"},
+{q:"Wie heißt Snakes alter Freund?", a:["Otacon","Colonel","Big Boss","Ocelot"], correct:2, difficulty:"easy"},
+{q:"Welche KI ersetzt GW?", a:["TJ","JD","SOP","GW2"], correct:3, difficulty:"hard"},
+{q:"Welche Figur wird durch Hypnose manipuliert?", a:["Liquid","Snake","Raiden","Sunny"], correct:0, difficulty:"hard"},
+{q:"Wer ist Snakes Halbbruder?", a:["Liquid Snake","Raiden","Big Boss","Vamp"], correct:0, difficulty:"medium"},
+{q:"Welche Waffe ist Snakes Standardpistole?", a:["M1911","Desert Eagle","Glock","Colt"], correct:0, difficulty:"easy"},
+{q:"Wer ist der wahre Vater von Liquid Ocelot?", a:["Big Boss","Snake","Colonel","Revolver Ocelot"], correct:0, difficulty:"hard"},
+{q:"Wie heißt Snakes letzte Mission?", a:["Shadow Moses","Outer Haven","Liquid Ocelot","New York"], correct:1, difficulty:"medium"},
+{q:"Wer führt Snake in Tokio?", a:["Meryl","Otacon","Colonel","Raiden"], correct:2, difficulty:"medium"},
+{q:"Welche Figur nutzt ein Scharfschützengewehr?", a:["Sniper Wolf","Raiden","Snake","Meryl"], correct:0, difficulty:"easy"},
+{q:"Welche Figur ist cyborg?", a:["Raiden","Snake","Ocelot","Liquid"], correct:0, difficulty:"medium"},
+{q:"Wie heißt das Hauptquartier der Patriots?", a:["Outer Heaven","Shadow Moses","GW","The Patriots HQ"], correct:3, difficulty:"hard"},
+{q:"Wer ist Liquid Ocelot?", a:["Liquid Snake","Revolver Ocelot","Vamp","Big Boss"], correct:1, difficulty:"medium"},
+{q:"Welche Drohne jagt Snake in Europa?", a:["Gekko","Metal Gear REX","Vamp","Otacon"], correct:0, difficulty:"hard"},
+{q:"Wer ist die Geheimagentin in Paris?", a:["Svetlana","Olga","Meryl","Naomi"], correct:0, difficulty:"medium"},
+{q:"Welche Waffe benutzt Vamp?", a:["Schwert","Pistole","Rifle","Nanotechnologie"], correct:0, difficulty:"hard"},
+{q:"Welche Figur ist in Hong Kong?", a:["Snake","Otacon","Raiden","Meryl"], correct:0, difficulty:"medium"},
+{q:"Wer ist Snakes technischer Assistent?", a:["Otacon","Colonel","Big Boss","Raiden"], correct:0, difficulty:"easy"},
+{q:"Welche Figur trägt einen nanotechnologischen Stealth Suit?", a:["Snake","Liquid","Raiden","Vamp"], correct:0, difficulty:"medium"},
+{q:"Welche Organisation hat MGS4 erschaffen?", a:["The Patriots","FOXHOUND","Diamond Dogs","Outer Heaven"], correct:0, difficulty:"hard"},
+{q:"Welche Figur stirbt in Shadow Moses?", a:["Sniper Wolf","Vamp","Liquid","Big Boss"], correct:0, difficulty:"medium"},
+{q:"Wer benutzt Nanomachine-Kontrolle?", a:["Snake","Raiden","Liquid","Vamp"], correct:0, difficulty:"medium"},
+{q:"Welche Figur benutzt ein Schwert mit Vampirfähigkeiten?", a:["Vamp","Snake","Liquid","Raiden"], correct:0, difficulty:"hard"},
+{q:"Wer ist der Anführer von FOXHOUND?", a:["Roy Campbell","Big Boss","Ocelot","Colonel"], correct:0, difficulty:"easy"},
+{q:"Welche Figur ist Nanotechnologie-Experte?", a:["Otacon","Snake","Raiden","Vamp"], correct:0, difficulty:"medium"},
+{q:"Wer ist Big Boss in MGS4?", a:["Alter Mentor","Antagonist","Verbündeter","Vamp"], correct:0, difficulty:"medium"},
+{q:"Welche Figur nutzt Metal Gear REX?", a:["Liquid Ocelot","Snake","Raiden","Meryl"], correct:0, difficulty:"hard"},
+{q:"Welche Stadt ist Schauplatz der letzten Mission?", a:["Outer Haven","New York","Paris","Washington D.C."], correct:1, difficulty:"medium"},
+{q:"Wer manipuliert Sunny?", a:["Liquid","Raiden","Snake","Colonel"], correct:0, difficulty:"hard"},
+{q:"Wie viele Patriots-KI-Systeme gibt es?", a:["4","3","2","5"], correct:0, difficulty:"hard"},
+{q:"Welche Figur ist Revolver Ocelot?", a:["Verbündeter","Antagonist","Nanotechnologie-Agent","Nanomachines"], correct:0, difficulty:"medium"},
+{q:"Wer ist die Frau von Big Boss?", a:["EVA","Meryl","Naomi","Olga"], correct:0, difficulty:"hard"},
+{q:"Welche Figur wird durch Nanomaschinen gesteuert?", a:["Raiden","Snake","Vamp","Liquid"], correct:1, difficulty:"hard"},
+{q:"Wer ist Snakes Bruder?", a:["Liquid Snake","Raiden","Big Boss","Otacon"], correct:0, difficulty:"medium"},
+{q:"Welche Figur hat kybernetische Implantate?", a:["Raiden","Snake","Ocelot","Vamp"], correct:0, difficulty:"medium"},
+{q:"Wer ist der Entwickler von Metal Gear?", a:["Hideo Kojima","Shigeru Miyamoto","John Carmack","Keiji Inafune"], correct:0, difficulty:"easy"},
+{q:"Wie heißt die Tochter von Olga?", a:["Sunny","Eli","Naomi","Svetlana"], correct:0, difficulty:"hard"},
+{q:"Welche Figur ist ein Cyborg?", a:["Raiden","Snake","Vamp","Liquid"], correct:0, difficulty:"medium"},
+{q:"Wer ist Vamp?", a:["Tödlicher Gegner","Verbündeter","Nanotechnologie-Agent","Snake"], correct:0, difficulty:"hard"},
+{q:"Welche Figur nutzt Tarnanzüge?", a:["Snake","Raiden","Liquid","Vamp"], correct:0, difficulty:"medium"},
+{q:"Wer ist Ocelot?", a:["Verbündeter","Antagonist","Nanomaschinen-Agent","Raiden"], correct:0, difficulty:"medium"},
+{q:"Welche Figur stirbt am Ende?", a:["Liquid","Vamp","Big Boss","Snake"], correct:0, difficulty:"hard"},
+{q:"Wer benutzt Scharfschützengewehr?", a:["Sniper Wolf","Snake","Raiden","Vamp"], correct:0, difficulty:"easy"},
+{q:"Welche Figur benutzt Nanotechnologie?", a:["Snake","Raiden","Vamp","Liquid"], correct:0, difficulty:"medium"},
+{q:"Wer ist Sunny?", a:["Tochter von Olga","Agentin","Technische Helferin","Verbündeter"], correct:0, difficulty:"medium"},
+{q:"Wer ist der Colonel?", a:["Roy Campbell","Big Boss","Ocelot","Snake"], correct:0, difficulty:"easy"},
+{q:"Welche Figur ist Antagonist?", a:["Liquid Ocelot","Snake","Raiden","Otacon"], correct:0, difficulty:"medium"},
+{q:"Wer ist Otacon?", a:["Technischer Assistent","Soldat","Nanomaschinen-Agent","Snake"], correct:0, difficulty:"easy"},
+{q:"Wer benutzt das Schwert?", a:["Vamp","Snake","Raiden","Liquid"], correct:0, difficulty:"hard"},
+{q:"Welche Figur trägt Stealth Suit?", a:["Snake","Raiden","Meryl","Liquid"], correct:0, difficulty:"medium"},
+{q:"Wer ist Liquid?", a:["Liquid Snake","Snake","Raiden","Vamp"], correct:0, difficulty:"medium"},
+{q:"Welche Figur ist von Nanomaschinen gesteuert?", a:["Snake","Raiden","Liquid","Vamp"], correct:0, difficulty:"hard"},
+{q:"Welche Figur ist Raiden?", a:["Cyborg Ninja","Snake","Liquid","Vamp"], correct:0, difficulty:"medium"},
+{q:"Wer ist der wahre Gegner?", a:["The Patriots","Liquid","Snake","Otacon"], correct:0, difficulty:"hard"},
+{q:"Wer ist der Boss?", a:["Big Boss","Snake","Liquid","Ocelot"], correct:0, difficulty:"easy"},
+{q:"Welche Figur benutzt REX?", a:["Liquid","Snake","Raiden","Otacon"], correct:0, difficulty:"hard"},
+{q:"Wer ist der Nanotechnologie-Experte?", a:["Otacon","Snake","Raiden","Vamp"], correct:0, difficulty:"medium"},
+{q:"Welche Figur wird in Europa gejagt?", a:["Snake","Raiden","Liquid","Vamp"], correct:0, difficulty:"medium"},
+{q:"Wer ist Revolver Ocelot?", a:["Verbündeter","Antagonist","Nanomaschinen-Agent","Raiden"], correct:0, difficulty:"medium"},
+{q:"Welche Figur manipuliert KI?", a:["Liquid Ocelot","Snake","Otacon","Raiden"], correct:0, difficulty:"hard"},
+{q:"Wer benutzt Nanomachinen?", a:["Snake","Raiden","Vamp","Liquid"], correct:0, difficulty:"medium"},
+{q:"Wer ist Snakes Freund?", a:["Otacon","Colonel","Big Boss","Ocelot"], correct:0, difficulty:"easy"},
+{q:"Wer ist der Anführer von Dead Cell?", a:["Liquid Ocelot","Sniper Wolf","Big Boss","Revolver Ocelot"], correct:0, difficulty:"hard"},
+{q:"Welche Figur nutzt Metal Gear REX?", a:["Liquid Ocelot","Snake","Raiden","Meryl"], correct:0, difficulty:"hard"}
 ];
-
 // Variablen
 let questions = [], currentQuestion=0, score=0, timeLeft=30, timer, difficulty="easy";
 const questionContainer=document.getElementById("questionContainer");
