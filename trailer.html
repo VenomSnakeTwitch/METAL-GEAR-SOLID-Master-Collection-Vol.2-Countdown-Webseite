@@ -12,21 +12,50 @@ html, body {
     height: 100%;
     background: black;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
 video {
     max-width: 90%;
-    max-height: 90%;
+    max-height: 80%;
     border: 2px solid gold;
+    margin-top: 20px;
+}
+
+#backButton {
+    background: black;
+    border: 2px solid gold;
+    color: gold;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+#backButton:hover {
+    background: gold;
+    color: black;
 }
 </style>
 </head>
 <body>
+
+<!-- Zurück zur Hauptseite -->
+<button id="backButton" onclick="goBack()">← Zurück zur Hauptseite</button>
+
+<!-- Trailer Video -->
 <video controls autoplay>
     <source src="trailer.mp4" type="video/mp4">
     Dein Browser unterstützt kein HTML5 Video.
 </video>
+
+<script>
+function goBack() {
+    window.location.href = "index.html"; // Link zur Hauptseite
+}
+</script>
+
 </body>
 </html>
