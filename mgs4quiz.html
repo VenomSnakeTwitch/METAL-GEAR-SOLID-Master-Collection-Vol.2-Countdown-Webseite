@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MGS4 Quiz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    font-family: 'Orbitron', sans-serif;
+    background: url("background.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color: gold;
+    text-align: center;
+    overflow-x: hidden;
+}
+
+#overlay {
+    background: rgba(0,0,0,0.85);
+    width: 100%;
+    min-height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 36px;
+    text-shadow: 0 0 15px gold, 0 0 30px black;
+    margin-bottom: 20px;
+}
+
+.question {
+    font-size: 24px;
+    margin: 20px 0 10px 0;
+}
+
+.answers button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid gold;
+    background: black;
+    color: gold;
+    width: 50%;
+}
+
+.answers button.correct {
+    background: green;
+    color: white;
+    border-color: green;
+}
+
+.answers button.wrong {
+    background: red;
+    color: white;
+    border-color: red;
+}
+
+#nextButton {
+    margin-top: 20px;
+    display: none;
+}
+
+#scoreBoard {
+    margin-top: 30px;
+    display: none;
+}
+
+input[type=text] {
+    padding: 8px;
+    font-size: 16px;
+    width: 200px;
+}
+
+button:hover {
+    background: gold;
+    color: black;
+}
+</style>
+</head>
+<body>
+
+<div id="overlay">
+<h1>MGS4 Quiz</h1>
+
+<div id="quizContainer">
+    <div id="questionContainer"></div>
+    <div class="answers" id="answersContainer"></div>
+    <button id="nextButton" onclick="nextQuestion()">▶ Nächste Frage</button>
+</div>
+
+<div id="scoreBoard">
+    <h2>Quiz beendet!</h2>
+    <p>Deine Punktzahl: <span id="finalScore"></span></p>
+    <p>Trage deinen Namen ein:</p>
+    <input type="text" id="playerName" placeholder="Name">
+    <button onclick="saveScore()">✔ Speichern</button>
+
+    <h3>Persönliche Bestenliste</h3>
+    <ul id="leaderBoard"></ul>
+    <br>
+    <button onclick="goBack()">← Zurück zur Hauptseite</button>
+</div>
+
+<audio id="bgMusic" loop autoplay>
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+</div>
+
+<script>
+// Hintergrundmusik auf 30%
+const audio = document.getElementById("bgMusic");
+audio.volume = 0.3;
+
+// Quiz Daten: 20 Fragen
+const questions = [
+    {q:"Wer ist der Hauptcharakter in MGS4?", a:["Solid Snake","Raiden","Big Boss","Ocelot"], correct:0},
+    {q:"Wie lautet Snakes Deckname in MGS4?", a:["Old Snake","Liquid Snake","Naked Snake","Venom Snake"], correct:0},
+    {q:"Welches Jahr spielt MGS4?", a:["2014","2005","2010","2015"], correct:0},
+    {q:"Wer ist der Antagonist in MGS4?", a:["Liquid Ocelot","Revolver Ocelot","Vulcan Raven","Psycho Mantis"], correct:0},
+    {q:"Wie heißt Snakes Mentor?", a:["Roy Campbell","Big Boss","Ocelot","Otacon"], correct:0},
+    {q:"Welche Organisation kämpft gegen Snake?", a:["Sons of Liberty","The Patriots","FOXHOUND","MSF"], correct:1},
+    {q:"Welche Waffe benutzt Snake am häufigsten?", a:["SOCOM","M1911","AK47","FAMAS"], correct:0},
+    {q:"Wer hilft Snake technologisch?", a:["Otacon","Campbell","Meryl","Liquid"], correct:0},
+    {q:"Was ist Snakes Krankheit?", a:["Accelerated Aging","Cyborg Implant","Poison","Amnesia"], correct:0},
+    {q:"Welche Figur ist Ocelot in MGS4?", a:["Liquid Ocelot","Revolver Ocelot","Shalashaska","Alle genannten"], correct:3},
+    {q:"Wer ist Vamp?", a:["Feindlicher Cyborg","Member of Dead Cell","Psycho Mantis","Snakes Bruder"], correct:1},
+    {q:"Welche Rüstung nutzt Snake teilweise?", a:["Exosuit","Stealth Suit","Power Armor","Metal Gear"], correct:1},
+    {q:"Wie viele Kapitel hat MGS4?", a:["5","10","9","8"], correct:2},
+    {q:"Wer ist die Tochter von Big Boss?", a:["EVA","Meryl","Raiden","Snakes Mutter"], correct:0},
+    {q:"Was ist Laughing Octopus Fähigkeit?", a:["Shapeshifter","Cyborg","Hacker","Snakes Gegner"], correct:0},
+    {q:"Wer ist Solidus?", a:["Bruder von Snake","Feind","Patriot","Liquid"], correct:1},
+    {q:"Wie heißt die Organisation 'Dead Cell'?", a:["Feindgruppe","Snake Team","Patriot","FOX"], correct:0},
+    {q:"Welche Figur stirbt am Ende?", a:["Snake","Ocelot","Raiden","Meryl"], correct:0},
+    {q:"Wer ist Naomi Hunter?", a:["Wissenschaftlerin","Soldatin","Feind","Journalistin"], correct:0},
+    {q:"Welche Figur ist Cyborg Ninja?", a:["Raiden","Snake","Liquid","Ocelot"], correct:0}
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+const questionContainer = document.getElementById("questionContainer");
+const answersContainer = document.getElementById("answersContainer");
+const nextButton = document.getElementById("nextButton");
+const quizContainer = document.getElementById("quizContainer");
+const scoreBoard = document.getElementById("scoreBoard");
+
+function showQuestion() {
+    const q = questions[currentQuestion];
+    questionContainer.innerHTML = `<div class="question">${q.q}</div>`;
+    answersContainer.innerHTML = "";
+    q.a.forEach((ans, i)=>{
+        const btn = document.createElement("button");
+        btn.textContent = ans;
+        btn.onclick = ()=> checkAnswer(i);
+        answersContainer.appendChild(btn);
+    });
+    nextButton.style.display = "none";
+}
+
+function checkAnswer(i){
+    const q = questions[currentQuestion];
+    const buttons = answersContainer.querySelectorAll("button");
+    if(i === q.correct){
+        buttons[i].classList.add("correct");
+        score += 1000;
+    } else {
+        buttons[i].classList.add("wrong");
+        buttons[q.correct].classList.add("correct");
+    }
+    buttons.forEach(b=>b.disabled=true);
+    nextButton.style.display = "inline-block";
+}
+
+function nextQuestion(){
+    currentQuestion++;
+    if(currentQuestion < questions.length){
+        showQuestion();
+    } else {
+        endQuiz();
+    }
+}
+
+function endQuiz(){
+    quizContainer.style.display="none";
+    scoreBoard.style.display="block";
+    document.getElementById("finalScore").textContent = score;
+    showLeaderBoard();
+}
+
+// Bestenliste
+function saveScore(){
+    const name = document.getElementById("playerName").value || "Unbekannt";
+    let board = JSON.parse(localStorage.getItem("mgs4Leaderboard")) || [];
+    board.push({name:name, score:score});
+    board.sort((a,b)=>b.score-a.score);
+    if(board.length>10) board = board.slice(0,10);
+    localStorage.setItem("mgs4Leaderboard", JSON.stringify(board));
+    showLeaderBoard();
+}
+
+function showLeaderBoard(){
+    const board = JSON.parse(localStorage.getItem("mgs4Leaderboard")) || [];
+    const list = document.getElementById("leaderBoard");
+    list.innerHTML="";
+    board.forEach(entry=>{
+        const li = document.createElement("li");
+        li.textContent = `${entry.name}: ${entry.score} Punkte`;
+        list.appendChild(li);
+    });
+}
+
+// Zurück zur Hauptseite
+function goBack(){
+    window.location.href="index.html";
+}
+
+// Quiz starten
+showQuestion();
+</script>
+</body>
+</html>
