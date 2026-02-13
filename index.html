@@ -40,21 +40,19 @@ body {
 h1 {
     font-size: 36px;
     text-shadow: 0 0 15px gold, 0 0 30px black;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
+/* Countdown direkt unter Titel */
 #countdown {
     font-size: 36px;
-    margin: 10px 0;
+    margin: 10px 0 30px 0; /* Abstand nach unten */
     text-shadow: 0 0 15px gold, 0 0 30px black;
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
+    position: static; /* nicht mehr fixed */
     background: rgba(0,0,0,0.5);
     padding: 8px 16px;
     border-radius: 8px;
+    display: inline-block;
 }
 
 button {
@@ -147,7 +145,7 @@ Lautstärke:
 const targetDate = new Date(Date.UTC(2026, 7, 27, 14, 0, 0)).getTime(); 
 // 14:00 UTC = 16:00 Uhr deutscher Zeit
 
-// Countdown fixiert
+// Countdown unter Titel
 function updateCountdown() {
     const now = new Date().getTime();
     const distance = targetDate - now;
