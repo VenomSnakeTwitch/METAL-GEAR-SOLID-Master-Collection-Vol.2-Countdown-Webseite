@@ -50,6 +50,12 @@ input[type=range] {
     width: 200px;
     margin-top: 10px;
 }
+
+@media (max-width: 600px){
+    h1 { font-size: 24px; }
+    button { padding: 8px 16px; font-size: 14px; }
+    input[type=range] { width: 150px; }
+}
 </style>
 </head>
 <body>
@@ -65,10 +71,10 @@ input[type=range] {
     
     <div>
         <button onclick="prevSong()">⏮ Vorheriger</button>
-        <button onclick="playSong()">▶ Play</button>
-        <button onclick="pauseSong()">⏸ Pause</button>
+        <button id="playPauseBtn" onclick="togglePlay()">▶ Play</button>
         <button onclick="stopSong()">⏹ Stop</button>
         <button onclick="nextSong()">⏭ Nächster</button>
+        <button onclick="goToMenu()">🏠 Hauptmenü</button>
     </div>
     
     <div>
@@ -94,41 +100,62 @@ const songs = [
 let currentIndex = 0;
 const audio = document.getElementById("audioPlayer");
 const currentSongLabel = document.getElementById("currentSong");
+const playPauseBtn = document.getElementById("playPauseBtn");
 
+// Laden eines Songs
 function loadSong(index){
     audio.src = songs[index];
     currentSongLabel.textContent = "▶ " + songs[index];
     audio.play();
+    playPauseBtn.textContent = "⏸ Pause";
 }
 
-function playSong(){
-    audio.play();
+// Play/Pause Toggle
+function togglePlay(){
+    if(audio.paused){
+        audio.play();
+        playPauseBtn.textContent = "⏸ Pause";
+    } else {
+        audio.pause();
+        playPauseBtn.textContent = "▶ Play";
+    }
 }
 
-function pauseSong(){
-    audio.pause();
-}
-
+// Stop
 function stopSong(){
     audio.pause();
     audio.currentTime = 0;
+    playPauseBtn.textContent = "▶ Play";
 }
 
+// Nächster Song
 function nextSong(){
     currentIndex = (currentIndex + 1) % songs.length;
     loadSong(currentIndex);
 }
 
+// Vorheriger Song
 function prevSong(){
     currentIndex = (currentIndex - 1 + songs.length) % songs.length;
     loadSong(currentIndex);
 }
 
+// Lautstärke setzen
 function setVolume(value){
     audio.volume = value;
 }
 
+// Zum Hauptmenü
+function goToMenu(){
+    window.location.href = "index.html";
+}
+
+// Autoplay nächsten Track
 audio.addEventListener("ended", nextSong);
+
+// Initiale Lautstärke
+audio.volume = 0.3;
 </script>
 </body>
 </html>
+
