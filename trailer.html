@@ -10,7 +10,8 @@ html, body {
     padding: 0;
     width: 100%;
     height: 100%;
-    background: black;
+    background: url("backgroundtrailer.png") no-repeat center center fixed;
+    background-size: cover;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -25,6 +26,7 @@ video {
     object-fit: contain;
     border: 2px solid gold;
     border-radius: 5px;
+    z-index: 1;
 }
 
 #backButton {
@@ -79,7 +81,7 @@ video {
     color: gold;
     font-family: 'Orbitron', sans-serif;
     font-size: 14px;
-    z-index: 1001; /* über dem Video */
+    z-index: 1001;
 }
 </style>
 </head>
@@ -127,15 +129,6 @@ function setResolution(res) {
     video.currentTime = currentTime;
     video.play().catch(() => {});
 }
-
-// Optional: automatisch Vollbild (wenn erlaubt)
-document.addEventListener("DOMContentLoaded", () => {
-    const vid = document.getElementById("trailerVideo");
-    if (vid.requestFullscreen) {
-        // vid.requestFullscreen().catch(() => {}); 
-        // Vollbild deaktiviert, damit Footer sichtbar bleibt
-    }
-});
 </script>
 
 </body>
