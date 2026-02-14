@@ -45,31 +45,29 @@ h1 {
 }
 
 .time-box {
-    background: rgba(0,0,0,0.6);
-    padding: 15px 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px gold;
-    min-width: 110px;
+    background: black;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(255,215,0,0.6);
+    min-width: 120px;
 }
 
 .number {
-    font-size: 42px;
-    position: relative;
-    overflow: hidden;
-    height: 50px;
-}
-
-.number span {
-    position: absolute;
-    width: 100%;
-    left: 0;
-    transition: transform 0.5s ease, opacity 0.5s ease;
+    font-size: 48px;
+    letter-spacing: 3px;
+    transition: opacity 0.2s ease, text-shadow 0.2s ease;
 }
 
 .label {
     font-size: 14px;
     margin-top: 8px;
     letter-spacing: 1px;
+}
+
+/* Digital blink effect */
+.blink {
+    opacity: 0.4;
+    text-shadow: 0 0 25px gold;
 }
 
 button {
@@ -101,19 +99,19 @@ input[type=range] {
 
 <div id="countdown">
     <div class="time-box">
-        <div class="number"><span id="days">00</span></div>
+        <div class="number" id="days">00</div>
         <div class="label">Tage</div>
     </div>
     <div class="time-box">
-        <div class="number"><span id="hours">00</span></div>
+        <div class="number" id="hours">00</div>
         <div class="label">Stunden</div>
     </div>
     <div class="time-box">
-        <div class="number"><span id="minutes">00</span></div>
+        <div class="number" id="minutes">00</div>
         <div class="label">Minuten</div>
     </div>
     <div class="time-box">
-        <div class="number"><span id="seconds">00</span></div>
+        <div class="number" id="seconds">00</div>
         <div class="label">Sekunden</div>
     </div>
 </div>
@@ -139,31 +137,15 @@ input[type=range] {
 <script>
 const targetDate = new Date(Date.UTC(2026, 7, 27, 14, 0, 0)).getTime();
 
-function animateValue(id, newValue) {
+function updateUnit(id, value) {
     const el = document.getElementById(id);
-    const currentSpan = el;
-    if (currentSpan.textContent === newValue) return;
-
-    const newSpan = document.createElement("span");
-    newSpan.textContent = newValue;
-    newSpan.style.transform = "translateY(-100%)";
-    newSpan.style.opacity = "0";
-
-    currentSpan.parentElement.appendChild(newSpan);
-
-    requestAnimationFrame(() => {
-        newSpan.style.transform = "translateY(0)";
-        newSpan.style.opacity = "1";
-        currentSpan.style.transform = "translateY(100%)";
-        currentSpan.style.opacity = "0";
-    });
-
-    setTimeout(() => {
-        currentSpan.textContent = newValue;
-        currentSpan.style.transform = "translateY(0)";
-        currentSpan.style.opacity = "1";
-        newSpan.remove();
-    }, 500);
+    if (el.textContent !== value) {
+        el.classList.add("blink");
+        setTimeout(() => {
+            el.textContent = value;
+            el.classList.remove("blink");
+        }, 120);
+    }
 }
 
 function updateCountdown() {
@@ -180,10 +162,10 @@ function updateCountdown() {
     const minutes = String(Math.floor((distance % (1000*60*60)) / (1000*60))).padStart(2,'0');
     const seconds = String(Math.floor((distance % (1000*60)) / 1000)).padStart(2,'0');
 
-    animateValue("days", days);
-    animateValue("hours", hours);
-    animateValue("minutes", minutes);
-    animateValue("seconds", seconds);
+    updateUnit("days", days);
+    updateUnit("hours", hours);
+    updateUnit("minutes", minutes);
+    updateUnit("seconds", seconds);
 }
 
 setInterval(updateCountdown, 1000);
