@@ -13,23 +13,68 @@ html, body {
     padding: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;
     font-family: 'Orbitron', sans-serif;
     background: url("background.jpg") no-repeat center center fixed;
     background-size: cover;
     color: gold;
-    text-align: center;
 }
 
-#overlay {
-    background: rgba(0,0,0,0.85);
+/* Main Menu Leiste */
+#mainMenu {
+    position: fixed;
+    top: 0;
     width: 100%;
-    height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+#menuButtons {
+    display: flex;
+    gap: 10px;
+}
+
+#menuButtons button {
+    font-size: 14px;
+    padding: 8px 16px;
+    background: black;
+    border: 2px solid gold;
+    color: gold;
+    cursor: pointer;
+}
+
+#menuButtons button:hover {
+    background: gold;
+    color: black;
+}
+
+#fullscreenBtn {
+    font-size: 14px;
+    padding: 8px 16px;
+    background: black;
+    border: 2px solid gold;
+    color: gold;
+    cursor: pointer;
+}
+
+#fullscreenBtn:hover {
+    background: gold;
+    color: black;
+}
+
+/* Content */
+#overlay {
+    margin-top: 70px; /* Platz für die Leiste */
     padding: 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
 }
 
 h1 {
@@ -64,25 +109,13 @@ h1 {
     letter-spacing: 1px;
 }
 
-/* Digital blink effect */
 .blink {
     opacity: 0.4;
     text-shadow: 0 0 25px gold;
 }
 
 button {
-    background: black;
-    border: 2px solid gold;
-    color: gold;
-    padding: 8px 16px;
     margin: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-button:hover {
-    background: gold;
-    color: black;
 }
 
 input[type=range] {
@@ -93,8 +126,19 @@ input[type=range] {
 
 <body>
 
-<div id="overlay">
+<!-- Main Menu Leiste -->
+<div id="mainMenu">
+    <div id="menuButtons">
+        <button onclick="window.location.href='mgs4quiz.html'">▶ MGS4 Quiz starten</button>
+        <button onclick="window.location.href='trailer.html'">▶ Zum Trailer</button>
+        <button onclick="window.location.href='Music.html'">▶ Music-Seite</button>
+        <!-- Hier können später weitere Buttons hinzugefügt werden -->
+    </div>
+    <button id="fullscreenBtn" onclick="toggleFullscreen()">⛶ Vollbild</button>
+</div>
 
+<!-- Haupt Content -->
+<div id="overlay">
 <h1>METAL GEAR SOLID Master Collection Vol. 2 Veröffentlichung</h1>
 
 <div id="countdown">
@@ -119,24 +163,18 @@ input[type=range] {
 <div>
     <button onclick="playAudio()">▶ Play Music</button>
     <button onclick="pauseAudio()">⏸ Pause Music</button>
-    <button onclick="toggleFullscreen()">⛶ Fullscreen</button>
     <br><br>
     Lautstärke:
     <input type="range" min="0" max="1" step="0.01" value="0.3" oninput="setVolume(this.value)">
 </div>
 
-<button onclick="window.location.href='mgs4quiz.html'">▶ MGS4 Quiz starten</button>
-<button onclick="window.location.href='trailer.html'">▶ Zum Trailer</button>
-<button onclick="window.location.href='Music.html'">▶ Music-Seite</button>
-
-
 <audio id="bgMusic" loop autoplay>
     <source src="music.mp3" type="audio/mpeg">
 </audio>
-
 </div>
 
 <script>
+// Countdown
 const targetDate = new Date(Date.UTC(2026, 7, 27, 14, 0, 0)).getTime();
 
 function updateUnit(id, value) {
@@ -176,13 +214,13 @@ updateCountdown();
 // Audio
 const audio = document.getElementById("bgMusic");
 audio.volume = 0.3;
-
 document.addEventListener("click", () => audio.play().catch(()=>{}), { once:true });
 
 function playAudio(){ audio.play(); }
 function pauseAudio(){ audio.pause(); }
 function setVolume(value){ audio.volume = value; }
 
+// Vollbild
 function toggleFullscreen(){
     if(!document.fullscreenElement){
         document.documentElement.requestFullscreen();
