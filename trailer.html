@@ -3,71 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MGS4 Trailer</title>
+<title>Trailer</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
-
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
     background: black;
-    font-family: 'Orbitron', sans-serif;
-    color: gold;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    font-family: 'Orbitron', sans-serif;
 }
 
-#videoContainer {
-    position: relative;
-    max-width: 90%;
-    max-height: 80vh; /* Höhe begrenzen */
-    margin-top: 20px;
-}
-
-#videoContainer video {
+video {
     width: 100%;
-    height: auto;
-    border: 2px solid gold;
-    border-radius: 8px;
-}
-
-#copyright {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    color: gold;
-    font-size: 14px;
-    background: rgba(0,0,0,0.6);
-    padding: 3px 6px;
-    border-radius: 4px;
+    height: 100%;
+    object-fit: contain;
 }
 
 #backButton {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     background: black;
     border: 2px solid gold;
     color: gold;
     padding: 10px 20px;
     cursor: pointer;
     font-size: 16px;
-    border-radius: 5px;
-    margin-top: 20px;
-    transition: all 0.2s ease;
+    z-index: 1000;
 }
 
 #backButton:hover {
     background: gold;
     color: black;
-}
-
-#resContainer {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
 }
 
 .res-button {
@@ -85,24 +59,49 @@ html, body {
     background: gold;
     color: black;
 }
+
+#resContainer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+/* Footer unten links */
+#footer {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    color: gold;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    z-index: 1001; /* über dem Video */
+}
 </style>
 </head>
 <body>
 
-<div id="videoContainer">
-    <video id="trailerVideo" controls autoplay loop>
-        <source id="videoSource" src="trailer.mp4" type="video/mp4">
-        Dein Browser unterstützt kein Video.
-    </video>
-    <div id="copyright">© Konami / MGS4 Trailer</div>
-</div>
+<!-- Zurück zur Hauptseite -->
+<button id="backButton" onclick="goBack()">← Zurück zur Hauptseite</button>
 
+<!-- Auflösungs-Buttons -->
 <div id="resContainer">
     <button class="res-button" onclick="setResolution('1080p')">1080p</button>
     <button class="res-button" onclick="setResolution('4k')">4K</button>
 </div>
 
-<button id="backButton" onclick="goBack()">← Zurück zur Hauptseite</button>
+<!-- Trailer Video -->
+<video id="trailerVideo" controls autoplay loop>
+    <source id="videoSource" src="trailer.mp4" type="video/mp4">
+    Dein Browser unterstützt kein HTML5 Video.
+</video>
+
+<!-- Footer -->
+<div id="footer">
+    © 2026 VenomSnake_Twitch. Alle Rechte vorbehalten.
+</div>
 
 <script>
 function goBack() {
@@ -112,17 +111,19 @@ function goBack() {
 function setResolution(res) {
     const video = document.getElementById('trailerVideo');
     const source = document.getElementById('videoSource');
-    const currentTime = video.currentTime;
+    const currentTime = video.currentTime; // aktuelle Position merken
 
     if(res === '1080p') {
         source.src = 'trailer.mp4';
+        source.type = 'video/mp4';
     } else if(res === '4k') {
         source.src = 'trailer4k.mp4';
+        source.type = 'video/mp4';
     }
 
-    video.load();
-    video.currentTime = currentTime;
-    video.play().catch(()=>{});
+    video.load(); // Video neu laden
+    video.currentTime = currentTime; // Zeit wiederherstellen
+    video.play().catch(() => {}); // Fehler ignorieren
 }
 
 // Optional: automatisch Vollbild (wenn erlaubt)
