@@ -13,7 +13,7 @@ html, body {
     padding: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* Kein Scroll */
+    overflow: hidden;
     font-family: 'Orbitron', sans-serif;
     background: url("background.jpg") no-repeat center center fixed;
     background-size: cover;
@@ -30,23 +30,46 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
 }
 
 h1 {
     font-size: 36px;
     text-shadow: 0 0 15px gold, 0 0 30px black;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 #countdown {
-    font-size: 36px;
-    margin: 10px 0 30px 0;
-    text-shadow: 0 0 15px gold, 0 0 30px black;
-    background: rgba(0,0,0,0.5);
-    padding: 8px 16px;
-    border-radius: 8px;
-    display: inline-block;
+    display: flex;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.time-box {
+    background: rgba(0,0,0,0.6);
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px gold;
+    min-width: 110px;
+}
+
+.number {
+    font-size: 42px;
+    position: relative;
+    overflow: hidden;
+    height: 50px;
+}
+
+.number span {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.label {
+    font-size: 14px;
+    margin-top: 8px;
+    letter-spacing: 1px;
 }
 
 button {
@@ -75,7 +98,25 @@ input[type=range] {
 <div id="overlay">
 
 <h1>METAL GEAR SOLID Master Collection Vol. 2 Veröffentlichung</h1>
-<div id="countdown"></div>
+
+<div id="countdown">
+    <div class="time-box">
+        <div class="number"><span id="days">00</span></div>
+        <div class="label">Tage</div>
+    </div>
+    <div class="time-box">
+        <div class="number"><span id="hours">00</span></div>
+        <div class="label">Stunden</div>
+    </div>
+    <div class="time-box">
+        <div class="number"><span id="minutes">00</span></div>
+        <div class="label">Minuten</div>
+    </div>
+    <div class="time-box">
+        <div class="number"><span id="seconds">00</span></div>
+        <div class="label">Sekunden</div>
+    </div>
+</div>
 
 <div>
     <button onclick="playAudio()">▶ Play Music</button>
@@ -86,11 +127,9 @@ input[type=range] {
     <input type="range" min="0" max="1" step="0.01" value="0.3" oninput="setVolume(this.value)">
 </div>
 
-<!-- Buttons für Quiz und Trailer -->
 <button onclick="window.location.href='mgs4quiz.html'">▶ MGS4 Quiz starten</button>
 <button onclick="window.location.href='trailer.html'">▶ Zum Trailer</button>
 
-<!-- Hintergrundmusik -->
 <audio id="bgMusic" loop autoplay>
     <source src="music.mp3" type="audio/mpeg">
 </audio>
@@ -98,41 +137,68 @@ input[type=range] {
 </div>
 
 <script>
-// Countdown auf 27. August 2026, 16:00 Uhr deutscher Zeit
 const targetDate = new Date(Date.UTC(2026, 7, 27, 14, 0, 0)).getTime();
+
+function animateValue(id, newValue) {
+    const el = document.getElementById(id);
+    const currentSpan = el;
+    if (currentSpan.textContent === newValue) return;
+
+    const newSpan = document.createElement("span");
+    newSpan.textContent = newValue;
+    newSpan.style.transform = "translateY(-100%)";
+    newSpan.style.opacity = "0";
+
+    currentSpan.parentElement.appendChild(newSpan);
+
+    requestAnimationFrame(() => {
+        newSpan.style.transform = "translateY(0)";
+        newSpan.style.opacity = "1";
+        currentSpan.style.transform = "translateY(100%)";
+        currentSpan.style.opacity = "0";
+    });
+
+    setTimeout(() => {
+        currentSpan.textContent = newValue;
+        currentSpan.style.transform = "translateY(0)";
+        currentSpan.style.opacity = "1";
+        newSpan.remove();
+    }, 500);
+}
 
 function updateCountdown() {
     const now = new Date().getTime();
     const distance = targetDate - now;
 
-    if(distance < 0){
-        document.getElementById("countdown").textContent = "Veröffentlicht!";
+    if (distance < 0) {
+        document.getElementById("countdown").innerHTML = "<h2>Veröffentlicht!</h2>";
         return;
     }
 
-    const days = Math.floor(distance / (1000*60*60*24));
-    const hours = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
-    const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
-    const seconds = Math.floor((distance % (1000*60)) / 1000);
+    const days = String(Math.floor(distance / (1000*60*60*24))).padStart(2,'0');
+    const hours = String(Math.floor((distance % (1000*60*60*24)) / (1000*60*60))).padStart(2,'0');
+    const minutes = String(Math.floor((distance % (1000*60*60)) / (1000*60))).padStart(2,'0');
+    const seconds = String(Math.floor((distance % (1000*60)) / 1000)).padStart(2,'0');
 
-    document.getElementById("countdown").textContent =
-        days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+    animateValue("days", days);
+    animateValue("hours", hours);
+    animateValue("minutes", minutes);
+    animateValue("seconds", seconds);
 }
 
 setInterval(updateCountdown, 1000);
 updateCountdown();
 
-// Audio-Steuerung
+// Audio
 const audio = document.getElementById("bgMusic");
 audio.volume = 0.3;
 
-document.addEventListener("click", function(){ audio.play().catch(()=>{}); }, { once:true });
+document.addEventListener("click", () => audio.play().catch(()=>{}), { once:true });
 
 function playAudio(){ audio.play(); }
 function pauseAudio(){ audio.pause(); }
 function setVolume(value){ audio.volume = value; }
 
-// Fullscreen
 function toggleFullscreen(){
     if(!document.fullscreenElement){
         document.documentElement.requestFullscreen();
