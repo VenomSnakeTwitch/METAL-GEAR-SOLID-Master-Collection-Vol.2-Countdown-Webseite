@@ -680,7 +680,7 @@
                     <canvas id="stealthCanvas" width="760" height="430" aria-label="Metal Gear Solid 4 Mini-Spiel"></canvas>
                 </div>
 
-                <p class="game-help">Steuerung: <strong>WASD</strong> oder <strong>Pfeiltasten</strong>. Alternativ kannst du Snake mit der Maus im Spielfeld bewegen.</p>
+                <p class="game-help">Steuerung: <strong>WASD</strong> oder <strong>Pfeiltasten</strong>. Alternativ kannst du Snake mit der Maus im Spielfeld bewegen. Das Spiel nutzt <strong>snake.png</strong> für Old Snake und <strong>gekko.png</strong> für die Gekko-Patrouillen.</p>
 
                 <div class="button-grid">
                     <button type="button" id="startMiniGameButton">▶ Mini-Spiel starten</button>
@@ -819,7 +819,7 @@
         let gameScoreValue = 0;
         let gameLivesValue = 3;
         let gameMessage = "Bereit";
-        let snake = { x: 45, y: 205, size: 18, speed: 3.1 };
+        let snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
         let goal = { x: 700, y: 185, width: 38, height: 70 };
         let intelItems = [];
         let gekkos = [];
@@ -857,6 +857,10 @@
         const musicTime = document.getElementById("musicTime");
         const stealthCanvas = document.getElementById("stealthCanvas");
         const stealthCtx = stealthCanvas.getContext("2d");
+        const snakeSprite = new Image();
+        const gekkoSprite = new Image();
+        snakeSprite.src = "snake.png";
+        gekkoSprite.src = "gekko.png";
         const gameScore = document.getElementById("gameScore");
         const gameLives = document.getElementById("gameLives");
         const gameTimer = document.getElementById("gameTimer");
@@ -905,6 +909,18 @@
         stealthCanvas.addEventListener("mouseleave", () => mouseTarget = null);
         stealthCanvas.addEventListener("click", () => {
             if (!gameRunning) startMiniGame();
+        });
+
+        [snakeSprite, gekkoSprite].forEach((sprite) => {
+            sprite.addEventListener("load", () => {
+                if (!miniGamePanel.classList.contains("hidden")) {
+                    gameRunning ? drawMiniGame() : drawMiniGameIntro();
+                }
+            });
+
+            sprite.addEventListener("error", () => {
+                console.warn("Sprite konnte nicht geladen werden:", sprite.src);
+            });
         });
 
         startReleaseCountdown();
@@ -1337,7 +1353,7 @@
             gameScoreValue = 0;
             gameLivesValue = 3;
             gameMessage = "Bereit";
-            snake = { x: 45, y: 205, size: 18, speed: 3.1 };
+            snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
             mouseTarget = null;
             pressedKeys.clear();
 
@@ -1352,9 +1368,9 @@
             ];
 
             gekkos = [
-                { x: 190, y: 105, size: 25, vx: 2.0, vy: 0, minX: 130, maxX: 330, minY: 80, maxY: 130 },
-                { x: 350, y: 250, size: 27, vx: 0, vy: 2.2, minX: 325, maxX: 390, minY: 155, maxY: 350 },
-                { x: 540, y: 175, size: 28, vx: 2.4, vy: 0, minX: 455, maxX: 665, minY: 145, maxY: 205 }
+                { x: 190, y: 105, size: 28, spriteWidth: 62, spriteHeight: 82, vx: 2.0, vy: 0, minX: 130, maxX: 330, minY: 80, maxY: 130 },
+                { x: 350, y: 250, size: 30, spriteWidth: 66, spriteHeight: 86, vx: 0, vy: 2.2, minX: 325, maxX: 390, minY: 155, maxY: 350 },
+                { x: 540, y: 175, size: 31, spriteWidth: 68, spriteHeight: 88, vx: 2.4, vy: 0, minX: 455, maxX: 665, minY: 145, maxY: 205 }
             ];
 
             updateGameHud();
@@ -1620,44 +1636,79 @@
             gekkos.forEach((gekko) => {
                 stealthCtx.fillStyle = "rgba(184, 40, 40, 0.18)";
                 stealthCtx.beginPath();
-                stealthCtx.arc(gekko.x, gekko.y, gekko.size + 24, 0, Math.PI * 2);
+                stealthCtx.arc(gekko.x, gekko.y, gekko.size + 26, 0, Math.PI * 2);
                 stealthCtx.fill();
 
-                stealthCtx.fillStyle = "#b82828";
-                stealthCtx.beginPath();
-                stealthCtx.arc(gekko.x, gekko.y, gekko.size, 0, Math.PI * 2);
-                stealthCtx.fill();
+                if (isSpriteReady(gekkoSprite)) {
+                    drawSprite(gekkoSprite, gekko.x, gekko.y, gekko.spriteWidth, gekko.spriteHeight);
+                } else {
+                    drawGekkoFallback(gekko);
+                }
 
-                stealthCtx.strokeStyle = "#ffb5b5";
-                stealthCtx.lineWidth = 3;
-                stealthCtx.beginPath();
-                stealthCtx.moveTo(gekko.x - 12, gekko.y + 20);
-                stealthCtx.lineTo(gekko.x - 22, gekko.y + 34);
-                stealthCtx.moveTo(gekko.x + 12, gekko.y + 20);
-                stealthCtx.lineTo(gekko.x + 22, gekko.y + 34);
-                stealthCtx.stroke();
-
-                stealthCtx.fillStyle = "#fff";
-                stealthCtx.font = "10px Orbitron, sans-serif";
+                stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+                stealthCtx.fillRect(gekko.x - 28, gekko.y + gekko.spriteHeight / 2 - 4, 56, 15);
+                stealthCtx.fillStyle = "#ffb5b5";
+                stealthCtx.font = "9px Orbitron, sans-serif";
                 stealthCtx.textAlign = "center";
-                stealthCtx.fillText("GEKKO", gekko.x, gekko.y + 4);
+                stealthCtx.fillText("GEKKO", gekko.x, gekko.y + gekko.spriteHeight / 2 + 7);
             });
         }
 
         function drawSnake() {
+            stealthCtx.fillStyle = "rgba(21, 148, 71, 0.18)";
+            stealthCtx.beginPath();
+            stealthCtx.arc(snake.x, snake.y, snake.size + 18, 0, Math.PI * 2);
+            stealthCtx.fill();
+
+            if (isSpriteReady(snakeSprite)) {
+                drawSprite(snakeSprite, snake.x, snake.y, snake.spriteWidth, snake.spriteHeight);
+            } else {
+                drawSnakeFallback();
+            }
+
+            stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+            stealthCtx.fillRect(snake.x - 30, snake.y + snake.spriteHeight / 2 - 5, 60, 15);
+            stealthCtx.fillStyle = "#ffd700";
+            stealthCtx.font = "9px Orbitron, sans-serif";
+            stealthCtx.textAlign = "center";
+            stealthCtx.fillText("OLD SNAKE", snake.x, snake.y + snake.spriteHeight / 2 + 7);
+        }
+
+        function isSpriteReady(sprite) {
+            return sprite.complete && sprite.naturalWidth > 0;
+        }
+
+        function drawSprite(sprite, centerX, centerY, width, height) {
+            stealthCtx.save();
+            stealthCtx.shadowColor = "rgba(255, 215, 0, 0.35)";
+            stealthCtx.shadowBlur = 8;
+            stealthCtx.drawImage(sprite, centerX - width / 2, centerY - height / 2, width, height);
+            stealthCtx.restore();
+        }
+
+        function drawSnakeFallback() {
             stealthCtx.fillStyle = "#159447";
             stealthCtx.beginPath();
             stealthCtx.arc(snake.x, snake.y, snake.size, 0, Math.PI * 2);
             stealthCtx.fill();
-
             stealthCtx.strokeStyle = "#ffd700";
             stealthCtx.lineWidth = 2;
             stealthCtx.stroke();
+        }
 
-            stealthCtx.fillStyle = "#ffffff";
-            stealthCtx.font = "10px Orbitron, sans-serif";
-            stealthCtx.textAlign = "center";
-            stealthCtx.fillText("SNAKE", snake.x, snake.y + 4);
+        function drawGekkoFallback(gekko) {
+            stealthCtx.fillStyle = "#b82828";
+            stealthCtx.beginPath();
+            stealthCtx.arc(gekko.x, gekko.y, gekko.size, 0, Math.PI * 2);
+            stealthCtx.fill();
+            stealthCtx.strokeStyle = "#ffb5b5";
+            stealthCtx.lineWidth = 3;
+            stealthCtx.beginPath();
+            stealthCtx.moveTo(gekko.x - 12, gekko.y + 20);
+            stealthCtx.lineTo(gekko.x - 22, gekko.y + 34);
+            stealthCtx.moveTo(gekko.x + 12, gekko.y + 20);
+            stealthCtx.lineTo(gekko.x + 22, gekko.y + 34);
+            stealthCtx.stroke();
         }
 
         function drawGameEndOverlay(success) {
