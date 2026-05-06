@@ -438,6 +438,45 @@
             color: var(--text-muted);
         }
 
+        .game-hud {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .game-hud span {
+            padding: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.28);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.48);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .game-canvas-wrap {
+            width: 100%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 215, 0, 0.42);
+            border-radius: 14px;
+            background: #050505;
+            box-shadow: inset 0 0 25px rgba(255, 215, 0, 0.08), 0 0 18px rgba(0, 0, 0, 0.65);
+        }
+
+        #stealthCanvas {
+            display: block;
+            width: 100%;
+            max-width: 760px;
+            height: auto;
+            margin: 0 auto;
+            background: radial-gradient(circle at center, #151515 0%, #070707 70%);
+            cursor: crosshair;
+        }
+
+        .game-help {
+            font-size: 13px;
+        }
+
         #copyright {
             margin-top: 28px;
             font-size: 12px;
@@ -479,7 +518,8 @@
             .quiz-topbar,
             .joker-panel,
             .leaderboard-tools,
-            .score-summary {
+            .score-summary,
+            .game-hud {
                 grid-template-columns: 1fr;
             }
 
@@ -537,6 +577,7 @@
                     <button type="button" data-difficulty="medium">Medium</button>
                     <button type="button" data-difficulty="hard">Hard</button>
                     <button type="button" id="openLeaderboardButton">🏆 Bestenliste anzeigen</button>
+                    <button type="button" id="openMiniGameButton">🎮 MGS4 Mini-Spiel</button>
                     <button type="button" class="secondary-button" id="backToStartButton">⬅ Zurück zur Startseite</button>
                 </div>
             </section>
@@ -623,6 +664,29 @@
                     <button type="button" id="leaderboardMenuButton">← Zurück zum Hauptmenü</button>
                 </div>
             </section>
+
+            <section id="miniGamePanel" class="panel hidden" aria-labelledby="miniGameTitle">
+                <h2 id="miniGameTitle">🎮 Shadow Moses Stealth Run</h2>
+                <p>Schleiche als Old Snake durch die Kampfzone, sammle Intel-Daten und erreiche Outer Haven. Vermeide die Gekko-Patrouillen.</p>
+
+                <div class="game-hud">
+                    <span id="gameScore">Intel: 0 / 5</span>
+                    <span id="gameLives">Leben: 3</span>
+                    <span id="gameTimer">Zeit: 60s</span>
+                    <span id="gameStatus">Bereit</span>
+                </div>
+
+                <div class="game-canvas-wrap">
+                    <canvas id="stealthCanvas" width="760" height="430" aria-label="Metal Gear Solid 4 Mini-Spiel"></canvas>
+                </div>
+
+                <p class="game-help">Steuerung: <strong>WASD</strong> oder <strong>Pfeiltasten</strong>. Alternativ kannst du Snake mit der Maus im Spielfeld bewegen.</p>
+
+                <div class="button-grid">
+                    <button type="button" id="startMiniGameButton">▶ Mini-Spiel starten</button>
+                    <button type="button" class="secondary-button" id="miniGameMenuButton">← Zurück zum Hauptmenü</button>
+                </div>
+            </section>
         </main>
 
         <audio id="bgMusic" loop preload="auto">
@@ -641,6 +705,8 @@
         const TIME_PER_QUESTION = 30;
         const QUESTIONS_PER_ROUND = 20;
         const HIGHSCORE_KEY = "mgs4QuizHighscoresV3";
+        const GAME_WIDTH = 760;
+        const GAME_HEIGHT = 430;
         const LEGACY_HIGHSCORE_KEY = "mgs4QuizHighscoresV2";
         const MAX_JOKERS_PER_ROUND = 5;
         const JOKER_DIFFICULTY = "hard";
@@ -746,11 +812,25 @@
         let scoreSaved = false;
         let jokersLeft = 0;
         let jokerUsedThisQuestion = false;
+        let gameRunning = false;
+        let gameAnimationId = null;
+        let gameStartTime = 0;
+        let gameTimeLeft = 60;
+        let gameScoreValue = 0;
+        let gameLivesValue = 3;
+        let gameMessage = "Bereit";
+        let snake = { x: 45, y: 205, size: 18, speed: 3.1 };
+        let goal = { x: 700, y: 185, width: 38, height: 70 };
+        let intelItems = [];
+        let gekkos = [];
+        const pressedKeys = new Set();
+        let mouseTarget = null;
 
         const difficultySelection = document.getElementById("difficultySelection");
         const quizContainer = document.getElementById("quizContainer");
         const scoreBoard = document.getElementById("scoreBoard");
         const leaderboardPanel = document.getElementById("leaderboardPanel");
+        const miniGamePanel = document.getElementById("miniGamePanel");
         const progressText = document.getElementById("progressText");
         const timerDisplay = document.getElementById("timer");
         const questionText = document.getElementById("questionText");
@@ -775,6 +855,12 @@
         const musicVolume = document.getElementById("musicVolume");
         const volumeValue = document.getElementById("volumeValue");
         const musicTime = document.getElementById("musicTime");
+        const stealthCanvas = document.getElementById("stealthCanvas");
+        const stealthCtx = stealthCanvas.getContext("2d");
+        const gameScore = document.getElementById("gameScore");
+        const gameLives = document.getElementById("gameLives");
+        const gameTimer = document.getElementById("gameTimer");
+        const gameStatus = document.getElementById("gameStatus");
         const countdownStatus = document.getElementById("countdownStatus");
         const countdownDays = document.getElementById("countdownDays");
         const countdownHours = document.getElementById("countdownHours");
@@ -787,10 +873,13 @@
 
         document.getElementById("backToStartButton").addEventListener("click", goBack);
         document.getElementById("openLeaderboardButton").addEventListener("click", openLeaderboard);
+        document.getElementById("openMiniGameButton").addEventListener("click", openMiniGame);
         document.getElementById("showLeaderboardAfterQuizButton").addEventListener("click", openLeaderboard);
         document.getElementById("leaderboardMenuButton").addEventListener("click", showMainMenu);
         document.getElementById("scoreMenuButton").addEventListener("click", showMainMenu);
         document.getElementById("restartButton").addEventListener("click", restartQuiz);
+        document.getElementById("startMiniGameButton").addEventListener("click", startMiniGame);
+        document.getElementById("miniGameMenuButton").addEventListener("click", showMainMenu);
         document.getElementById("clearScoresButton").addEventListener("click", clearScores);
         nextButton.addEventListener("click", nextQuestion);
         saveScoreButton.addEventListener("click", saveScoreLocal);
@@ -809,6 +898,14 @@
         bgMusic.addEventListener("timeupdate", updateMusicTime);
         bgMusic.addEventListener("play", updateMusicButton);
         bgMusic.addEventListener("pause", updateMusicButton);
+
+        window.addEventListener("keydown", handleGameKeyDown);
+        window.addEventListener("keyup", handleGameKeyUp);
+        stealthCanvas.addEventListener("mousemove", handleGameMouseMove);
+        stealthCanvas.addEventListener("mouseleave", () => mouseTarget = null);
+        stealthCanvas.addEventListener("click", () => {
+            if (!gameRunning) startMiniGame();
+        });
 
         startReleaseCountdown();
         migrateLegacyScores();
@@ -845,10 +942,15 @@
         }
 
         function showOnly(section) {
+            if (section !== miniGamePanel) {
+                stopMiniGame(false);
+            }
+
             difficultySelection.classList.add("hidden");
             quizContainer.classList.add("hidden");
             scoreBoard.classList.add("hidden");
             leaderboardPanel.classList.add("hidden");
+            miniGamePanel.classList.add("hidden");
             section.classList.remove("hidden");
         }
 
@@ -1219,6 +1321,371 @@
 
             localStorage.removeItem(HIGHSCORE_KEY);
             renderLeaderboard();
+        }
+
+        function openMiniGame() {
+            clearTimer();
+            showOnly(miniGamePanel);
+            resetMiniGame();
+            drawMiniGameIntro();
+        }
+
+        function resetMiniGame() {
+            stopMiniGame(false);
+            gameRunning = false;
+            gameTimeLeft = 60;
+            gameScoreValue = 0;
+            gameLivesValue = 3;
+            gameMessage = "Bereit";
+            snake = { x: 45, y: 205, size: 18, speed: 3.1 };
+            mouseTarget = null;
+            pressedKeys.clear();
+
+            goal = { x: 700, y: 185, width: 38, height: 70 };
+
+            intelItems = [
+                { x: 145, y: 78, size: 12, collected: false },
+                { x: 260, y: 330, size: 12, collected: false },
+                { x: 382, y: 135, size: 12, collected: false },
+                { x: 515, y: 310, size: 12, collected: false },
+                { x: 610, y: 92, size: 12, collected: false }
+            ];
+
+            gekkos = [
+                { x: 190, y: 105, size: 25, vx: 2.0, vy: 0, minX: 130, maxX: 330, minY: 80, maxY: 130 },
+                { x: 350, y: 250, size: 27, vx: 0, vy: 2.2, minX: 325, maxX: 390, minY: 155, maxY: 350 },
+                { x: 540, y: 175, size: 28, vx: 2.4, vy: 0, minX: 455, maxX: 665, minY: 145, maxY: 205 }
+            ];
+
+            updateGameHud();
+        }
+
+        function startMiniGame() {
+            resetMiniGame();
+            gameRunning = true;
+            gameStartTime = performance.now();
+            gameMessage = "Schleichen!";
+            updateGameHud();
+            gameLoop();
+        }
+
+        function stopMiniGame(keepFrame) {
+            gameRunning = false;
+            if (gameAnimationId !== null) {
+                cancelAnimationFrame(gameAnimationId);
+                gameAnimationId = null;
+            }
+            if (!keepFrame && stealthCtx) {
+                stealthCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            }
+        }
+
+        function handleGameKeyDown(event) {
+            const key = event.key.toLowerCase();
+            if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+                pressedKeys.add(key);
+                mouseTarget = null;
+                if (!miniGamePanel.classList.contains("hidden")) event.preventDefault();
+            }
+        }
+
+        function handleGameKeyUp(event) {
+            pressedKeys.delete(event.key.toLowerCase());
+        }
+
+        function handleGameMouseMove(event) {
+            if (miniGamePanel.classList.contains("hidden")) return;
+
+            const rect = stealthCanvas.getBoundingClientRect();
+            const scaleX = GAME_WIDTH / rect.width;
+            const scaleY = GAME_HEIGHT / rect.height;
+
+            mouseTarget = {
+                x: (event.clientX - rect.left) * scaleX,
+                y: (event.clientY - rect.top) * scaleY
+            };
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            const elapsed = Math.floor((performance.now() - gameStartTime) / 1000);
+            gameTimeLeft = Math.max(0, 60 - elapsed);
+
+            updateSnakeMovement();
+            updateGekkos();
+            checkIntelCollection();
+            checkGekkoCollisions();
+            checkGoalReached();
+            drawMiniGame();
+            updateGameHud();
+
+            if (gameTimeLeft <= 0) {
+                endMiniGame(false, "Zeit abgelaufen! Snake wurde entdeckt.");
+                return;
+            }
+
+            gameAnimationId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateSnakeMovement() {
+            let dx = 0;
+            let dy = 0;
+
+            if (pressedKeys.has("w") || pressedKeys.has("arrowup")) dy -= 1;
+            if (pressedKeys.has("s") || pressedKeys.has("arrowdown")) dy += 1;
+            if (pressedKeys.has("a") || pressedKeys.has("arrowleft")) dx -= 1;
+            if (pressedKeys.has("d") || pressedKeys.has("arrowright")) dx += 1;
+
+            if (mouseTarget) {
+                const targetDx = mouseTarget.x - snake.x;
+                const targetDy = mouseTarget.y - snake.y;
+                const distance = Math.hypot(targetDx, targetDy);
+
+                if (distance > 4) {
+                    dx = targetDx / distance;
+                    dy = targetDy / distance;
+                }
+            }
+
+            if (dx !== 0 || dy !== 0) {
+                const length = Math.hypot(dx, dy) || 1;
+                snake.x += (dx / length) * snake.speed;
+                snake.y += (dy / length) * snake.speed;
+            }
+
+            snake.x = clamp(snake.x, snake.size, GAME_WIDTH - snake.size);
+            snake.y = clamp(snake.y, snake.size, GAME_HEIGHT - snake.size);
+        }
+
+        function updateGekkos() {
+            gekkos.forEach((gekko) => {
+                gekko.x += gekko.vx;
+                gekko.y += gekko.vy;
+
+                if (gekko.x < gekko.minX || gekko.x > gekko.maxX) gekko.vx *= -1;
+                if (gekko.y < gekko.minY || gekko.y > gekko.maxY) gekko.vy *= -1;
+            });
+        }
+
+        function checkIntelCollection() {
+            intelItems.forEach((item) => {
+                if (!item.collected && circleDistance(snake, item) < snake.size + item.size) {
+                    item.collected = true;
+                    gameScoreValue += 1;
+                    gameMessage = "Intel gesichert";
+                }
+            });
+        }
+
+        function checkGekkoCollisions() {
+            for (const gekko of gekkos) {
+                if (circleDistance(snake, gekko) < snake.size + gekko.size - 2) {
+                    gameLivesValue -= 1;
+                    gameMessage = "Gekko-Kontakt! Zurück in Deckung!";
+                    snake.x = 45;
+                    snake.y = 205;
+                    mouseTarget = null;
+
+                    if (gameLivesValue <= 0) {
+                        endMiniGame(false, "Mission gescheitert! Snake wurde überwältigt.");
+                    }
+                    break;
+                }
+            }
+        }
+
+        function checkGoalReached() {
+            const inGoal = snake.x > goal.x && snake.x < goal.x + goal.width && snake.y > goal.y && snake.y < goal.y + goal.height;
+            const allIntelCollected = intelItems.every((item) => item.collected);
+
+            if (inGoal && allIntelCollected) {
+                endMiniGame(true, "Mission erfüllt! Intel gesichert und Outer Haven erreicht.");
+            } else if (inGoal && !allIntelCollected) {
+                gameMessage = "Erst alle Intel-Daten sammeln!";
+            }
+        }
+
+        function endMiniGame(success, message) {
+            gameRunning = false;
+            if (gameAnimationId !== null) {
+                cancelAnimationFrame(gameAnimationId);
+                gameAnimationId = null;
+            }
+
+            gameMessage = success ? `${message} Rang: ${getMiniGameRank()}` : message;
+            updateGameHud();
+            drawMiniGame();
+            drawGameEndOverlay(success);
+        }
+
+        function getMiniGameRank() {
+            if (gameLivesValue === 3 && gameTimeLeft >= 35) return "Big Boss";
+            if (gameLivesValue >= 2 && gameTimeLeft >= 20) return "Foxhound";
+            if (gameLivesValue >= 1) return "Fox";
+            return "Rookie";
+        }
+
+        function drawMiniGameIntro() {
+            drawMiniGameBackground();
+            stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+            stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            stealthCtx.fillStyle = "#ffd700";
+            stealthCtx.font = "26px Orbitron, sans-serif";
+            stealthCtx.textAlign = "center";
+            stealthCtx.fillText("Shadow Moses Stealth Run", GAME_WIDTH / 2, 165);
+            stealthCtx.fillStyle = "#d8d8d8";
+            stealthCtx.font = "15px Orbitron, sans-serif";
+            stealthCtx.fillText("Sammle 5 Intel-Daten und erreiche Outer Haven.", GAME_WIDTH / 2, 205);
+            stealthCtx.fillText("Meide die Gekko-Patrouillen. Klick ins Spielfeld oder nutze den Start-Button.", GAME_WIDTH / 2, 235);
+        }
+
+        function drawMiniGame() {
+            drawMiniGameBackground();
+            drawGoal();
+            drawIntel();
+            drawGekkos();
+            drawSnake();
+        }
+
+        function drawMiniGameBackground() {
+            stealthCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            stealthCtx.fillStyle = "#080808";
+            stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+            stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.08)";
+            stealthCtx.lineWidth = 1;
+            for (let x = 0; x < GAME_WIDTH; x += 38) {
+                stealthCtx.beginPath();
+                stealthCtx.moveTo(x, 0);
+                stealthCtx.lineTo(x, GAME_HEIGHT);
+                stealthCtx.stroke();
+            }
+            for (let y = 0; y < GAME_HEIGHT; y += 38) {
+                stealthCtx.beginPath();
+                stealthCtx.moveTo(0, y);
+                stealthCtx.lineTo(GAME_WIDTH, y);
+                stealthCtx.stroke();
+            }
+
+            stealthCtx.fillStyle = "rgba(255, 215, 0, 0.08)";
+            stealthCtx.fillRect(0, 0, 92, GAME_HEIGHT);
+            stealthCtx.fillRect(650, 0, 110, GAME_HEIGHT);
+
+            stealthCtx.fillStyle = "rgba(80, 80, 80, 0.55)";
+            drawCrate(118, 180, 55, 55);
+            drawCrate(295, 58, 70, 45);
+            drawCrate(442, 230, 70, 50);
+            drawCrate(575, 350, 55, 42);
+        }
+
+        function drawCrate(x, y, width, height) {
+            stealthCtx.fillRect(x, y, width, height);
+            stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.16)";
+            stealthCtx.strokeRect(x, y, width, height);
+            stealthCtx.beginPath();
+            stealthCtx.moveTo(x, y);
+            stealthCtx.lineTo(x + width, y + height);
+            stealthCtx.moveTo(x + width, y);
+            stealthCtx.lineTo(x, y + height);
+            stealthCtx.stroke();
+        }
+
+        function drawGoal() {
+            stealthCtx.fillStyle = "rgba(255, 215, 0, 0.18)";
+            stealthCtx.fillRect(goal.x, goal.y, goal.width, goal.height);
+            stealthCtx.strokeStyle = "#ffd700";
+            stealthCtx.strokeRect(goal.x, goal.y, goal.width, goal.height);
+            stealthCtx.fillStyle = "#ffd700";
+            stealthCtx.font = "11px Orbitron, sans-serif";
+            stealthCtx.textAlign = "center";
+            stealthCtx.fillText("HAVEN", goal.x + goal.width / 2, goal.y - 8);
+        }
+
+        function drawIntel() {
+            intelItems.forEach((item) => {
+                if (item.collected) return;
+                stealthCtx.fillStyle = "#3aa7ff";
+                stealthCtx.beginPath();
+                stealthCtx.arc(item.x, item.y, item.size, 0, Math.PI * 2);
+                stealthCtx.fill();
+                stealthCtx.fillStyle = "#ffffff";
+                stealthCtx.font = "10px Orbitron, sans-serif";
+                stealthCtx.textAlign = "center";
+                stealthCtx.fillText("i", item.x, item.y + 4);
+            });
+        }
+
+        function drawGekkos() {
+            gekkos.forEach((gekko) => {
+                stealthCtx.fillStyle = "rgba(184, 40, 40, 0.18)";
+                stealthCtx.beginPath();
+                stealthCtx.arc(gekko.x, gekko.y, gekko.size + 24, 0, Math.PI * 2);
+                stealthCtx.fill();
+
+                stealthCtx.fillStyle = "#b82828";
+                stealthCtx.beginPath();
+                stealthCtx.arc(gekko.x, gekko.y, gekko.size, 0, Math.PI * 2);
+                stealthCtx.fill();
+
+                stealthCtx.strokeStyle = "#ffb5b5";
+                stealthCtx.lineWidth = 3;
+                stealthCtx.beginPath();
+                stealthCtx.moveTo(gekko.x - 12, gekko.y + 20);
+                stealthCtx.lineTo(gekko.x - 22, gekko.y + 34);
+                stealthCtx.moveTo(gekko.x + 12, gekko.y + 20);
+                stealthCtx.lineTo(gekko.x + 22, gekko.y + 34);
+                stealthCtx.stroke();
+
+                stealthCtx.fillStyle = "#fff";
+                stealthCtx.font = "10px Orbitron, sans-serif";
+                stealthCtx.textAlign = "center";
+                stealthCtx.fillText("GEKKO", gekko.x, gekko.y + 4);
+            });
+        }
+
+        function drawSnake() {
+            stealthCtx.fillStyle = "#159447";
+            stealthCtx.beginPath();
+            stealthCtx.arc(snake.x, snake.y, snake.size, 0, Math.PI * 2);
+            stealthCtx.fill();
+
+            stealthCtx.strokeStyle = "#ffd700";
+            stealthCtx.lineWidth = 2;
+            stealthCtx.stroke();
+
+            stealthCtx.fillStyle = "#ffffff";
+            stealthCtx.font = "10px Orbitron, sans-serif";
+            stealthCtx.textAlign = "center";
+            stealthCtx.fillText("SNAKE", snake.x, snake.y + 4);
+        }
+
+        function drawGameEndOverlay(success) {
+            stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+            stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            stealthCtx.fillStyle = success ? "#ffd700" : "#ffb5b5";
+            stealthCtx.font = "24px Orbitron, sans-serif";
+            stealthCtx.textAlign = "center";
+            stealthCtx.fillText(success ? "MISSION ERFÜLLT" : "MISSION GESCHEITERT", GAME_WIDTH / 2, 175);
+            stealthCtx.fillStyle = "#d8d8d8";
+            stealthCtx.font = "14px Orbitron, sans-serif";
+            stealthCtx.fillText(gameMessage, GAME_WIDTH / 2, 215);
+            stealthCtx.fillText("Drücke Start für einen neuen Versuch.", GAME_WIDTH / 2, 250);
+        }
+
+        function updateGameHud() {
+            gameScore.textContent = `Intel: ${gameScoreValue} / ${intelItems.length || 5}`;
+            gameLives.textContent = `Leben: ${gameLivesValue}`;
+            gameTimer.textContent = `Zeit: ${gameTimeLeft}s`;
+            gameStatus.textContent = gameMessage;
+        }
+
+        function circleDistance(a, b) {
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
         }
 
         function restartQuiz() {
