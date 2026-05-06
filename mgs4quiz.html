@@ -1451,8 +1451,8 @@
         function openMiniGame() {
             clearTimer();
             loadMiniGameProgress();
-            renderMiniGameLevelSelect();
             showOnly(miniGamePanel);
+            renderMiniGameLevelSelect();
             resetMiniGame();
             drawMiniGameIntro();
         }
@@ -1631,8 +1631,14 @@
             updateCameras();
             checkIntelCollection();
             checkDetection();
+            if (!gameRunning) return;
+
             checkGekkoCollisions();
+            if (!gameRunning) return;
+
             checkGoalReached();
+            if (!gameRunning) return;
+
             drawMiniGame();
             updateGameHud();
 
@@ -1806,6 +1812,7 @@
 
         function endMiniGame(success, message) {
             gameRunning = false;
+            setCamouflage(false);
             if (gameAnimationId !== null) {
                 cancelAnimationFrame(gameAnimationId);
                 gameAnimationId = null;
@@ -2108,18 +2115,6 @@
             while (diff < -Math.PI) diff += Math.PI * 2;
             while (diff > Math.PI) diff -= Math.PI * 2;
             return diff;
-        }
-
-        function circleDistance(a, b) {
-            return Math.hypot(a.x - b.x, a.y - b.y);
-        }
-
-        function clamp(value, min, max) {
-            return Math.min(max, Math.max(min, value));
-        }
-
-        function restartQuiz() {it: ${gameTimeLeft}s`;
-            gameStatus.textContent = gameMessage;
         }
 
         function circleDistance(a, b) {
