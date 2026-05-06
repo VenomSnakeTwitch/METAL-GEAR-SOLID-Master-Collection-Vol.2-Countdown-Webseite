@@ -335,6 +335,66 @@
     .level-button.selected { background: var(--gold); color: #000; box-shadow: 0 0 14px rgba(255, 215, 0, 0.4); }
     .level-button.locked { border-color: #777; color: #999; opacity: 0.55; }
 
+    .shop-status {
+        display: grid;
+        gap: 6px;
+        margin: 14px 0;
+        padding: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.24);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.42);
+        color: var(--text-muted);
+    }
+
+    .shop-status strong { color: var(--gold); }
+
+    .shop-panel {
+        margin: 14px 0;
+        padding: 14px;
+        border: 1px solid rgba(255, 215, 0, 0.28);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .shop-card {
+        padding: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.22);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.55);
+        color: var(--text-muted);
+        text-align: left;
+    }
+
+    .shop-card strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--gold);
+    }
+
+    .shop-card span {
+        display: block;
+        margin: 6px 0;
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .shop-card button {
+        width: 100%;
+        margin-top: 8px;
+        padding: 9px 8px;
+        font-size: 12px;
+    }
+
+    .shop-card.owned { border-color: rgba(58, 167, 255, 0.55); }
+    .shop-card.maxed { border-color: rgba(21, 148, 71, 0.65); }
+
     .game-hud {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -856,29 +916,51 @@
             </div>
 
             <div id="gamePlayPanel" class="game-play-panel">
-                <div class="game-hud">
+                <div class="shop-status">
+                <strong>Verdiente Punkte: <span id="playerPointsDisplay">0</span></strong>
+                <span id="shopMessage">Schließe Missionen ab, um Punkte zu verdienen.</span>
+            </div>
+
+            <div id="weaponShopPanel" class="shop-panel hidden">
+                <h3>Waffen-Menü</h3>
+                <p class="game-help">Gekaufte Waffen stehen dauerhaft zur Verfügung. In Stealth-Leveln helfen Betäubungswaffen gegen Gekkos, in Boss-Leveln verursachen Waffen Schaden.</p>
+                <div id="weaponShopList" class="shop-grid"></div>
+            </div>
+
+            <div id="itemShopPanel" class="shop-panel hidden">
+                <h3>Item-Menü & Upgrades</h3>
+                <p class="game-help">Items sind Verbrauchsgegenstände. Upgrades bleiben dauerhaft aktiv.</p>
+                <div id="itemShopList" class="shop-grid"></div>
+            </div>
+
+            <div class="game-hud">
                 <span id="gameLevel">Level: 1</span>
                 <span id="gameScore">Intel: 0 / 5</span>
                 <span id="gameLives">Leben: 3</span>
+                <span id="snakeHealthHud">HP: 100%</span>
                 <span id="gameTimer">Zeit: 60s</span>
                 <span id="gameAlert">Phase: Normal</span>
                 <span id="gameCamo">Tarnung: 100%</span>
                 <span id="bossHealthHud" class="hidden">Boss: 100%</span>
                 <span id="weaponHud" class="hidden">Waffe: SOCOM</span>
                 <span id="gameStatus">Bereit</span>
+                <span id="itemHud">Items: -</span>
             </div>
 
             <div id="gameCanvasWrap" class="game-canvas-wrap">
                 <canvas id="stealthCanvas" width="760" height="430" aria-label="Metal Gear Solid 4 Mini-Spiel"></canvas>
             </div>
 
-            <p class="game-help">Steuerung: <strong>WASD</strong>, <strong>Pfeiltasten</strong>, Maus oder Touch. Tarnung per Button als Toggle. Boss-Modus: <strong>J</strong> oder Feuer-Button zum Schießen, <strong>1/2/3</strong> oder Waffenbutton für Waffenwechsel.</p>
+            <p class="game-help">Steuerung: <strong>WASD</strong>, <strong>Pfeiltasten</strong>, Maus oder Touch. Tarnung per Button als Toggle. <strong>J</strong> oder Feuer-Button: In Stealth-Leveln Betäubungspistole gegen Gekkos, im Boss-Modus aktuelle Waffe feuern. <strong>1/2/3</strong> oder Waffenbutton für Waffenwechsel. Rationen stellen 20% HP wieder her.</p>
 
             <div class="button-grid">
                 <button type="button" id="startMiniGameButton">▶ Gewähltes Stealth-Level starten</button>
                 <button type="button" id="startBossLevelButton" class="boss-button">⚔ Boss-Level starten</button>
                 <button type="button" id="fireWeaponButton" class="boss-button">🔥 Feuern</button>
                 <button type="button" id="switchWeaponButton" class="boss-button">🔁 Waffe wechseln</button>
+                <button type="button" id="openWeaponShopButton">🔫 Waffen-Menü</button>
+                <button type="button" id="openItemShopButton">🎒 Item-Menü</button>
+                <button type="button" id="useDistractionButton">📦 Ablenkung einsetzen</button>
                 <button type="button" id="fullscreenGameButton">⛶ Vollbild</button>
                 <button type="button" id="camoButton">🕶 Tarnung aktivieren</button>
                 <button type="button" class="secondary-button" id="miniGameMenuButton">← Zurück zum Hauptmenü</button>
@@ -905,6 +987,7 @@
     const HIGHSCORE_KEY = "mgs4QuizHighscoresV4";
     const LEGACY_HIGHSCORE_KEY = "mgs4QuizHighscoresV3";
     const GAME_PROGRESS_KEY = "mgs4MiniGameProgressV2";
+    const GAME_SHOP_KEY = "mgs4MiniGameShopV1";
     const GAME_WIDTH = 760;
     const GAME_HEIGHT = 430;
     const MAX_JOKERS_PER_ROUND = 5;
@@ -987,9 +1070,23 @@
     ];
 
     const weapons = [
-        { name: "SOCOM", label: "SOCOM", damage: 8, speed: 8, cooldown: 260 },
-        { name: "M4 Custom", label: "M4", damage: 5, speed: 10, cooldown: 120 },
-        { name: "RPG", label: "RPG", damage: 24, speed: 5, cooldown: 900 }
+        { id: "socom", name: "SOCOM", label: "SOCOM", damage: 8, speed: 8, cooldown: 260, cost: 0, description: "Standardpistole für Boss-Level. Ausgewogen und zuverlässig." },
+        { id: "m4", name: "M4 Custom", label: "M4", damage: 5, speed: 10, cooldown: 120, cost: 350, description: "Schnelle Feuerrate, ideal gegen bewegliche Bosse." },
+        { id: "rpg", name: "RPG", label: "RPG", damage: 24, speed: 5, cooldown: 900, cost: 750, description: "Langsam, aber hoher Schaden gegen Boss-Ziele." },
+        { id: "railgun", name: "Railgun Prototype", label: "Railgun", damage: 36, speed: 12, cooldown: 1150, cost: 1500, description: "Sehr hoher Schaden und schnelle Projektile. Endgame-Waffe." }
+    ];
+
+    const stealthWeapons = [
+        { id: "tranq", name: "Betäubungspistole", label: "Betäubung", stunDuration: 10000, speed: 9, cooldown: 420, cost: 0, description: "Standardwaffe. Betäubt Gekkos für 10 Sekunden." },
+        { id: "emp", name: "EMP-Pistole", label: "EMP", stunDuration: 15000, speed: 8, cooldown: 620, cost: 450, description: "Betäubt Gekkos länger und ist gut für enge Stealth-Level." },
+        { id: "mosin", name: "Mosin-Nagant Tranq", label: "Mosin", stunDuration: 20000, speed: 10, cooldown: 850, cost: 900, description: "Langsamere Feuerrate, aber sehr lange Betäubung." }
+    ];
+
+    const shopItems = [
+        { id: "distraction", name: "Ablenkung", type: "consumable", cost: 200, description: "Lenkt Gekkos und Bosse 8 Sekunden ab. Funktioniert in Stealth- und Boss-Leveln." },
+        { id: "ration_pack", name: "Notration", type: "consumable", cost: 250, description: "Wird automatisch benutzt, wenn Snake sonst kampfunfähig wäre. Stellt 35 HP her." },
+        { id: "camo_upgrade", name: "OctoCamo Akku", type: "upgrade", upgradeKey: "camo", maxLevel: 2, cost: 500, description: "Dauerhaftes Upgrade. Mehr Tarnenergie und geringerer Verbrauch." },
+        { id: "health_upgrade", name: "Körperpanzer", type: "upgrade", upgradeKey: "health", maxLevel: 2, cost: 650, description: "Dauerhaftes Upgrade. Erhöht Snakes maximale HP um 20 pro Stufe." }
     ];
 
     const stealthLevels = [
@@ -1020,8 +1117,17 @@
     let alertPhase = "normal", alertCountdown = 0, cautionCountdown = 0;
     let camoToggle = false, camoEnergy = 100;
     let snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
-    let goal = { x: 700, y: 185, width: 38, height: 70 }, intelItems = [], gekkos = [], cameras = [], obstacles = [];
-    let boss = null, projectiles = [], bossProjectiles = [], selectedWeaponIndex = 0, lastShotTime = 0;
+    let snakeHealthValue = 100;
+    let goal = { x: 700, y: 185, width: 38, height: 70 }, intelItems = [], gekkos = [], cameras = [], obstacles = [], rations = [];
+    let boss = null, projectiles = [], bossProjectiles = [], selectedWeaponIndex = 0, selectedStealthWeaponIndex = 0, lastShotTime = 0, victoryAnimationId = null;
+    let activeDistraction = null;
+    let shopState = {
+        points: 0,
+        bossWeapons: ["socom"],
+        stealthWeapons: ["tranq"],
+        upgrades: { camo: 0, health: 0 },
+        inventory: { distraction: 0, ration_pack: 0 }
+    };
     const pressedKeys = new Set();
     let mouseTarget = null;
 
@@ -1035,7 +1141,8 @@
     const stealthCanvas = $("stealthCanvas"), ctx = stealthCanvas.getContext("2d");
     const gameCanvasWrap = $("gameCanvasWrap");
     const miniGameLevelSelect = $("miniGameLevelSelect"), bossLevelSelect = $("bossLevelSelect"), levelInfo = $("levelInfo"), camoButton = $("camoButton");
-    const gameLevel = $("gameLevel"), gameScore = $("gameScore"), gameLives = $("gameLives"), gameTimer = $("gameTimer"), gameAlert = $("gameAlert"), gameCamo = $("gameCamo"), gameStatus = $("gameStatus"), bossHealthHud = $("bossHealthHud"), weaponHud = $("weaponHud");
+    const gameLevel = $("gameLevel"), gameScore = $("gameScore"), gameLives = $("gameLives"), snakeHealthHud = $("snakeHealthHud"), gameTimer = $("gameTimer"), gameAlert = $("gameAlert"), gameCamo = $("gameCamo"), gameStatus = $("gameStatus"), bossHealthHud = $("bossHealthHud"), weaponHud = $("weaponHud"), itemHud = $("itemHud");
+    const playerPointsDisplay = $("playerPointsDisplay"), shopMessage = $("shopMessage"), weaponShopPanel = $("weaponShopPanel"), itemShopPanel = $("itemShopPanel"), weaponShopList = $("weaponShopList"), itemShopList = $("itemShopList");
     const countdownStatus = $("countdownStatus"), countdownDays = $("countdownDays"), countdownHours = $("countdownHours"), countdownMinutes = $("countdownMinutes"), countdownSeconds = $("countdownSeconds");
 
     const snakeSprite = new Image();
@@ -1056,6 +1163,9 @@
     $("startBossLevelButton").addEventListener("click", startBossGame);
     $("fireWeaponButton").addEventListener("click", fireWeapon);
     $("switchWeaponButton").addEventListener("click", switchWeapon);
+    $("openWeaponShopButton").addEventListener("click", toggleWeaponShop);
+    $("openItemShopButton").addEventListener("click", toggleItemShop);
+    $("useDistractionButton").addEventListener("click", useDistraction);
     $("fullscreenGameButton").addEventListener("click", toggleGameFullscreen);
     $("miniGameMenuButton").addEventListener("click", showMainMenu);
     nextButton.addEventListener("click", nextQuestion);
@@ -1087,7 +1197,7 @@
     window.addEventListener("resize", handleGameViewportChange);
     window.addEventListener("orientationchange", handleGameViewportChange);
 
-    updateMusicButton(); updateMusicVolumeLabel(); updateMusicTime(); startReleaseCountdown(); migrateLegacyScores();
+    updateMusicButton(); updateMusicVolumeLabel(); updateMusicTime(); startReleaseCountdown(); migrateLegacyScores(); loadShopState(); renderShop(); updateShopHud();
 
     function showOnly(section) {
         if (section !== miniGamePanel) stopGame(false);
@@ -1201,7 +1311,7 @@
     function migrateLegacyScores() { if (localStorage.getItem(HIGHSCORE_KEY)) return; try { const old = JSON.parse(localStorage.getItem(LEGACY_HIGHSCORE_KEY) || "[]"); if (Array.isArray(old) && old.length) localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(old)); } catch {} }
     function clearScores() { if (confirm("Möchtest du die lokale Bestenliste wirklich löschen?")) { localStorage.removeItem(HIGHSCORE_KEY); renderLeaderboard(); } }
 
-    function openMiniGame() { loadGameProgress(); renderLevelSelects(); showOnly(miniGamePanel); currentGameMode = "stealth"; resetStealth(); drawIntro(); }
+    function openMiniGame() { loadGameProgress(); loadShopState(); renderShop(); renderLevelSelects(); showOnly(miniGamePanel); currentGameMode = "stealth"; resetStealth(); drawIntro(); updateShopHud(); }
     function loadGameProgress() { try { const saved = JSON.parse(localStorage.getItem(GAME_PROGRESS_KEY) || "{}"); unlockedStealthLevel = clamp(Number(saved.unlockedLevel || 1), 1, stealthLevels.length); } catch { unlockedStealthLevel = 1; } selectedStealthLevel = Math.min(selectedStealthLevel, unlockedStealthLevel); }
     function saveGameProgress(level) { unlockedStealthLevel = Math.max(unlockedStealthLevel, Math.min(stealthLevels.length, level + 1)); localStorage.setItem(GAME_PROGRESS_KEY, JSON.stringify({ unlockedLevel: unlockedStealthLevel, updatedAt: Date.now() })); renderLevelSelects(); }
 
@@ -1216,14 +1326,49 @@
     function getStealthLevel() { return stealthLevels.find((l) => l.id === selectedStealthLevel) || stealthLevels[0]; }
     function getBossLevel() { return bossLevels.find((l) => l.id === selectedBossLevel) || bossLevels[0]; }
 
-    function resetCommon() { stopGame(false); gameRunning = false; gameScoreValue = 0; gameMessage = "Bereit"; alertPhase = "normal"; alertCountdown = 0; cautionCountdown = 0; camoToggle = false; camoEnergy = 100; mouseTarget = null; pressedKeys.clear(); setCamouflage(false); projectiles = []; bossProjectiles = []; }
-    function resetStealth() { currentGameMode = "stealth"; resetCommon(); const level = getStealthLevel(); gameTimeLeft = level.time; gameLivesValue = level.lives; snake = makeSnake(level.snake[0], level.snake[1]); goal = { x: level.goal[0], y: level.goal[1], width: level.goal[2], height: level.goal[3] }; intelItems = level.intel.map(([x, y]) => ({ x, y, size: 12, collected: false })); obstacles = level.obstacles.map(([x, y, width, height]) => ({ x, y, width, height })); gekkos = level.gekkos.map(([x,y,size,spriteWidth,spriteHeight,vx,vy,minX,maxX,minY,maxY]) => ({ x,y,size,spriteWidth,spriteHeight,vx,vy,minX,maxX,minY,maxY })); cameras = level.cameras.map(([x,y,minAngle,maxAngle,speed,range,fov]) => ({ x,y,minAngle,maxAngle,angle:minAngle,speed,range,fov:fov*Math.PI/180,direction:1 })); boss = null; updateGameHud(); }
-    function resetBoss() { currentGameMode = "boss"; resetCommon(); const level = getBossLevel(); gameTimeLeft = level.time; gameLivesValue = level.lives; alertPhase = "alert"; alertCountdown = level.time; snake = makeSnake(level.snake[0], level.snake[1]); obstacles = level.obstacles.map(([x,y,width,height]) => ({ x,y,width,height })); intelItems = []; gekkos = []; cameras = []; selectedWeaponIndex = 0; lastShotTime = 0; boss = { x: level.start[0], y: level.start[1], size: 34, spriteWidth: 84, spriteHeight: 108, health: level.health, maxHealth: level.health, speed: level.speed, fireRate: level.fireRate, lastFire: 0, name: level.bossName, color: level.color }; updateGameHud(); }
+    function resetCommon() {
+        stopGame(false);
+        gameRunning = false;
+        gameScoreValue = 0;
+        gameMessage = "Bereit";
+        alertPhase = "normal";
+        alertCountdown = 0;
+        cautionCountdown = 0;
+        camoToggle = false;
+        camoEnergy = getMaxCamo();
+        snakeHealthValue = getMaxHealth();
+        mouseTarget = null;
+        pressedKeys.clear();
+        setCamouflage(false);
+        projectiles = [];
+        bossProjectiles = [];
+        rations = [];
+        activeDistraction = null;
+    }
+    function resetStealth() { currentGameMode = "stealth"; resetCommon(); const level = getStealthLevel(); gameTimeLeft = level.time; gameLivesValue = level.lives; snake = makeSnake(level.snake[0], level.snake[1]); goal = { x: level.goal[0], y: level.goal[1], width: level.goal[2], height: level.goal[3] }; intelItems = level.intel.map(([x, y]) => ({ x, y, size: 12, collected: false })); obstacles = level.obstacles.map(([x, y, width, height]) => ({ x, y, width, height })); gekkos = level.gekkos.map(([x,y,size,spriteWidth,spriteHeight,vx,vy,minX,maxX,minY,maxY]) => ({ x,y,size,spriteWidth,spriteHeight,vx,vy,minX,maxX,minY,maxY })); cameras = level.cameras.map(([x,y,minAngle,maxAngle,speed,range,fov]) => ({ x,y,minAngle,maxAngle,angle:minAngle,speed,range,fov:fov*Math.PI/180,direction:1 }));
+        rations = createRations("stealth", selectedStealthLevel);
+        boss = null;
+        updateGameHud();
+    }
+    function resetBoss() { currentGameMode = "boss"; resetCommon(); const level = getBossLevel(); gameTimeLeft = level.time; gameLivesValue = level.lives; alertPhase = "alert"; alertCountdown = level.time; snake = makeSnake(level.snake[0], level.snake[1]); obstacles = level.obstacles.map(([x,y,width,height]) => ({ x,y,width,height }));
+        intelItems = [];
+        gekkos = [];
+        cameras = [];
+        rations = createRations("boss", selectedBossLevel);
+        selectedWeaponIndex = 0;
+        selectedStealthWeaponIndex = 0;
+        lastShotTime = 0;
+        boss = { x: level.start[0], y: level.start[1], size: 34, spriteWidth: 84, spriteHeight: 108, health: level.health, maxHealth: level.health, speed: level.speed, fireRate: level.fireRate, lastFire: 0, name: level.bossName, color: level.color }; updateGameHud(); }
     function makeSnake(x, y) { return { x, y, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 }; }
 
     function startStealthGame() { currentGameMode = "stealth"; resetStealth(); gameRunning = true; gameStartTime = performance.now(); gameMessage = "Schleichen!"; gameLoop(); }
     function startBossGame() { currentGameMode = "boss"; resetBoss(); gameRunning = true; gameStartTime = performance.now(); gameMessage = "Bosskampf gestartet!"; gameLoop(); }
-    function stopGame(clearFrame) { gameRunning = false; if (gameAnimationId !== null) { cancelAnimationFrame(gameAnimationId); gameAnimationId = null; } if (clearFrame) ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT); }
+    function stopGame(clearFrame) {
+        gameRunning = false;
+        if (gameAnimationId !== null) { cancelAnimationFrame(gameAnimationId); gameAnimationId = null; }
+        if (victoryAnimationId !== null) { cancelAnimationFrame(victoryAnimationId); victoryAnimationId = null; }
+        if (clearFrame) ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    }
 
     function gameLoop() {
         if (!gameRunning) return;
@@ -1237,10 +1382,31 @@
         gameAnimationId = requestAnimationFrame(gameLoop);
     }
 
-    function updateStealthFight() { updateGekkos(); updateCameras(); collectIntel(); checkDetection(); if (!gameRunning) return; checkGekkoCollisions(); if (!gameRunning) return; checkGoal(); }
-    function updateBossFight() { updateBossMovement(); updateProjectiles(); if (!gameRunning) return; updateBossProjectiles(); if (!gameRunning) return; maybeBossFire(); checkBossContact(); }
+    function updateStealthFight() {
+        updateGekkos();
+        updateCameras();
+        updateProjectiles();
+        if (!gameRunning) return;
+        collectIntel();
+        collectRations();
+        checkDetection();
+        if (!gameRunning) return;
+        checkGekkoCollisions();
+        if (!gameRunning) return;
+        checkGoal();
+    }
+    function updateBossFight() {
+        updateBossMovement();
+        updateProjectiles();
+        if (!gameRunning) return;
+        updateBossProjectiles();
+        if (!gameRunning) return;
+        collectRations();
+        maybeBossFire();
+        checkBossContact();
+    }
 
-    function updateCamouflage() { const active = camoToggle && camoEnergy > 0; if (active) { camoEnergy = Math.max(0, camoEnergy - 0.24); snake.speed = currentGameMode === "boss" ? 2.0 : 1.75; if (camoEnergy <= 0) setCamouflage(false); } else { camoEnergy = Math.min(100, camoEnergy + 0.08); snake.speed = currentGameMode === "boss" ? 3.25 : 3.1; } }
+    function updateCamouflage() { const active = camoToggle && camoEnergy > 0; if (active) { camoEnergy = Math.max(0, camoEnergy - (0.24 * getCamoDrainMultiplier())); snake.speed = currentGameMode === "boss" ? 2.0 : 1.75; if (camoEnergy <= 0) setCamouflage(false); } else { camoEnergy = Math.min(getMaxCamo(), camoEnergy + 0.08); snake.speed = currentGameMode === "boss" ? 3.25 : 3.1; } }
     function setCamouflage(active) { camoToggle = active && camoEnergy > 0; camoButton.classList.toggle("active", camoToggle); camoButton.textContent = camoToggle ? "🕶 Tarnung deaktivieren" : "🕶 Tarnung aktivieren"; }
     function toggleCamouflageButton() { setCamouflage(!camoToggle); }
     function isCamouflaged() { return camoToggle && camoEnergy > 0; }
@@ -1248,24 +1414,266 @@
     function updateAlertPhase() { if (currentGameMode === "boss") return; if (alertPhase === "alert") { alertCountdown = Math.max(0, alertCountdown - 1/60); if (alertCountdown <= 0) { alertPhase = "caution"; cautionCountdown = 12; gameMessage = "Vorsichtsphase: Feinde suchen weiter."; } } else if (alertPhase === "caution") { cautionCountdown = Math.max(0, cautionCountdown - 1/60); if (cautionCountdown <= 0) { alertPhase = "normal"; gameMessage = "Normalphase: Gebiet ruhig."; } } }
     function updateMovement() { let dx = 0, dy = 0; if (pressedKeys.has("w") || pressedKeys.has("arrowup")) dy--; if (pressedKeys.has("s") || pressedKeys.has("arrowdown")) dy++; if (pressedKeys.has("a") || pressedKeys.has("arrowleft")) dx--; if (pressedKeys.has("d") || pressedKeys.has("arrowright")) dx++; if (mouseTarget) { const tx = mouseTarget.x - snake.x, ty = mouseTarget.y - snake.y, dist = Math.hypot(tx, ty); if (dist > 4) { dx = tx / dist; dy = ty / dist; } } if (dx || dy) { const len = Math.hypot(dx, dy) || 1; moveSnake(dx / len * snake.speed, 0); moveSnake(0, dy / len * snake.speed); } snake.x = clamp(snake.x, snake.size, GAME_WIDTH - snake.size); snake.y = clamp(snake.y, snake.size, GAME_HEIGHT - snake.size); }
     function moveSnake(dx, dy) { snake.x += dx; if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.x -= dx; snake.y += dy; if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.y -= dy; }
-    function updateGekkos() { const bonus = alertPhase === "alert" ? 1.45 : alertPhase === "caution" ? 1.18 : 1; gekkos.forEach((g) => { g.x += g.vx * bonus; g.y += g.vy * bonus; if (g.x < g.minX || g.x > g.maxX) g.vx *= -1; if (g.y < g.minY || g.y > g.maxY) g.vy *= -1; }); }
+    function updateGekkos() {
+        const bonus = alertPhase === "alert" ? 1.45 : alertPhase === "caution" ? 1.18 : 1;
+        const now = performance.now();
+        gekkos.forEach((g) => {
+            if (g.stunnedUntil && g.stunnedUntil > now) return;
+            g.x += g.vx * bonus;
+            g.y += g.vy * bonus;
+            if (g.x < g.minX || g.x > g.maxX) g.vx *= -1;
+            if (g.y < g.minY || g.y > g.maxY) g.vy *= -1;
+        });
+    }
     function updateCameras() { cameras.forEach((c) => { c.angle += c.speed * c.direction; if (c.angle > c.maxAngle || c.angle < c.minAngle) { c.direction *= -1; c.angle = clamp(c.angle, c.minAngle, c.maxAngle); } }); }
     function collectIntel() { intelItems.forEach((item) => { if (!item.collected && distance(snake, item) < snake.size + item.size) { item.collected = true; gameScoreValue++; gameMessage = "Intel gesichert"; } }); }
-    function checkDetection() { if (isCamouflaged()) return; for (const g of gekkos) { if (distance(snake, g) < g.size + 48 && hasLineOfSight(g.x, g.y, snake.x, snake.y)) return triggerAlert("Gekko hat Snake entdeckt!"); } for (const c of cameras) { if (inCameraCone(c, snake.x, snake.y) && hasLineOfSight(c.x, c.y, snake.x, snake.y)) return triggerAlert("Überwachungskamera hat Snake entdeckt!"); } }
-    function triggerAlert(message) { if (alertPhase !== "alert") gameLivesValue = Math.max(0, gameLivesValue - 1); alertPhase = "alert"; alertCountdown = 10; cautionCountdown = 0; gameMessage = `${message} Alarmphase!`; if (gameLivesValue <= 0) endGame(false, "Mission gescheitert! Keine Leben mehr übrig."); }
-    function checkGekkoCollisions() { for (const g of gekkos) if (distance(snake, g) < snake.size + g.size - 2) { gameLivesValue--; snake.x = getStealthLevel().snake[0]; snake.y = getStealthLevel().snake[1]; mouseTarget = null; alertPhase = "alert"; alertCountdown = 8; gameMessage = "Gekko-Kontakt!"; if (gameLivesValue <= 0) endGame(false, "Mission gescheitert! Snake wurde überwältigt."); break; } }
+    function checkDetection() {
+        if (isCamouflaged() || isDistractionActive()) return;
+        const now = performance.now();
+        for (const g of gekkos) {
+            if (g.stunnedUntil && g.stunnedUntil > now) continue;
+            if (distance(snake, g) < g.size + 48 && hasLineOfSight(g.x, g.y, snake.x, snake.y)) return triggerAlert("Gekko hat Snake entdeckt!");
+        }
+        for (const c of cameras) {
+            if (inCameraCone(c, snake.x, snake.y) && hasLineOfSight(c.x, c.y, snake.x, snake.y)) return triggerAlert("Überwachungskamera hat Snake entdeckt!");
+        }
+    }
+    function triggerAlert(message) {
+        if (alertPhase !== "alert") applySnakeDamage(22, message);
+        alertPhase = "alert";
+        alertCountdown = 10;
+        cautionCountdown = 0;
+        gameMessage = `${message} Alarmphase!`;
+    }
+    function checkGekkoCollisions() {
+        const now = performance.now();
+        for (const g of gekkos) {
+            if (g.stunnedUntil && g.stunnedUntil > now) continue;
+            if (distance(snake, g) < snake.size + g.size - 2) {
+                applySnakeDamage(35, "Gekko-Kontakt!");
+                snake.x = getStealthLevel().snake[0];
+                snake.y = getStealthLevel().snake[1];
+                mouseTarget = null;
+                alertPhase = "alert";
+                alertCountdown = 8;
+                break;
+            }
+        }
+    }
     function checkGoal() { const inGoal = snake.x > goal.x && snake.x < goal.x + goal.width && snake.y > goal.y && snake.y < goal.y + goal.height; if (inGoal && intelItems.every((i) => i.collected)) endGame(true, `Level ${selectedStealthLevel} abgeschlossen!`); else if (inGoal) gameMessage = "Erst alle Intel-Daten sammeln!"; }
 
     function updateBossMovement() { if (!boss) return; const dx = snake.x - boss.x, dy = snake.y - boss.y, dist = Math.hypot(dx, dy) || 1; boss.x = clamp(boss.x + dx / dist * boss.speed * 0.35, 430, GAME_WIDTH - boss.size); boss.y = clamp(boss.y + Math.sin(performance.now() / 450) * boss.speed * 0.55, boss.size, GAME_HEIGHT - boss.size); }
-    function updateProjectiles() { projectiles.forEach((p) => { p.x += p.vx; p.y += p.vy; p.life--; if (boss && distance(p, boss) < boss.size + p.size) { boss.health -= p.damage; p.life = 0; gameScoreValue++; gameMessage = `${weapons[selectedWeaponIndex].label} Treffer!`; if (boss.health <= 0) endGame(true, `${boss.name} besiegt!`); } if (collidesWithObstacles(p.x, p.y, p.size)) p.life = 0; }); projectiles = projectiles.filter((p) => p.life > 0 && p.x >= 0 && p.x <= GAME_WIDTH && p.y >= 0 && p.y <= GAME_HEIGHT); }
-    function updateBossProjectiles() { bossProjectiles.forEach((p) => { p.x += p.vx; p.y += p.vy; p.life--; if (distance(p, snake) < snake.size + p.size) { p.life = 0; gameLivesValue--; gameMessage = "Boss-Angriff getroffen!"; if (gameLivesValue <= 0) endGame(false, "Bosskampf verloren! Snake wurde getroffen."); } if (collidesWithObstacles(p.x, p.y, p.size)) p.life = 0; }); bossProjectiles = bossProjectiles.filter((p) => p.life > 0 && p.x >= 0 && p.x <= GAME_WIDTH && p.y >= 0 && p.y <= GAME_HEIGHT); }
-    function maybeBossFire() { if (!boss || isCamouflaged()) return; const now = performance.now(); if (now - boss.lastFire < boss.fireRate || !hasLineOfSight(boss.x, boss.y, snake.x, snake.y)) return; boss.lastFire = now; const dx = snake.x - boss.x, dy = snake.y - boss.y, dist = Math.hypot(dx, dy) || 1; bossProjectiles.push({ x: boss.x, y: boss.y, vx: dx / dist * 4.8, vy: dy / dist * 4.8, size: 7, life: 150 }); }
-    function checkBossContact() { if (boss && distance(snake, boss) < snake.size + boss.size) { gameLivesValue--; snake.x = getBossLevel().snake[0]; snake.y = getBossLevel().snake[1]; mouseTarget = null; gameMessage = "Boss-Kontakt! Abstand halten."; if (gameLivesValue <= 0) endGame(false, "Bosskampf verloren! Snake wurde überwältigt."); } }
-    function fireWeapon() { if (!gameRunning || currentGameMode !== "boss" || !boss) return; const weapon = weapons[selectedWeaponIndex], now = performance.now(); if (now - lastShotTime < weapon.cooldown) return; lastShotTime = now; const dx = boss.x - snake.x, dy = boss.y - snake.y, dist = Math.hypot(dx, dy) || 1; projectiles.push({ x: snake.x, y: snake.y, vx: dx / dist * weapon.speed, vy: dy / dist * weapon.speed, size: weapon.name === "RPG" ? 8 : 5, damage: weapon.damage, life: 120 }); }
-    function switchWeapon() { selectedWeaponIndex = (selectedWeaponIndex + 1) % weapons.length; updateGameHud(); }
+    function updateProjectiles() {
+        const now = performance.now();
+        projectiles.forEach((p) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
 
-    function endGame(success, message) { stopGame(false); setCamouflage(false); if (success && currentGameMode === "stealth") saveGameProgress(selectedStealthLevel); gameMessage = success ? `${message} Rang: ${getMiniRank()}` : message; updateGameHud(); drawGame(); drawEndOverlay(success); }
-    function getMiniRank() { const maxLives = currentGameMode === "boss" ? getBossLevel().lives : getStealthLevel().lives; const maxTime = currentGameMode === "boss" ? getBossLevel().time : getStealthLevel().time; if (gameLivesValue === maxLives && gameTimeLeft >= Math.floor(maxTime * 0.55)) return "Big Boss"; if (gameLivesValue >= Math.max(1, maxLives - 1) && gameTimeLeft >= Math.floor(maxTime * 0.35)) return "Foxhound"; if (gameLivesValue >= 1) return "Fox"; return "Rookie"; }
+            if (currentGameMode === "boss" && boss && distance(p, boss) < boss.size + p.size) {
+                boss.health -= p.damage;
+                p.life = 0;
+                gameScoreValue++;
+                gameMessage = `${getCurrentBossWeapon().label} Treffer!`;
+                if (boss.health <= 0) endGame(true, `${boss.name} besiegt!`);
+            }
+
+            if (currentGameMode === "stealth") {
+                for (const g of gekkos) {
+                    if (distance(p, g) < g.size + p.size) {
+                        g.stunnedUntil = now + (p.stunDuration || 10000);
+                        p.life = 0;
+                        gameMessage = "Gekko für 10 Sekunden betäubt!";
+                        break;
+                    }
+                }
+            }
+
+            if (collidesWithObstacles(p.x, p.y, p.size)) p.life = 0;
+        });
+        projectiles = projectiles.filter((p) => p.life > 0 && p.x >= 0 && p.x <= GAME_WIDTH && p.y >= 0 && p.y <= GAME_HEIGHT);
+    }
+    function updateBossProjectiles() {
+        bossProjectiles.forEach((p) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            if (distance(p, snake) < snake.size + p.size) {
+                p.life = 0;
+                applySnakeDamage(28, "Boss-Angriff getroffen!");
+            }
+            if (collidesWithObstacles(p.x, p.y, p.size)) p.life = 0;
+        });
+        bossProjectiles = bossProjectiles.filter((p) => p.life > 0 && p.x >= 0 && p.x <= GAME_WIDTH && p.y >= 0 && p.y <= GAME_HEIGHT);
+    }
+    function maybeBossFire() { if (!boss || isCamouflaged() || isDistractionActive()) return; const now = performance.now(); if (now - boss.lastFire < boss.fireRate || !hasLineOfSight(boss.x, boss.y, snake.x, snake.y)) return; boss.lastFire = now; const dx = snake.x - boss.x, dy = snake.y - boss.y, dist = Math.hypot(dx, dy) || 1; bossProjectiles.push({ x: boss.x, y: boss.y, vx: dx / dist * 4.8, vy: dy / dist * 4.8, size: 7, life: 150 }); }
+    function checkBossContact() {
+        if (boss && distance(snake, boss) < snake.size + boss.size) {
+            applySnakeDamage(35, "Boss-Kontakt! Abstand halten.");
+            snake.x = getBossLevel().snake[0];
+            snake.y = getBossLevel().snake[1];
+            mouseTarget = null;
+        }
+    }
+    function fireWeapon() {
+        if (!gameRunning) return;
+
+        if (currentGameMode === "stealth") {
+            fireStealthPistol();
+            return;
+        }
+
+        if (currentGameMode !== "boss" || !boss) return;
+        const weapon = getCurrentBossWeapon(), now = performance.now();
+        if (now - lastShotTime < weapon.cooldown) return;
+        lastShotTime = now;
+        const dx = boss.x - snake.x, dy = boss.y - snake.y, dist = Math.hypot(dx, dy) || 1;
+        projectiles.push({ x: snake.x, y: snake.y, vx: dx / dist * weapon.speed, vy: dy / dist * weapon.speed, size: weapon.name === "RPG" ? 8 : 5, damage: weapon.damage, life: 120 });
+    }
+
+    function fireStealthPistol() {
+        const weapon = getCurrentStealthWeapon();
+        const now = performance.now();
+        if (now - lastShotTime < weapon.cooldown) return;
+        lastShotTime = now;
+
+        const target = gekkos
+            .filter((g) => !(g.stunnedUntil && g.stunnedUntil > now))
+            .sort((a, b) => distance(snake, a) - distance(snake, b))[0];
+
+        if (!target) return;
+        const dx = target.x - snake.x, dy = target.y - snake.y, dist = Math.hypot(dx, dy) || 1;
+        projectiles.push({ x: snake.x, y: snake.y, vx: dx / dist * weapon.speed, vy: dy / dist * weapon.speed, size: 5, damage: 0, life: 90, stun: true, stunDuration: weapon.stunDuration });
+        gameMessage = `${weapon.label} abgefeuert.`;
+    }
+    function switchWeapon() {
+        if (currentGameMode === "boss") {
+            const owned = getOwnedBossWeapons();
+            selectedWeaponIndex = (selectedWeaponIndex + 1) % Math.max(1, owned.length);
+        } else {
+            const owned = getOwnedStealthWeapons();
+            selectedStealthWeaponIndex = (selectedStealthWeaponIndex + 1) % Math.max(1, owned.length);
+        }
+        updateGameHud();
+    }
+
+    function endGame(success, message) {
+        stopGame(false);
+        setCamouflage(false);
+        let earnedPoints = 0;
+        if (success) earnedPoints = awardMissionPoints();
+        if (success && currentGameMode === "stealth") saveGameProgress(selectedStealthLevel);
+        gameMessage = success ? `${message} +${earnedPoints} Punkte · Rang: ${getMiniRank()}` : message;
+        updateGameHud();
+        drawGame();
+        drawEndOverlay(success);
+        if (success) startVictoryAnimation();
+    }
+    function getMiniRank() { const maxLives = currentGameMode === "boss" ? getBossLevel().lives : getStealthLevel().lives; const maxTime = currentGameMode === "boss" ? getBossLevel().time : getStealthLevel().time; if (gameLivesValue === maxLives && snakeHealthValue >= 90 && gameTimeLeft >= Math.floor(maxTime * 0.55)) return "Big Boss"; if (gameLivesValue >= Math.max(1, maxLives - 1) && snakeHealthValue >= 50 && gameTimeLeft >= Math.floor(maxTime * 0.35)) return "Foxhound"; if (gameLivesValue >= 1) return "Fox"; return "Rookie"; }
+
+    function createRations(mode, levelId) {
+        const stealthRations = {
+            1: [[90, 355], [650, 360]],
+            2: [[90, 95], [620, 380]],
+            3: [[95, 210], [650, 55]],
+            4: [[120, 360], [670, 70]],
+            5: [[90, 90], [680, 360]],
+            6: [[90, 350], [660, 160]],
+            7: [[125, 60], [635, 255]],
+            8: [[105, 340], [660, 70]],
+            9: [[92, 230], [660, 330]],
+            10: [[105, 60], [675, 225]]
+        };
+
+        const bossRations = {
+            1: [[115, 85], [115, 345]],
+            2: [[115, 110], [610, 345]],
+            3: [[110, 340], [500, 70]],
+            4: [[105, 80], [105, 350], [620, 210]]
+        };
+
+        const source = mode === "boss" ? bossRations : stealthRations;
+        return (source[levelId] || []).map(([x, y]) => ({ x, y, size: 14, collected: false }));
+    }
+
+    function collectRations() {
+        rations.forEach((ration) => {
+            if (ration.collected) return;
+            if (distance(snake, ration) < snake.size + ration.size) {
+                ration.collected = true;
+                const before = snakeHealthValue;
+                snakeHealthValue = Math.min(getMaxHealth(), snakeHealthValue + 20);
+                gameMessage = before >= 100 ? "Ration aufgenommen. HP ist bereits voll." : "Ration genutzt: +20% HP.";
+            }
+        });
+    }
+
+    function applySnakeDamage(amount, message) {
+        if (!gameRunning) return;
+        snakeHealthValue = Math.max(0, snakeHealthValue - amount);
+        gameMessage = `${message} -${amount}% HP`;
+
+        if (snakeHealthValue > 0) return;
+
+        gameLivesValue -= 1;
+        if (shopState.inventory.ration_pack > 0) {
+            shopState.inventory.ration_pack -= 1;
+            snakeHealthValue = Math.min(getMaxHealth(), 35);
+            saveShopState();
+            updateShopHud();
+            gameMessage = "Notration automatisch benutzt. HP stabilisiert.";
+            return;
+        }
+
+        snakeHealthValue = getMaxHealth();
+        mouseTarget = null;
+        const start = currentGameMode === "boss" ? getBossLevel().snake : getStealthLevel().snake;
+        snake.x = start[0];
+        snake.y = start[1];
+
+        if (gameLivesValue <= 0) {
+            endGame(false, currentGameMode === "boss" ? "Bosskampf verloren! Snake hat keine HP mehr." : "Mission gescheitert! Snake hat keine HP mehr.");
+        } else {
+            gameMessage = "Snake wurde schwer getroffen. Neustart am Einstiegspunkt.";
+        }
+    }
+
+    function startVictoryAnimation() {
+        const startedAt = performance.now();
+        const duration = 1800;
+
+        function animateVictory(now) {
+            const progress = Math.min(1, (now - startedAt) / duration);
+            drawGame();
+            drawEndOverlay(true);
+
+            for (let i = 0; i < 18; i++) {
+                const angle = (i / 18) * Math.PI * 2 + progress * 3;
+                const radius = 35 + progress * 190 + (i % 3) * 18;
+                const x = GAME_WIDTH / 2 + Math.cos(angle) * radius;
+                const y = 190 + Math.sin(angle) * radius * 0.45;
+                ctx.fillStyle = `rgba(255, 215, 0, ${1 - progress})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 4 + (i % 2), 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = `rgba(255, 215, 0, ${0.9 - progress * 0.7})`;
+            ctx.font = "18px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("MISSION COMPLETE", GAME_WIDTH / 2, 295 + Math.sin(progress * Math.PI * 4) * 4);
+
+            if (progress < 1) {
+                victoryAnimationId = requestAnimationFrame(animateVictory);
+            } else {
+                victoryAnimationId = null;
+                drawGame();
+                drawEndOverlay(true);
+            }
+        }
+
+        victoryAnimationId = requestAnimationFrame(animateVictory);
+    }
 
     function redrawMiniGameScreen() {
         if (miniGamePanel.classList.contains("hidden")) return;
@@ -1294,16 +1702,86 @@
     }
 
     function drawIntro() { drawBackground(); ctx.fillStyle = "rgba(0,0,0,0.72)"; ctx.fillRect(0,0,GAME_WIDTH,GAME_HEIGHT); ctx.textAlign = "center"; ctx.fillStyle = "#ffd700"; ctx.font = "24px Orbitron, sans-serif"; if (currentGameMode === "boss") { ctx.fillText(`Boss ${selectedBossLevel}: ${getBossLevel().name}`, GAME_WIDTH/2, 145); ctx.fillStyle = "#d8d8d8"; ctx.font = "14px Orbitron, sans-serif"; ctx.fillText("Besiege den Boss mit SOCOM, M4 oder RPG.", GAME_WIDTH/2, 195); ctx.fillText("J / Feuer-Button = schießen · 1/2/3 = Waffenwechsel.", GAME_WIDTH/2, 225); ctx.fillText("Kisten blockieren Schüsse und Bewegung. Bleib in Deckung.", GAME_WIDTH/2, 255); } else { ctx.fillText(`Level ${selectedStealthLevel}: ${getStealthLevel().name}`, GAME_WIDTH/2, 150); ctx.fillStyle = "#d8d8d8"; ctx.font = "14px Orbitron, sans-serif"; ctx.fillText("Sammle alle Intel-Daten und erreiche Outer Haven.", GAME_WIDTH/2, 195); ctx.fillText("Kisten blockieren deinen Weg und Sichtlinien.", GAME_WIDTH/2, 225); ctx.fillText("Nutze Tarnung gegen Kameras und Gekkos.", GAME_WIDTH/2, 255); } updateGameHud(); }
-    function drawGame() { drawBackground(); drawCameraCones(); if (currentGameMode === "boss") drawBossMode(); else { drawGoal(); drawIntel(); drawGekkos(); } drawSnake(); }
+    function drawGame() {
+        drawBackground();
+        drawCameraCones();
+        drawActiveDistraction();
+        if (currentGameMode === "boss") {
+            drawBossMode();
+        } else {
+            drawProjectiles(projectiles, "#9fd4ff");
+            drawGoal();
+            drawIntel();
+            drawRations();
+            drawGekkos();
+        }
+        drawSnake();
+        drawSnakeHealthBar();
+    }
     function drawBackground() { ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT); ctx.fillStyle = "#080808"; ctx.fillRect(0,0,GAME_WIDTH,GAME_HEIGHT); ctx.strokeStyle = "rgba(255,215,0,0.08)"; ctx.lineWidth = 1; for (let x=0;x<GAME_WIDTH;x+=38) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,GAME_HEIGHT); ctx.stroke(); } for (let y=0;y<GAME_HEIGHT;y+=38) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(GAME_WIDTH,y); ctx.stroke(); } ctx.fillStyle = "rgba(255,215,0,0.08)"; ctx.fillRect(0,0,92,GAME_HEIGHT); ctx.fillRect(650,0,110,GAME_HEIGHT); obstacles.forEach((o) => drawCrate(o.x,o.y,o.width,o.height)); if (currentGameMode === "stealth") drawCameras(); }
     function drawCrate(x,y,w,h) { ctx.fillStyle = "rgba(80,80,80,0.65)"; ctx.fillRect(x,y,w,h); ctx.strokeStyle = "rgba(255,215,0,0.22)"; ctx.strokeRect(x,y,w,h); ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+w,y+h); ctx.moveTo(x+w,y); ctx.lineTo(x,y+h); ctx.stroke(); }
     function drawCameras() { cameras.forEach((c) => { ctx.fillStyle = "#d8d8d8"; ctx.beginPath(); ctx.arc(c.x,c.y,9,0,Math.PI*2); ctx.fill(); ctx.strokeStyle = "#ffd700"; ctx.stroke(); }); }
     function drawCameraCones() { if (currentGameMode !== "stealth") return; cameras.forEach((c) => { ctx.fillStyle = alertPhase === "alert" ? "rgba(255,60,60,0.18)" : "rgba(255,215,0,0.12)"; ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.arc(c.x,c.y,c.range,c.angle-c.fov/2,c.angle+c.fov/2); ctx.closePath(); ctx.fill(); }); }
     function drawGoal() { ctx.fillStyle = "rgba(255,215,0,0.18)"; ctx.fillRect(goal.x,goal.y,goal.width,goal.height); ctx.strokeStyle = "#ffd700"; ctx.strokeRect(goal.x,goal.y,goal.width,goal.height); ctx.fillStyle = "#ffd700"; ctx.font = "11px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText("HAVEN", goal.x+goal.width/2, goal.y-8); }
     function drawIntel() { intelItems.forEach((i) => { if (i.collected) return; ctx.fillStyle = "#3aa7ff"; ctx.beginPath(); ctx.arc(i.x,i.y,i.size,0,Math.PI*2); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = "10px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText("i", i.x, i.y+4); }); }
-    function drawGekkos() { gekkos.forEach((g) => { ctx.fillStyle = alertPhase === "alert" ? "rgba(255,40,40,0.22)" : "rgba(184,40,40,0.14)"; ctx.beginPath(); ctx.arc(g.x,g.y,g.size+48,0,Math.PI*2); ctx.fill(); drawGekkoSprite(g.x,g.y,g.spriteWidth,g.spriteHeight,g.size,"GEKKO"); }); }
-    function drawSnake() { ctx.fillStyle = isCamouflaged() ? "rgba(58,167,255,0.22)" : "rgba(21,148,71,0.18)"; ctx.beginPath(); ctx.arc(snake.x,snake.y,snake.size+18,0,Math.PI*2); ctx.fill(); if (spriteReady(snakeSprite)) drawSprite(snakeSprite, snake.x, snake.y, snake.spriteWidth, snake.spriteHeight, isCamouflaged()?0.45:1); else { ctx.fillStyle = isCamouflaged()?"#3aa7ff":"#159447"; ctx.beginPath(); ctx.arc(snake.x,snake.y,snake.size,0,Math.PI*2); ctx.fill(); } ctx.fillStyle = "rgba(0,0,0,0.72)"; ctx.fillRect(snake.x-30,snake.y+snake.spriteHeight/2-5,60,15); ctx.fillStyle = isCamouflaged()?"#3aa7ff":"#ffd700"; ctx.font = "9px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText(isCamouflaged()?"CAMO":"OLD SNAKE", snake.x, snake.y+snake.spriteHeight/2+7); }
-    function drawBossMode() { drawProjectiles(projectiles, "#9fd4ff"); drawProjectiles(bossProjectiles, "#ff5a5a"); if (boss) { ctx.fillStyle = "rgba(255,40,40,0.22)"; ctx.beginPath(); ctx.arc(boss.x,boss.y,boss.size+42,0,Math.PI*2); ctx.fill(); drawGekkoSprite(boss.x,boss.y,boss.spriteWidth,boss.spriteHeight,boss.size,boss.name,boss.color); drawBossHealthBar(); } }
+
+    function drawRations() {
+        rations.forEach((ration) => {
+            if (ration.collected) return;
+            ctx.fillStyle = "#31d66b";
+            ctx.fillRect(ration.x - 12, ration.y - 9, 24, 18);
+            ctx.strokeStyle = "#ffffff";
+            ctx.strokeRect(ration.x - 12, ration.y - 9, 24, 18);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "9px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("R", ration.x, ration.y + 4);
+        });
+    }
+    function drawGekkos() {
+        const now = performance.now();
+        gekkos.forEach((g) => {
+            const stunned = g.stunnedUntil && g.stunnedUntil > now;
+            ctx.fillStyle = stunned ? "rgba(58,167,255,0.18)" : (alertPhase === "alert" ? "rgba(255,40,40,0.22)" : "rgba(184,40,40,0.14)");
+            ctx.beginPath();
+            ctx.arc(g.x,g.y,g.size+48,0,Math.PI*2);
+            ctx.fill();
+            drawGekkoSprite(g.x,g.y,g.spriteWidth,g.spriteHeight,g.size, stunned ? `STUN ${Math.ceil((g.stunnedUntil - now) / 1000)}s` : "GEKKO", stunned ? "#9fd4ff" : "#ffb5b5");
+        });
+    }
+    function drawSnake() {
+        ctx.fillStyle = isCamouflaged() ? "rgba(58,167,255,0.22)" : "rgba(21,148,71,0.18)";
+        ctx.beginPath();
+        ctx.arc(snake.x,snake.y,snake.size+18,0,Math.PI*2);
+        ctx.fill();
+        if (spriteReady(snakeSprite)) drawSprite(snakeSprite, snake.x, snake.y, snake.spriteWidth, snake.spriteHeight, isCamouflaged()?0.45:1);
+        else { ctx.fillStyle = isCamouflaged()?"#3aa7ff":"#159447"; ctx.beginPath(); ctx.arc(snake.x,snake.y,snake.size,0,Math.PI*2); ctx.fill(); }
+        ctx.fillStyle = "rgba(0,0,0,0.72)";
+        ctx.fillRect(snake.x-30,snake.y+snake.spriteHeight/2-5,60,15);
+        ctx.fillStyle = isCamouflaged()?"#3aa7ff":"#ffd700";
+        ctx.font = "9px Orbitron, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(isCamouflaged()?"CAMO":"OLD SNAKE", snake.x, snake.y+snake.spriteHeight/2+7);
+    }
+
+    function drawSnakeHealthBar() {
+        const width = 58;
+        const height = 7;
+        const x = snake.x - width / 2;
+        const y = snake.y - snake.spriteHeight / 2 - 15;
+        const fill = Math.max(0, snakeHealthValue / getMaxHealth());
+        ctx.fillStyle = "rgba(0,0,0,0.78)";
+        ctx.fillRect(x, y, width, height);
+        ctx.fillStyle = fill > 0.55 ? "#31d66b" : fill > 0.25 ? "#ffe66d" : "#ff5a5a";
+        ctx.fillRect(x, y, width * fill, height);
+        ctx.strokeStyle = "#ffd700";
+        ctx.strokeRect(x, y, width, height);
+    }
+    function drawBossMode() {
+        drawRations();
+        drawProjectiles(projectiles, "#9fd4ff");
+        drawProjectiles(bossProjectiles, "#ff5a5a");
+        if (boss) { ctx.fillStyle = "rgba(255,40,40,0.22)"; ctx.beginPath(); ctx.arc(boss.x,boss.y,boss.size+42,0,Math.PI*2); ctx.fill(); drawGekkoSprite(boss.x,boss.y,boss.spriteWidth,boss.spriteHeight,boss.size,boss.name,boss.color); drawBossHealthBar(); } }
     function drawGekkoSprite(x,y,w,h,size,label,color="#ffb5b5") { if (spriteReady(gekkoSprite)) drawSprite(gekkoSprite,x,y,w,h,1); else { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fill(); } ctx.fillStyle = "rgba(0,0,0,0.72)"; ctx.fillRect(x-55,y+h/2-4,110,16); ctx.fillStyle = color; ctx.font = "9px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText(label, x, y+h/2+8); }
     function drawSprite(sprite,x,y,w,h,alpha=1) { ctx.save(); ctx.globalAlpha = alpha; ctx.shadowColor = "rgba(255,215,0,0.35)"; ctx.shadowBlur = 8; ctx.drawImage(sprite, x-w/2, y-h/2, w, h); ctx.restore(); }
     function spriteReady(sprite) { return sprite.complete && sprite.naturalWidth > 0; }
@@ -1311,12 +1789,213 @@
     function drawBossHealthBar() { if (!boss) return; const w = 360, h = 14, x = (GAME_WIDTH-w)/2, y = 18, fill = Math.max(0,boss.health/boss.maxHealth); ctx.fillStyle = "rgba(0,0,0,0.75)"; ctx.fillRect(x,y,w,h); ctx.fillStyle = boss.color; ctx.fillRect(x,y,w*fill,h); ctx.strokeStyle = "#ffd700"; ctx.strokeRect(x,y,w,h); ctx.fillStyle = "#ffd700"; ctx.font = "11px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText(boss.name, GAME_WIDTH/2, y+31); }
     function drawEndOverlay(success) { ctx.fillStyle = "rgba(0,0,0,0.72)"; ctx.fillRect(0,0,GAME_WIDTH,GAME_HEIGHT); ctx.fillStyle = success ? "#ffd700" : "#ffb5b5"; ctx.font = "24px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText(success ? "MISSION ERFÜLLT" : "MISSION GESCHEITERT", GAME_WIDTH/2, 165); ctx.fillStyle = "#d8d8d8"; ctx.font = "14px Orbitron, sans-serif"; ctx.fillText(gameMessage, GAME_WIDTH/2, 210); ctx.fillText(currentGameMode === "boss" ? "Starte den Bosskampf erneut oder wähle einen anderen Boss." : (success && selectedStealthLevel < stealthLevels.length ? `Level ${selectedStealthLevel + 1} wurde freigeschaltet.` : "Starte das Level für einen neuen Versuch."), GAME_WIDTH/2, 245); }
 
-    function updateGameHud() { gameLevel.textContent = currentGameMode === "boss" ? `Boss: ${selectedBossLevel}` : `Level: ${selectedStealthLevel}`; gameScore.textContent = currentGameMode === "boss" ? `Treffer: ${gameScoreValue}` : `Intel: ${gameScoreValue} / ${intelItems.length || 5}`; gameLives.textContent = `Leben: ${gameLivesValue}`; gameTimer.textContent = `Zeit: ${gameTimeLeft}s`; gameCamo.textContent = `Tarnung: ${Math.round(camoEnergy)}%`; bossHealthHud.classList.toggle("hidden", currentGameMode !== "boss"); weaponHud.classList.toggle("hidden", currentGameMode !== "boss"); if (currentGameMode === "boss" && boss) { bossHealthHud.textContent = `Boss: ${Math.max(0, Math.ceil(boss.health / boss.maxHealth * 100))}%`; weaponHud.textContent = `Waffe: ${weapons[selectedWeaponIndex].label}`; } gameAlert.classList.remove("alert-normal","alert-caution","alert-alert"); if (currentGameMode === "boss") { gameAlert.textContent = "Phase: Bosskampf"; gameAlert.classList.add("alert-alert"); } else if (alertPhase === "alert") { gameAlert.textContent = `Phase: Alarm ${Math.ceil(alertCountdown)}s`; gameAlert.classList.add("alert-alert"); } else if (alertPhase === "caution") { gameAlert.textContent = `Phase: Vorsicht ${Math.ceil(cautionCountdown)}s`; gameAlert.classList.add("alert-caution"); } else { gameAlert.textContent = "Phase: Normal"; gameAlert.classList.add("alert-normal"); } gameStatus.textContent = gameMessage; }
+    function updateGameHud() { gameLevel.textContent = currentGameMode === "boss" ? `Boss: ${selectedBossLevel}` : `Level: ${selectedStealthLevel}`; gameScore.textContent = currentGameMode === "boss" ? `Treffer: ${gameScoreValue}` : `Intel: ${gameScoreValue} / ${intelItems.length || 5}`; gameLives.textContent = `Leben: ${gameLivesValue}`; snakeHealthHud.textContent = `HP: ${Math.round(snakeHealthValue)}/${getMaxHealth()}`; gameTimer.textContent = `Zeit: ${gameTimeLeft}s`; gameCamo.textContent = `Tarnung: ${Math.round(camoEnergy)}/${getMaxCamo()}`; bossHealthHud.classList.toggle("hidden", currentGameMode !== "boss");
+        weaponHud.classList.remove("hidden");
+        if (currentGameMode === "boss" && boss) {
+            bossHealthHud.textContent = `Boss: ${Math.max(0, Math.ceil(boss.health / boss.maxHealth * 100))}%`;
+            weaponHud.textContent = `Waffe: ${getCurrentBossWeapon().label}`;
+        } else {
+            weaponHud.textContent = `Waffe: ${getCurrentStealthWeapon().label}`;
+        }
+        updateShopHud(); gameAlert.classList.remove("alert-normal","alert-caution","alert-alert"); if (currentGameMode === "boss") { gameAlert.textContent = "Phase: Bosskampf"; gameAlert.classList.add("alert-alert"); } else if (alertPhase === "alert") { gameAlert.textContent = `Phase: Alarm ${Math.ceil(alertCountdown)}s`; gameAlert.classList.add("alert-alert"); } else if (alertPhase === "caution") { gameAlert.textContent = `Phase: Vorsicht ${Math.ceil(cautionCountdown)}s`; gameAlert.classList.add("alert-caution"); } else { gameAlert.textContent = "Phase: Normal"; gameAlert.classList.add("alert-normal"); } gameStatus.textContent = gameMessage; }
 
-    function handleKeyDown(event) { const key = event.key.toLowerCase(); if (["w","a","s","d","arrowup","arrowleft","arrowdown","arrowright"].includes(key)) { pressedKeys.add(key); mouseTarget = null; if (!miniGamePanel.classList.contains("hidden")) event.preventDefault(); } if (["1","2","3"].includes(key) && !miniGamePanel.classList.contains("hidden")) { selectedWeaponIndex = Number(key)-1; updateGameHud(); event.preventDefault(); } if (key === "j" && !miniGamePanel.classList.contains("hidden")) { fireWeapon(); event.preventDefault(); } }
+    function handleKeyDown(event) { const key = event.key.toLowerCase(); if (["w","a","s","d","arrowup","arrowleft","arrowdown","arrowright"].includes(key)) { pressedKeys.add(key); mouseTarget = null; if (!miniGamePanel.classList.contains("hidden")) event.preventDefault(); } if (["1","2","3"].includes(key) && !miniGamePanel.classList.contains("hidden")) { const index = Number(key)-1; if (currentGameMode === "boss") selectedWeaponIndex = Math.min(index, getOwnedBossWeapons().length - 1); else selectedStealthWeaponIndex = Math.min(index, getOwnedStealthWeapons().length - 1); updateGameHud(); event.preventDefault(); } if (key === "j" && !miniGamePanel.classList.contains("hidden")) { fireWeapon(); event.preventDefault(); } }
     function handleKeyUp(event) { pressedKeys.delete(event.key.toLowerCase()); }
     function handleTouch(event) { if (miniGamePanel.classList.contains("hidden")) return; event.preventDefault(); const touch = event.touches[0] || event.changedTouches[0]; if (!touch) return; if (!gameRunning) currentGameMode === "boss" ? startBossGame() : startStealthGame(); setTargetFromClient(touch.clientX, touch.clientY); }
     function setTargetFromClient(clientX, clientY) { if (miniGamePanel.classList.contains("hidden")) return; const rect = stealthCanvas.getBoundingClientRect(); mouseTarget = { x: (clientX - rect.left) * GAME_WIDTH / rect.width, y: (clientY - rect.top) * GAME_HEIGHT / rect.height }; }
+
+    function loadShopState() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(GAME_SHOP_KEY) || "{}");
+            shopState = normalizeShopState(saved);
+        } catch {
+            shopState = normalizeShopState({});
+        }
+    }
+
+    function normalizeShopState(saved) {
+        return {
+            points: Number(saved.points || 0),
+            bossWeapons: Array.isArray(saved.bossWeapons) && saved.bossWeapons.length ? [...new Set(["socom", ...saved.bossWeapons])] : ["socom"],
+            stealthWeapons: Array.isArray(saved.stealthWeapons) && saved.stealthWeapons.length ? [...new Set(["tranq", ...saved.stealthWeapons])] : ["tranq"],
+            upgrades: {
+                camo: clamp(Number(saved.upgrades?.camo || 0), 0, 2),
+                health: clamp(Number(saved.upgrades?.health || 0), 0, 2)
+            },
+            inventory: {
+                distraction: Number(saved.inventory?.distraction || 0),
+                ration_pack: Number(saved.inventory?.ration_pack || 0)
+            }
+        };
+    }
+
+    function saveShopState() {
+        localStorage.setItem(GAME_SHOP_KEY, JSON.stringify(shopState));
+    }
+
+    function getOwnedBossWeapons() {
+        return weapons.filter((weapon) => shopState.bossWeapons.includes(weapon.id));
+    }
+
+    function getOwnedStealthWeapons() {
+        return stealthWeapons.filter((weapon) => shopState.stealthWeapons.includes(weapon.id));
+    }
+
+    function getCurrentBossWeapon() {
+        const owned = getOwnedBossWeapons();
+        if (selectedWeaponIndex >= owned.length) selectedWeaponIndex = 0;
+        return owned[selectedWeaponIndex] || weapons[0];
+    }
+
+    function getCurrentStealthWeapon() {
+        const owned = getOwnedStealthWeapons();
+        if (selectedStealthWeaponIndex >= owned.length) selectedStealthWeaponIndex = 0;
+        return owned[selectedStealthWeaponIndex] || stealthWeapons[0];
+    }
+
+    function getMaxHealth() { return 100 + (shopState.upgrades.health * 20); }
+    function getMaxCamo() { return 100 + (shopState.upgrades.camo * 25); }
+    function getCamoDrainMultiplier() { return Math.max(0.55, 1 - (shopState.upgrades.camo * 0.18)); }
+
+    function toggleWeaponShop() {
+        weaponShopPanel.classList.toggle("hidden");
+        itemShopPanel.classList.add("hidden");
+        renderShop();
+    }
+
+    function toggleItemShop() {
+        itemShopPanel.classList.toggle("hidden");
+        weaponShopPanel.classList.add("hidden");
+        renderShop();
+    }
+
+    function renderShop() {
+        renderWeaponShop();
+        renderItemShop();
+        updateShopHud();
+    }
+
+    function renderWeaponShop() {
+        weaponShopList.replaceChildren();
+        [...stealthWeapons.map((weapon) => ({ ...weapon, shopType: "stealth" })), ...weapons.map((weapon) => ({ ...weapon, shopType: "boss" }))].forEach((weapon) => {
+            const owned = weapon.shopType === "boss" ? shopState.bossWeapons.includes(weapon.id) : shopState.stealthWeapons.includes(weapon.id);
+            const card = createShopCard(weapon.name, `${weapon.shopType === "boss" ? "Boss-Waffe" : "Stealth-Waffe"} · ${weapon.description}`, weapon.cost, owned ? "Gekauft" : "Kaufen", owned || shopState.points < weapon.cost, owned ? "owned" : "");
+            card.querySelector("button").addEventListener("click", () => buyWeapon(weapon.shopType, weapon.id));
+            weaponShopList.appendChild(card);
+        });
+    }
+
+    function renderItemShop() {
+        itemShopList.replaceChildren();
+        shopItems.forEach((item) => {
+            const level = item.type === "upgrade" ? shopState.upgrades[item.upgradeKey] : 0;
+            const maxed = item.type === "upgrade" && level >= item.maxLevel;
+            const ownedText = item.type === "upgrade" ? `Stufe ${level}/${item.maxLevel}` : `Besitz: ${shopState.inventory[item.id] || 0}`;
+            const card = createShopCard(item.name, `${ownedText} · ${item.description}`, item.cost, maxed ? "Maximum" : "Kaufen", maxed || shopState.points < item.cost, maxed ? "maxed" : "");
+            card.querySelector("button").addEventListener("click", () => buyItem(item.id));
+            itemShopList.appendChild(card);
+        });
+    }
+
+    function createShopCard(title, description, cost, buttonText, disabled, extraClass) {
+        const card = document.createElement("div");
+        card.className = `shop-card ${extraClass || ""}`.trim();
+        const titleEl = document.createElement("strong");
+        titleEl.textContent = title;
+        const descriptionEl = document.createElement("span");
+        descriptionEl.textContent = description;
+        const costEl = document.createElement("span");
+        costEl.textContent = cost > 0 ? `Kosten: ${cost} Punkte` : "Standard-Ausrüstung";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = buttonText;
+        button.disabled = disabled;
+        card.append(titleEl, descriptionEl, costEl, button);
+        return card;
+    }
+
+    function buyWeapon(type, id) {
+        const list = type === "boss" ? weapons : stealthWeapons;
+        const weapon = list.find((entry) => entry.id === id);
+        if (!weapon) return;
+        const ownedList = type === "boss" ? shopState.bossWeapons : shopState.stealthWeapons;
+        if (ownedList.includes(id)) return;
+        if (shopState.points < weapon.cost) return setShopMessage("Nicht genug Punkte.");
+        shopState.points -= weapon.cost;
+        ownedList.push(id);
+        saveShopState();
+        setShopMessage(`${weapon.name} gekauft.`);
+        renderShop();
+    }
+
+    function buyItem(id) {
+        const item = shopItems.find((entry) => entry.id === id);
+        if (!item) return;
+        if (shopState.points < item.cost) return setShopMessage("Nicht genug Punkte.");
+        if (item.type === "upgrade") {
+            const current = shopState.upgrades[item.upgradeKey];
+            if (current >= item.maxLevel) return setShopMessage("Upgrade ist bereits auf Maximum.");
+            shopState.upgrades[item.upgradeKey] += 1;
+        } else {
+            shopState.inventory[id] = (shopState.inventory[id] || 0) + 1;
+        }
+        shopState.points -= item.cost;
+        saveShopState();
+        setShopMessage(`${item.name} gekauft.`);
+        renderShop();
+    }
+
+    function setShopMessage(message) {
+        shopMessage.textContent = message;
+    }
+
+    function updateShopHud() {
+        if (!playerPointsDisplay) return;
+        playerPointsDisplay.textContent = String(shopState.points);
+        itemHud.textContent = `Items: Ablenkung ${shopState.inventory.distraction || 0} · Notration ${shopState.inventory.ration_pack || 0}`;
+    }
+
+    function awardMissionPoints() {
+        const base = currentGameMode === "boss" ? 300 + selectedBossLevel * 150 : 120 + selectedStealthLevel * 80;
+        const hpBonus = Math.round(snakeHealthValue);
+        const timeBonus = gameTimeLeft * 4;
+        const lifeBonus = gameLivesValue * 45;
+        const earned = base + hpBonus + timeBonus + lifeBonus;
+        shopState.points += earned;
+        saveShopState();
+        updateShopHud();
+        setShopMessage(`Mission geschafft: +${earned} Punkte verdient.`);
+        return earned;
+    }
+
+    function useDistraction() {
+        if (!gameRunning) return;
+        if ((shopState.inventory.distraction || 0) <= 0) return setShopMessage("Keine Ablenkung im Inventar.");
+        shopState.inventory.distraction -= 1;
+        activeDistraction = { x: snake.x, y: snake.y, until: performance.now() + 8000 };
+        saveShopState();
+        updateShopHud();
+        gameMessage = "Ablenkung aktiv: Gegner sind 8 Sekunden abgelenkt.";
+    }
+
+    function isDistractionActive() {
+        return activeDistraction && activeDistraction.until > performance.now();
+    }
+
+    function drawActiveDistraction() {
+        if (!isDistractionActive()) return;
+        const remaining = Math.ceil((activeDistraction.until - performance.now()) / 1000);
+        ctx.fillStyle = "rgba(255, 184, 77, 0.25)";
+        ctx.beginPath();
+        ctx.arc(activeDistraction.x, activeDistraction.y, 46, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#ffb84d";
+        ctx.fillRect(activeDistraction.x - 12, activeDistraction.y - 12, 24, 24);
+        ctx.fillStyle = "#000";
+        ctx.font = "10px Orbitron, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`${remaining}s`, activeDistraction.x, activeDistraction.y + 4);
+    }
 
     function collidesWithObstacles(x,y,r) { return obstacles.some((o) => circleRectCollision(x,y,r,o)); }
     function circleRectCollision(cx,cy,r,rect) { const nx = clamp(cx, rect.x, rect.x+rect.width), ny = clamp(cy, rect.y, rect.y+rect.height); return Math.hypot(cx-nx, cy-ny) < r; }
