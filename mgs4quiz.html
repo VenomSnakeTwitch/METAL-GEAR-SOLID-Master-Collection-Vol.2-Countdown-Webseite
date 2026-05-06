@@ -438,6 +438,40 @@
             color: var(--text-muted);
         }
 
+        .level-select-wrap {
+            margin: 16px 0;
+            padding: 14px;
+            border: 1px solid rgba(255, 215, 0, 0.24);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.42);
+        }
+
+        .level-select-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .level-button {
+            width: 100%;
+            min-width: 0;
+            padding: 10px 8px;
+            font-size: 13px;
+        }
+
+        .level-button.selected {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 14px rgba(255, 215, 0, 0.4);
+        }
+
+        .level-button.locked {
+            border-color: #777;
+            color: #999;
+            opacity: 0.55;
+        }
+
         .game-hud {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -452,6 +486,25 @@
             background: rgba(0, 0, 0, 0.48);
             color: var(--text-muted);
             font-size: 13px;
+        }
+
+        #gameAlert.alert-normal {
+            color: #9fffc4;
+        }
+
+        #gameAlert.alert-caution {
+            color: #ffe66d;
+        }
+
+        #gameAlert.alert-alert {
+            color: #ff8a8a;
+        }
+
+        #camoButton.active {
+            background: var(--blue);
+            color: #000;
+            border-color: var(--blue);
+            box-shadow: 0 0 18px rgba(58, 167, 255, 0.45);
         }
 
         .game-canvas-wrap {
@@ -471,6 +524,9 @@
             margin: 0 auto;
             background: radial-gradient(circle at center, #151515 0%, #070707 70%);
             cursor: crosshair;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .game-help {
@@ -521,6 +577,10 @@
             .score-summary,
             .game-hud {
                 grid-template-columns: 1fr;
+            }
+
+            .level-select-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             #musicToggleButton,
@@ -667,12 +727,21 @@
 
             <section id="miniGamePanel" class="panel hidden" aria-labelledby="miniGameTitle">
                 <h2 id="miniGameTitle">🎮 Shadow Moses Stealth Run</h2>
-                <p>Schleiche als Old Snake durch die Kampfzone, sammle Intel-Daten und erreiche Outer Haven. Vermeide die Gekko-Patrouillen.</p>
+                <p>Schleiche als Old Snake durch die Kampfzone, sammle Intel-Daten und erreiche Outer Haven. Spätere Level werden erst freigeschaltet, wenn du das vorherige Level geschafft hast.</p>
+
+                <div class="level-select-wrap">
+                    <h3>Levelauswahl</h3>
+                    <div id="miniGameLevelSelect" class="level-select-grid"></div>
+                    <p id="levelInfo" class="game-help">Level 1 ist freigeschaltet. Schließe Level ab, um weitere Missionen freizuschalten.</p>
+                </div>
 
                 <div class="game-hud">
+                    <span id="gameLevel">Level: 1</span>
                     <span id="gameScore">Intel: 0 / 5</span>
                     <span id="gameLives">Leben: 3</span>
                     <span id="gameTimer">Zeit: 60s</span>
+                    <span id="gameAlert">Phase: Normal</span>
+                    <span id="gameCamo">Tarnung: 100%</span>
                     <span id="gameStatus">Bereit</span>
                 </div>
 
@@ -680,10 +749,11 @@
                     <canvas id="stealthCanvas" width="760" height="430" aria-label="Metal Gear Solid 4 Mini-Spiel"></canvas>
                 </div>
 
-                <p class="game-help">Steuerung: <strong>WASD</strong> oder <strong>Pfeiltasten</strong>. Alternativ kannst du Snake mit der Maus im Spielfeld bewegen. Das Spiel nutzt <strong>snake.png</strong> für Old Snake und <strong>gekko.png</strong> für die Gekko-Patrouillen.</p>
+                <p class="game-help">Steuerung am PC: <strong>WASD</strong>, <strong>Pfeiltasten</strong> oder <strong>Maus</strong>. Auf Handy und Tablet steuerst du Old Snake per <strong>Touch</strong>. Tarnung: am PC <strong>Leertaste</strong> halten oder den Tarnungsbutton nutzen. Auf Mobile den Tarnungsbutton gedrückt halten. Das Spiel nutzt <strong>snake.png</strong> für Old Snake und <strong>gekko.png</strong> für die Gekko-Patrouillen.</p>
 
                 <div class="button-grid">
-                    <button type="button" id="startMiniGameButton">▶ Mini-Spiel starten</button>
+                    <button type="button" id="startMiniGameButton">▶ Gewähltes Level starten</button>
+                    <button type="button" id="camoButton">🕶 Tarnung halten</button>
                     <button type="button" class="secondary-button" id="miniGameMenuButton">← Zurück zum Hauptmenü</button>
                 </div>
             </section>
@@ -705,6 +775,7 @@
         const TIME_PER_QUESTION = 30;
         const QUESTIONS_PER_ROUND = 20;
         const HIGHSCORE_KEY = "mgs4QuizHighscoresV3";
+        const GAME_PROGRESS_KEY = "mgs4MiniGameProgressV1";
         const GAME_WIDTH = 760;
         const GAME_HEIGHT = 430;
         const LEGACY_HIGHSCORE_KEY = "mgs4QuizHighscoresV2";
@@ -819,12 +890,34 @@
         let gameScoreValue = 0;
         let gameLivesValue = 3;
         let gameMessage = "Bereit";
+        let selectedMiniGameLevel = 1;
+        let unlockedMiniGameLevel = 1;
+        let alertPhase = "normal";
+        let alertCountdown = 0;
+        let cautionCountdown = 0;
+        let isCamouflaged = false;
+        let camoEnergy = 100;
         let snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
         let goal = { x: 700, y: 185, width: 38, height: 70 };
         let intelItems = [];
         let gekkos = [];
+        let obstacles = [];
+        let cameras = [];
         const pressedKeys = new Set();
         let mouseTarget = null;
+
+        const miniGameLevels = [
+            { id: 1, name: "Shadow Moses Dock", time: 65, lives: 3, intel: [[145, 78], [260, 330], [382, 135], [515, 310], [610, 92]], goal: [700, 185, 38, 70], snake: [45, 205], obstacles: [[118, 180, 55, 55], [295, 58, 70, 45], [442, 230, 70, 50], [575, 350, 55, 42]], gekkos: [[190,105,28,62,82,2,0,130,330,80,130], [350,250,30,66,86,0,2.2,325,390,155,350], [540,175,31,68,88,2.4,0,455,665,145,205]], cameras: [] },
+            { id: 2, name: "SOP Checkpoint", time: 62, lives: 3, intel: [[120, 330], [230, 80], [390, 340], [535, 115], [650, 305]], goal: [705, 45, 34, 70], snake: [45, 365], obstacles: [[145,150,95,42], [330,60,52,135], [455,275,120,42], [610,145,50,125]], gekkos: [[245,265,29,64,84,2.3,0,150,360,245,290], [500,115,31,68,88,0,2.3,475,535,70,245]], cameras: [[350,215,0.25,1.2,0.018,150,90]] },
+            { id: 3, name: "Nomad Signal", time: 60, lives: 3, intel: [[118, 72], [220, 360], [365, 90], [520, 355], [675, 210]], goal: [700, 330, 38, 70], snake: [42, 45], obstacles: [[120,125,55,170], [245,35,90,45], [360,205,72,110], [535,75,55,185], [600,300,60,45]], gekkos: [[220,330,29,64,84,2.4,0,140,350,305,355], [420,105,31,68,88,2,0,355,565,80,130], [590,260,30,66,86,0,2.1,560,625,175,340]], cameras: [[470,55,1.2,2.2,0.02,155,85]] },
+            { id: 4, name: "PMC Lager", time: 58, lives: 3, intel: [[95, 205], [225, 70], [355, 350], [565, 80], [650, 300]], goal: [698, 185, 40, 70], snake: [42, 365], obstacles: [[95,100,120,42], [260,175,55,165], [405,55,95,45], [500,245,150,42], [625,115,50,95]], gekkos: [[195,250,30,66,86,0,2.5,160,220,150,350], [410,145,31,68,88,2.5,0,330,560,120,170], [600,350,32,70,90,2.2,0,500,690,325,375]], cameras: [[315,60,0.6,1.8,0.02,150,80], [580,210,2.8,4.0,0.018,145,80]] },
+            { id: 5, name: "Beauty & Beast Spur", time: 56, lives: 3, intel: [[130, 340], [245, 155], [390, 55], [525, 250], [665, 105]], goal: [700, 45, 38, 70], snake: [45, 385], obstacles: [[100,230,70,45], [205,45,45,185], [345,145,125,42], [455,310,70,80], [600,180,55,140]], gekkos: [[155,115,30,66,86,2.5,0,90,265,90,140], [360,315,32,70,90,0,2.6,335,390,210,385], [575,115,32,70,90,2.6,0,480,690,90,140]], cameras: [[300,255,3.4,4.6,0.022,160,85], [650,255,4.0,5.1,0.018,145,90]] },
+            { id: 6, name: "Shadow Moses Hangar", time: 54, lives: 3, intel: [[100, 70], [230, 365], [365, 205], [535, 65], [650, 340]], goal: [700, 185, 38, 70], snake: [42, 205], obstacles: [[135,145,55,145], [255,65,115,42], [315,300,110,45], [480,130,55,170], [600,45,50,100], [610,285,55,80]], gekkos: [[225,105,31,68,88,2.5,0,130,355,80,130], [430,355,33,72,92,2.4,0,330,560,330,380], [585,205,33,72,92,0,2.6,560,620,120,300]], cameras: [[365,165,0.1,1.3,0.024,160,90], [560,365,4.0,5.2,0.02,155,85]] },
+            { id: 7, name: "RAY Wartungsdeck", time: 52, lives: 3, intel: [[110, 355], [250, 230], [360, 75], [520, 365], [665, 160]], goal: [700, 330, 38, 70], snake: [42, 45], obstacles: [[100,110,150,42], [210,285,45,110], [340,155,55,170], [465,70,130,45], [580,230,60,125]], gekkos: [[170,220,32,70,90,0,2.6,145,195,140,330], [410,80,34,72,94,2.6,0,315,545,55,105], [600,345,34,74,94,2.5,0,500,690,320,370]], cameras: [[300,365,4.7,5.9,0.024,155,90], [660,70,1.7,2.8,0.02,155,85]] },
+            { id: 8, name: "Outer Haven Zugang", time: 50, lives: 3, intel: [[100, 195], [205, 55], [350, 345], [510, 105], [650, 325]], goal: [702, 45, 36, 70], snake: [42, 380], obstacles: [[95,260,110,42], [250,105,55,145], [370,40,105,42], [425,260,50,135], [570,150,130,45], [620,365,60,38]], gekkos: [[210,350,33,72,92,2.7,0,120,330,325,375], [380,165,34,74,94,0,2.8,350,410,80,280], [615,95,35,76,96,2.6,0,510,700,70,120]], cameras: [[155,110,0.1,1.4,0.024,155,90], [535,300,3.7,4.9,0.026,165,85], [675,235,3.9,5.0,0.018,150,80]] },
+            { id: 9, name: "Mikrowellen-Korridor", time: 48, lives: 2, intel: [[115, 75], [230, 355], [380, 115], [535, 330], [650, 85]], goal: [700, 185, 38, 70], snake: [42, 205], obstacles: [[105,150,80,42], [205,245,105,42], [320,45,55,145], [445,220,55,150], [560,50,120,42], [595,300,70,45]], gekkos: [[205,110,34,74,94,2.8,0,115,310,85,135], [370,330,35,76,96,2.7,0,300,520,305,355], [570,180,36,78,98,0,2.8,540,600,105,290]], cameras: [[290,185,2.7,4.0,0.028,165,90], [500,105,0.2,1.5,0.025,165,85], [655,260,3.6,5.1,0.022,155,85]] },
+            { id: 10, name: "Big Boss Finale", time: 45, lives: 2, intel: [[105, 350], [220, 70], [350, 230], [505, 75], [650, 345]], goal: [700, 45, 38, 70], snake: [42, 385], obstacles: [[90,115,115,42], [145,250,55,105], [270,160,120,42], [410,45,55,145], [455,275,120,42], [590,150,55,150], [640,370,55,35]], gekkos: [[180,320,35,76,96,2.9,0,100,310,295,345], [355,90,36,78,98,2.8,0,260,510,65,115], [520,230,36,78,98,0,3.0,490,550,130,335], [655,110,34,74,94,0,2.5,630,690,70,230]], cameras: [[255,235,3.1,4.5,0.03,170,90], [470,370,4.2,5.5,0.026,165,85], [650,260,3.5,5.0,0.025,170,85]] }
+        ];
 
         const difficultySelection = document.getElementById("difficultySelection");
         const quizContainer = document.getElementById("quizContainer");
@@ -861,10 +954,16 @@
         const gekkoSprite = new Image();
         snakeSprite.src = "snake.png";
         gekkoSprite.src = "gekko.png";
+        const gameLevel = document.getElementById("gameLevel");
         const gameScore = document.getElementById("gameScore");
         const gameLives = document.getElementById("gameLives");
         const gameTimer = document.getElementById("gameTimer");
+        const gameAlert = document.getElementById("gameAlert");
+        const gameCamo = document.getElementById("gameCamo");
         const gameStatus = document.getElementById("gameStatus");
+        const miniGameLevelSelect = document.getElementById("miniGameLevelSelect");
+        const levelInfo = document.getElementById("levelInfo");
+        const camoButton = document.getElementById("camoButton");
         const countdownStatus = document.getElementById("countdownStatus");
         const countdownDays = document.getElementById("countdownDays");
         const countdownHours = document.getElementById("countdownHours");
@@ -884,6 +983,12 @@
         document.getElementById("restartButton").addEventListener("click", restartQuiz);
         document.getElementById("startMiniGameButton").addEventListener("click", startMiniGame);
         document.getElementById("miniGameMenuButton").addEventListener("click", showMainMenu);
+        camoButton.addEventListener("mousedown", () => setCamouflage(true));
+        camoButton.addEventListener("mouseup", () => setCamouflage(false));
+        camoButton.addEventListener("mouseleave", () => setCamouflage(false));
+        camoButton.addEventListener("touchstart", (event) => { event.preventDefault(); setCamouflage(true); }, { passive: false });
+        camoButton.addEventListener("touchend", (event) => { event.preventDefault(); setCamouflage(false); }, { passive: false });
+        camoButton.addEventListener("touchcancel", (event) => { event.preventDefault(); setCamouflage(false); }, { passive: false });
         document.getElementById("clearScoresButton").addEventListener("click", clearScores);
         nextButton.addEventListener("click", nextQuestion);
         saveScoreButton.addEventListener("click", saveScoreLocal);
@@ -910,6 +1015,10 @@
         stealthCanvas.addEventListener("click", () => {
             if (!gameRunning) startMiniGame();
         });
+        stealthCanvas.addEventListener("touchstart", handleGameTouch, { passive: false });
+        stealthCanvas.addEventListener("touchmove", handleGameTouch, { passive: false });
+        stealthCanvas.addEventListener("touchend", handleGameTouchEnd, { passive: false });
+        stealthCanvas.addEventListener("touchcancel", handleGameTouchEnd, { passive: false });
 
         [snakeSprite, gekkoSprite].forEach((sprite) => {
             sprite.addEventListener("load", () => {
@@ -1341,37 +1450,85 @@
 
         function openMiniGame() {
             clearTimer();
+            loadMiniGameProgress();
+            renderMiniGameLevelSelect();
             showOnly(miniGamePanel);
             resetMiniGame();
             drawMiniGameIntro();
         }
 
+        function loadMiniGameProgress() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(GAME_PROGRESS_KEY) || "{}");
+                unlockedMiniGameLevel = Math.min(miniGameLevels.length, Math.max(1, Number(saved.unlockedLevel || 1)));
+            } catch (error) {
+                unlockedMiniGameLevel = 1;
+            }
+
+            if (selectedMiniGameLevel > unlockedMiniGameLevel) {
+                selectedMiniGameLevel = unlockedMiniGameLevel;
+            }
+        }
+
+        function saveMiniGameProgress(completedLevel) {
+            const nextUnlocked = Math.min(miniGameLevels.length, Math.max(unlockedMiniGameLevel, completedLevel + 1));
+            unlockedMiniGameLevel = nextUnlocked;
+            localStorage.setItem(GAME_PROGRESS_KEY, JSON.stringify({ unlockedLevel: unlockedMiniGameLevel, updatedAt: Date.now() }));
+            renderMiniGameLevelSelect();
+        }
+
+        function renderMiniGameLevelSelect() {
+            miniGameLevelSelect.replaceChildren();
+
+            miniGameLevels.forEach((level) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "level-button";
+                button.textContent = level.id <= unlockedMiniGameLevel ? `Level ${level.id}` : `🔒 Level ${level.id}`;
+                button.disabled = level.id > unlockedMiniGameLevel;
+                button.classList.toggle("selected", level.id === selectedMiniGameLevel);
+                button.classList.toggle("locked", level.id > unlockedMiniGameLevel);
+                button.title = level.name;
+                button.addEventListener("click", () => {
+                    selectedMiniGameLevel = level.id;
+                    resetMiniGame();
+                    renderMiniGameLevelSelect();
+                    drawMiniGameIntro();
+                });
+                miniGameLevelSelect.appendChild(button);
+            });
+
+            const currentLevel = getCurrentLevel();
+            levelInfo.textContent = `${currentLevel.name} · Freigeschaltet bis Level ${unlockedMiniGameLevel} von ${miniGameLevels.length}`;
+        }
+
+        function getCurrentLevel() {
+            return miniGameLevels.find((level) => level.id === selectedMiniGameLevel) || miniGameLevels[0];
+        }
+
         function resetMiniGame() {
             stopMiniGame(false);
+
+            const level = getCurrentLevel();
             gameRunning = false;
-            gameTimeLeft = 60;
+            gameTimeLeft = level.time;
             gameScoreValue = 0;
-            gameLivesValue = 3;
+            gameLivesValue = level.lives;
             gameMessage = "Bereit";
-            snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
+            alertPhase = "normal";
+            alertCountdown = 0;
+            cautionCountdown = 0;
+            isCamouflaged = false;
+            camoEnergy = 100;
+            snake = { x: level.snake[0], y: level.snake[1], size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
             mouseTarget = null;
             pressedKeys.clear();
 
-            goal = { x: 700, y: 185, width: 38, height: 70 };
-
-            intelItems = [
-                { x: 145, y: 78, size: 12, collected: false },
-                { x: 260, y: 330, size: 12, collected: false },
-                { x: 382, y: 135, size: 12, collected: false },
-                { x: 515, y: 310, size: 12, collected: false },
-                { x: 610, y: 92, size: 12, collected: false }
-            ];
-
-            gekkos = [
-                { x: 190, y: 105, size: 28, spriteWidth: 62, spriteHeight: 82, vx: 2.0, vy: 0, minX: 130, maxX: 330, minY: 80, maxY: 130 },
-                { x: 350, y: 250, size: 30, spriteWidth: 66, spriteHeight: 86, vx: 0, vy: 2.2, minX: 325, maxX: 390, minY: 155, maxY: 350 },
-                { x: 540, y: 175, size: 31, spriteWidth: 68, spriteHeight: 88, vx: 2.4, vy: 0, minX: 455, maxX: 665, minY: 145, maxY: 205 }
-            ];
+            goal = { x: level.goal[0], y: level.goal[1], width: level.goal[2], height: level.goal[3] };
+            intelItems = level.intel.map(([x, y]) => ({ x, y, size: 12, collected: false }));
+            obstacles = level.obstacles.map(([x, y, width, height]) => ({ x, y, width, height }));
+            gekkos = level.gekkos.map(([x, y, size, spriteWidth, spriteHeight, vx, vy, minX, maxX, minY, maxY]) => ({ x, y, size, spriteWidth, spriteHeight, vx, vy, minX, maxX, minY, maxY }));
+            cameras = level.cameras.map(([x, y, minAngle, maxAngle, speed, range, fov]) => ({ x, y, minAngle, maxAngle, angle: minAngle, speed, range, fov: fov * Math.PI / 180, direction: 1 }));
 
             updateGameHud();
         }
@@ -1403,34 +1560,77 @@
                 mouseTarget = null;
                 if (!miniGamePanel.classList.contains("hidden")) event.preventDefault();
             }
+
+            if ((key === " " || key === "spacebar") && !miniGamePanel.classList.contains("hidden")) {
+                setCamouflage(true);
+                event.preventDefault();
+            }
         }
 
         function handleGameKeyUp(event) {
-            pressedKeys.delete(event.key.toLowerCase());
+            const key = event.key.toLowerCase();
+            pressedKeys.delete(key);
+
+            if (key === " " || key === "spacebar") {
+                setCamouflage(false);
+            }
         }
 
         function handleGameMouseMove(event) {
             if (miniGamePanel.classList.contains("hidden")) return;
+            setGameTargetFromClientPosition(event.clientX, event.clientY);
+        }
 
+        function handleGameTouch(event) {
+            if (miniGamePanel.classList.contains("hidden")) return;
+            event.preventDefault();
+
+            const touch = event.touches[0] || event.changedTouches[0];
+            if (!touch) return;
+
+            if (!gameRunning) startMiniGame();
+            setGameTargetFromClientPosition(touch.clientX, touch.clientY);
+        }
+
+        function handleGameTouchEnd(event) {
+            if (miniGamePanel.classList.contains("hidden")) return;
+            event.preventDefault();
+            mouseTarget = null;
+        }
+
+        function setGameTargetFromClientPosition(clientX, clientY) {
             const rect = stealthCanvas.getBoundingClientRect();
             const scaleX = GAME_WIDTH / rect.width;
             const scaleY = GAME_HEIGHT / rect.height;
 
             mouseTarget = {
-                x: (event.clientX - rect.left) * scaleX,
-                y: (event.clientY - rect.top) * scaleY
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
             };
+        }
+
+        function setCamouflage(active) {
+            if (active && camoEnergy <= 0) {
+                isCamouflaged = false;
+            } else {
+                isCamouflaged = active;
+            }
+            camoButton.classList.toggle("active", isCamouflaged);
         }
 
         function gameLoop() {
             if (!gameRunning) return;
 
             const elapsed = Math.floor((performance.now() - gameStartTime) / 1000);
-            gameTimeLeft = Math.max(0, 60 - elapsed);
+            gameTimeLeft = Math.max(0, getCurrentLevel().time - elapsed);
 
+            updateCamouflage();
+            updateAlertPhase();
             updateSnakeMovement();
             updateGekkos();
+            updateCameras();
             checkIntelCollection();
+            checkDetection();
             checkGekkoCollisions();
             checkGoalReached();
             drawMiniGame();
@@ -1442,6 +1642,34 @@
             }
 
             gameAnimationId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateCamouflage() {
+            if (isCamouflaged && camoEnergy > 0) {
+                camoEnergy = Math.max(0, camoEnergy - 0.24);
+                snake.speed = 1.75;
+                if (camoEnergy <= 0) setCamouflage(false);
+            } else {
+                camoEnergy = Math.min(100, camoEnergy + 0.08);
+                snake.speed = 3.1;
+            }
+        }
+
+        function updateAlertPhase() {
+            if (alertPhase === "alert") {
+                alertCountdown = Math.max(0, alertCountdown - 1 / 60);
+                if (alertCountdown <= 0) {
+                    alertPhase = "caution";
+                    cautionCountdown = 12;
+                    gameMessage = "Vorsichtsphase: Feinde suchen weiter.";
+                }
+            } else if (alertPhase === "caution") {
+                cautionCountdown = Math.max(0, cautionCountdown - 1 / 60);
+                if (cautionCountdown <= 0) {
+                    alertPhase = "normal";
+                    gameMessage = "Normalphase: Gebiet ruhig.";
+                }
+            }
         }
 
         function updateSnakeMovement() {
@@ -1466,21 +1694,40 @@
 
             if (dx !== 0 || dy !== 0) {
                 const length = Math.hypot(dx, dy) || 1;
-                snake.x += (dx / length) * snake.speed;
-                snake.y += (dy / length) * snake.speed;
+                moveSnake((dx / length) * snake.speed, 0);
+                moveSnake(0, (dy / length) * snake.speed);
             }
 
             snake.x = clamp(snake.x, snake.size, GAME_WIDTH - snake.size);
             snake.y = clamp(snake.y, snake.size, GAME_HEIGHT - snake.size);
         }
 
+        function moveSnake(dx, dy) {
+            snake.x += dx;
+            if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.x -= dx;
+            snake.y += dy;
+            if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.y -= dy;
+        }
+
         function updateGekkos() {
+            const speedBonus = alertPhase === "alert" ? 1.45 : alertPhase === "caution" ? 1.18 : 1;
+
             gekkos.forEach((gekko) => {
-                gekko.x += gekko.vx;
-                gekko.y += gekko.vy;
+                gekko.x += gekko.vx * speedBonus;
+                gekko.y += gekko.vy * speedBonus;
 
                 if (gekko.x < gekko.minX || gekko.x > gekko.maxX) gekko.vx *= -1;
                 if (gekko.y < gekko.minY || gekko.y > gekko.maxY) gekko.vy *= -1;
+            });
+        }
+
+        function updateCameras() {
+            cameras.forEach((camera) => {
+                camera.angle += camera.speed * camera.direction;
+                if (camera.angle > camera.maxAngle || camera.angle < camera.minAngle) {
+                    camera.direction *= -1;
+                    camera.angle = clamp(camera.angle, camera.minAngle, camera.maxAngle);
+                }
             });
         }
 
@@ -1494,14 +1741,49 @@
             });
         }
 
+        function checkDetection() {
+            if (isCamouflaged) return;
+
+            for (const gekko of gekkos) {
+                if (circleDistance(snake, gekko) < gekko.size + 48 && hasLineOfSight(gekko.x, gekko.y, snake.x, snake.y)) {
+                    triggerAlert("Gekko hat Snake entdeckt!");
+                    return;
+                }
+            }
+
+            for (const camera of cameras) {
+                if (isPointInCameraCone(camera, snake.x, snake.y) && hasLineOfSight(camera.x, camera.y, snake.x, snake.y)) {
+                    triggerAlert("Überwachungskamera hat Snake entdeckt!");
+                    return;
+                }
+            }
+        }
+
+        function triggerAlert(message) {
+            if (alertPhase !== "alert") {
+                gameLivesValue = Math.max(0, gameLivesValue - 1);
+            }
+
+            alertPhase = "alert";
+            alertCountdown = 10;
+            cautionCountdown = 0;
+            gameMessage = `${message} Alarmphase!`;
+
+            if (gameLivesValue <= 0) {
+                endMiniGame(false, "Mission gescheitert! Alarm ausgelöst und keine Leben mehr übrig.");
+            }
+        }
+
         function checkGekkoCollisions() {
             for (const gekko of gekkos) {
                 if (circleDistance(snake, gekko) < snake.size + gekko.size - 2) {
                     gameLivesValue -= 1;
                     gameMessage = "Gekko-Kontakt! Zurück in Deckung!";
-                    snake.x = 45;
-                    snake.y = 205;
+                    snake.x = getCurrentLevel().snake[0];
+                    snake.y = getCurrentLevel().snake[1];
                     mouseTarget = null;
+                    alertPhase = "alert";
+                    alertCountdown = 8;
 
                     if (gameLivesValue <= 0) {
                         endMiniGame(false, "Mission gescheitert! Snake wurde überwältigt.");
@@ -1516,7 +1798,7 @@
             const allIntelCollected = intelItems.every((item) => item.collected);
 
             if (inGoal && allIntelCollected) {
-                endMiniGame(true, "Mission erfüllt! Intel gesichert und Outer Haven erreicht.");
+                endMiniGame(true, `Level ${selectedMiniGameLevel} abgeschlossen!`);
             } else if (inGoal && !allIntelCollected) {
                 gameMessage = "Erst alle Intel-Daten sammeln!";
             }
@@ -1529,6 +1811,10 @@
                 gameAnimationId = null;
             }
 
+            if (success) {
+                saveMiniGameProgress(selectedMiniGameLevel);
+            }
+
             gameMessage = success ? `${message} Rang: ${getMiniGameRank()}` : message;
             updateGameHud();
             drawMiniGame();
@@ -1536,8 +1822,8 @@
         }
 
         function getMiniGameRank() {
-            if (gameLivesValue === 3 && gameTimeLeft >= 35) return "Big Boss";
-            if (gameLivesValue >= 2 && gameTimeLeft >= 20) return "Foxhound";
+            if (gameLivesValue === getCurrentLevel().lives && gameTimeLeft >= Math.floor(getCurrentLevel().time * 0.55) && alertPhase === "normal") return "Big Boss";
+            if (gameLivesValue >= Math.max(1, getCurrentLevel().lives - 1) && gameTimeLeft >= Math.floor(getCurrentLevel().time * 0.35)) return "Foxhound";
             if (gameLivesValue >= 1) return "Fox";
             return "Rookie";
         }
@@ -1547,17 +1833,19 @@
             stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
             stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             stealthCtx.fillStyle = "#ffd700";
-            stealthCtx.font = "26px Orbitron, sans-serif";
+            stealthCtx.font = "24px Orbitron, sans-serif";
             stealthCtx.textAlign = "center";
-            stealthCtx.fillText("Shadow Moses Stealth Run", GAME_WIDTH / 2, 165);
+            stealthCtx.fillText(`Level ${selectedMiniGameLevel}: ${getCurrentLevel().name}`, GAME_WIDTH / 2, 150);
             stealthCtx.fillStyle = "#d8d8d8";
-            stealthCtx.font = "15px Orbitron, sans-serif";
-            stealthCtx.fillText("Sammle 5 Intel-Daten und erreiche Outer Haven.", GAME_WIDTH / 2, 205);
-            stealthCtx.fillText("Meide die Gekko-Patrouillen. Klick ins Spielfeld oder nutze den Start-Button.", GAME_WIDTH / 2, 235);
+            stealthCtx.font = "14px Orbitron, sans-serif";
+            stealthCtx.fillText("Sammle alle Intel-Daten und erreiche Outer Haven.", GAME_WIDTH / 2, 195);
+            stealthCtx.fillText("Kisten und Hindernisse blockieren deinen Weg.", GAME_WIDTH / 2, 225);
+            stealthCtx.fillText("Nutze Tarnung gegen Sichtkegel, Kameras und Gekkos.", GAME_WIDTH / 2, 255);
         }
 
         function drawMiniGame() {
             drawMiniGameBackground();
+            drawCameraCones();
             drawGoal();
             drawIntel();
             drawGekkos();
@@ -1588,16 +1876,14 @@
             stealthCtx.fillRect(0, 0, 92, GAME_HEIGHT);
             stealthCtx.fillRect(650, 0, 110, GAME_HEIGHT);
 
-            stealthCtx.fillStyle = "rgba(80, 80, 80, 0.55)";
-            drawCrate(118, 180, 55, 55);
-            drawCrate(295, 58, 70, 45);
-            drawCrate(442, 230, 70, 50);
-            drawCrate(575, 350, 55, 42);
+            obstacles.forEach((obstacle) => drawCrate(obstacle.x, obstacle.y, obstacle.width, obstacle.height));
+            drawCameras();
         }
 
         function drawCrate(x, y, width, height) {
+            stealthCtx.fillStyle = "rgba(80, 80, 80, 0.65)";
             stealthCtx.fillRect(x, y, width, height);
-            stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.16)";
+            stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.22)";
             stealthCtx.strokeRect(x, y, width, height);
             stealthCtx.beginPath();
             stealthCtx.moveTo(x, y);
@@ -1605,6 +1891,28 @@
             stealthCtx.moveTo(x + width, y);
             stealthCtx.lineTo(x, y + height);
             stealthCtx.stroke();
+        }
+
+        function drawCameras() {
+            cameras.forEach((camera) => {
+                stealthCtx.fillStyle = "#d8d8d8";
+                stealthCtx.beginPath();
+                stealthCtx.arc(camera.x, camera.y, 9, 0, Math.PI * 2);
+                stealthCtx.fill();
+                stealthCtx.strokeStyle = "#ffd700";
+                stealthCtx.stroke();
+            });
+        }
+
+        function drawCameraCones() {
+            cameras.forEach((camera) => {
+                stealthCtx.fillStyle = alertPhase === "alert" ? "rgba(255, 60, 60, 0.18)" : "rgba(255, 215, 0, 0.12)";
+                stealthCtx.beginPath();
+                stealthCtx.moveTo(camera.x, camera.y);
+                stealthCtx.arc(camera.x, camera.y, camera.range, camera.angle - camera.fov / 2, camera.angle + camera.fov / 2);
+                stealthCtx.closePath();
+                stealthCtx.fill();
+            });
         }
 
         function drawGoal() {
@@ -1634,13 +1942,13 @@
 
         function drawGekkos() {
             gekkos.forEach((gekko) => {
-                stealthCtx.fillStyle = "rgba(184, 40, 40, 0.18)";
+                stealthCtx.fillStyle = alertPhase === "alert" ? "rgba(255, 40, 40, 0.22)" : "rgba(184, 40, 40, 0.14)";
                 stealthCtx.beginPath();
-                stealthCtx.arc(gekko.x, gekko.y, gekko.size + 26, 0, Math.PI * 2);
+                stealthCtx.arc(gekko.x, gekko.y, gekko.size + 48, 0, Math.PI * 2);
                 stealthCtx.fill();
 
                 if (isSpriteReady(gekkoSprite)) {
-                    drawSprite(gekkoSprite, gekko.x, gekko.y, gekko.spriteWidth, gekko.spriteHeight);
+                    drawSprite(gekkoSprite, gekko.x, gekko.y, gekko.spriteWidth, gekko.spriteHeight, 1);
                 } else {
                     drawGekkoFallback(gekko);
                 }
@@ -1655,31 +1963,32 @@
         }
 
         function drawSnake() {
-            stealthCtx.fillStyle = "rgba(21, 148, 71, 0.18)";
+            stealthCtx.fillStyle = isCamouflaged ? "rgba(58, 167, 255, 0.22)" : "rgba(21, 148, 71, 0.18)";
             stealthCtx.beginPath();
             stealthCtx.arc(snake.x, snake.y, snake.size + 18, 0, Math.PI * 2);
             stealthCtx.fill();
 
             if (isSpriteReady(snakeSprite)) {
-                drawSprite(snakeSprite, snake.x, snake.y, snake.spriteWidth, snake.spriteHeight);
+                drawSprite(snakeSprite, snake.x, snake.y, snake.spriteWidth, snake.spriteHeight, isCamouflaged ? 0.45 : 1);
             } else {
                 drawSnakeFallback();
             }
 
             stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
             stealthCtx.fillRect(snake.x - 30, snake.y + snake.spriteHeight / 2 - 5, 60, 15);
-            stealthCtx.fillStyle = "#ffd700";
+            stealthCtx.fillStyle = isCamouflaged ? "#3aa7ff" : "#ffd700";
             stealthCtx.font = "9px Orbitron, sans-serif";
             stealthCtx.textAlign = "center";
-            stealthCtx.fillText("OLD SNAKE", snake.x, snake.y + snake.spriteHeight / 2 + 7);
+            stealthCtx.fillText(isCamouflaged ? "CAMO" : "OLD SNAKE", snake.x, snake.y + snake.spriteHeight / 2 + 7);
         }
 
         function isSpriteReady(sprite) {
             return sprite.complete && sprite.naturalWidth > 0;
         }
 
-        function drawSprite(sprite, centerX, centerY, width, height) {
+        function drawSprite(sprite, centerX, centerY, width, height, alpha = 1) {
             stealthCtx.save();
+            stealthCtx.globalAlpha = alpha;
             stealthCtx.shadowColor = "rgba(255, 215, 0, 0.35)";
             stealthCtx.shadowBlur = 8;
             stealthCtx.drawImage(sprite, centerX - width / 2, centerY - height / 2, width, height);
@@ -1687,7 +1996,7 @@
         }
 
         function drawSnakeFallback() {
-            stealthCtx.fillStyle = "#159447";
+            stealthCtx.fillStyle = isCamouflaged ? "#3aa7ff" : "#159447";
             stealthCtx.beginPath();
             stealthCtx.arc(snake.x, snake.y, snake.size, 0, Math.PI * 2);
             stealthCtx.fill();
@@ -1717,17 +2026,99 @@
             stealthCtx.fillStyle = success ? "#ffd700" : "#ffb5b5";
             stealthCtx.font = "24px Orbitron, sans-serif";
             stealthCtx.textAlign = "center";
-            stealthCtx.fillText(success ? "MISSION ERFÜLLT" : "MISSION GESCHEITERT", GAME_WIDTH / 2, 175);
+            stealthCtx.fillText(success ? "MISSION ERFÜLLT" : "MISSION GESCHEITERT", GAME_WIDTH / 2, 165);
             stealthCtx.fillStyle = "#d8d8d8";
             stealthCtx.font = "14px Orbitron, sans-serif";
-            stealthCtx.fillText(gameMessage, GAME_WIDTH / 2, 215);
-            stealthCtx.fillText("Drücke Start für einen neuen Versuch.", GAME_WIDTH / 2, 250);
+            stealthCtx.fillText(gameMessage, GAME_WIDTH / 2, 210);
+            stealthCtx.fillText(success && selectedMiniGameLevel < miniGameLevels.length ? `Level ${selectedMiniGameLevel + 1} wurde freigeschaltet.` : "Drücke Start für einen neuen Versuch.", GAME_WIDTH / 2, 245);
         }
 
         function updateGameHud() {
+            gameLevel.textContent = `Level: ${selectedMiniGameLevel}`;
             gameScore.textContent = `Intel: ${gameScoreValue} / ${intelItems.length || 5}`;
             gameLives.textContent = `Leben: ${gameLivesValue}`;
             gameTimer.textContent = `Zeit: ${gameTimeLeft}s`;
+            gameCamo.textContent = `Tarnung: ${Math.round(camoEnergy)}%`;
+
+            gameAlert.classList.remove("alert-normal", "alert-caution", "alert-alert");
+            if (alertPhase === "alert") {
+                gameAlert.textContent = `Phase: Alarm ${Math.ceil(alertCountdown)}s`;
+                gameAlert.classList.add("alert-alert");
+            } else if (alertPhase === "caution") {
+                gameAlert.textContent = `Phase: Vorsicht ${Math.ceil(cautionCountdown)}s`;
+                gameAlert.classList.add("alert-caution");
+            } else {
+                gameAlert.textContent = "Phase: Normal";
+                gameAlert.classList.add("alert-normal");
+            }
+
+            gameStatus.textContent = gameMessage;
+        }
+
+        function collidesWithObstacles(x, y, radius) {
+            return obstacles.some((obstacle) => circleRectCollision(x, y, radius, obstacle));
+        }
+
+        function circleRectCollision(cx, cy, radius, rect) {
+            const nearestX = clamp(cx, rect.x, rect.x + rect.width);
+            const nearestY = clamp(cy, rect.y, rect.y + rect.height);
+            return Math.hypot(cx - nearestX, cy - nearestY) < radius;
+        }
+
+        function isPointInCameraCone(camera, x, y) {
+            const dx = x - camera.x;
+            const dy = y - camera.y;
+            const distance = Math.hypot(dx, dy);
+            if (distance > camera.range) return false;
+
+            const angleToPoint = normalizeAngle(Math.atan2(dy, dx));
+            const cameraAngle = normalizeAngle(camera.angle);
+            const diff = Math.abs(shortestAngleDifference(angleToPoint, cameraAngle));
+            return diff <= camera.fov / 2;
+        }
+
+        function hasLineOfSight(x1, y1, x2, y2) {
+            return !obstacles.some((obstacle) => lineIntersectsRect(x1, y1, x2, y2, obstacle));
+        }
+
+        function lineIntersectsRect(x1, y1, x2, y2, rect) {
+            return lineIntersectsLine(x1, y1, x2, y2, rect.x, rect.y, rect.x + rect.width, rect.y) ||
+                lineIntersectsLine(x1, y1, x2, y2, rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height) ||
+                lineIntersectsLine(x1, y1, x2, y2, rect.x + rect.width, rect.y + rect.height, rect.x, rect.y + rect.height) ||
+                lineIntersectsLine(x1, y1, x2, y2, rect.x, rect.y + rect.height, rect.x, rect.y);
+        }
+
+        function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+            const denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+            if (denominator === 0) return false;
+
+            const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
+            const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator;
+            return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
+        }
+
+        function normalizeAngle(angle) {
+            while (angle < 0) angle += Math.PI * 2;
+            while (angle >= Math.PI * 2) angle -= Math.PI * 2;
+            return angle;
+        }
+
+        function shortestAngleDifference(a, b) {
+            let diff = a - b;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            return diff;
+        }
+
+        function circleDistance(a, b) {
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function restartQuiz() {it: ${gameTimeLeft}s`;
             gameStatus.textContent = gameMessage;
         }
 
