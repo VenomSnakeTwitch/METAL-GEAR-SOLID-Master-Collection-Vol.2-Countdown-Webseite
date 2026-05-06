@@ -1,2219 +1,2220 @@
-<!DOCTYPE html>
-<html lang="de">
+<!DOCTYPE html><html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Fan-Quiz zu Metal Gear Solid 4: Guns of the Patriots">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <title>MGS4 Quiz – Metal Gear Solid 4</title>
+    <title>MGS4 Quiz – Metal Gear Solid 4</title><style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+    :root {
+        --gold: #ffd700;
+        --dark: #050505;
+        --panel: rgba(0, 0, 0, 0.86);
+        --soft-panel: rgba(15, 15, 15, 0.92);
+        --text-muted: #d8d8d8;
+        --green: #159447;
+        --red: #b82828;
+        --blue: #3aa7ff;
+    }
 
-        :root {
-            --gold: #ffd700;
-            --dark: #050505;
-            --panel: rgba(0, 0, 0, 0.86);
-            --soft-panel: rgba(15, 15, 15, 0.92);
-            --text-muted: #d8d8d8;
-            --green: #159447;
-            --red: #b82828;
-            --blue: #3aa7ff;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        font-family: 'Orbitron', sans-serif;
+        background: url("background.jpg") no-repeat center center fixed;
+        background-size: cover;
+        color: var(--gold);
+        text-align: center;
+        overflow-x: hidden;
+    }
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100%;
-            font-family: 'Orbitron', sans-serif;
-            background: url("background.jpg") no-repeat center center fixed;
-            background-size: cover;
-            color: var(--gold);
-            text-align: center;
-            overflow-x: hidden;
-        }
+    #overlay {
+        min-height: 100vh;
+        padding: 24px 16px 118px;
+        background: var(--panel);
+    }
 
+    main {
+        width: min(960px, 100%);
+        margin: 0 auto;
+    }
+
+    h1 {
+        margin: 0 0 18px;
+        font-size: clamp(28px, 5vw, 44px);
+        line-height: 1.15;
+        text-shadow: 0 0 15px var(--gold), 0 0 30px #000;
+    }
+
+    h2,
+    h3 {
+        margin-top: 0;
+        text-shadow: 0 0 10px #000;
+    }
+
+    p {
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .release-countdown {
+        position: fixed;
+        left: 50%;
+        bottom: 12px;
+        z-index: 50;
+        width: min(860px, calc(100% - 24px));
+        padding: 10px 14px;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr auto;
+        gap: 12px;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.9);
+        border: 1px solid rgba(255, 215, 0, 0.5);
+        border-radius: 14px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.75), 0 0 12px rgba(255, 215, 0, 0.18);
+        transform: translateX(-50%);
+        backdrop-filter: blur(6px);
+    }
+
+    .countdown-title {
+        color: var(--gold);
+        font-size: 13px;
+        line-height: 1.35;
+        text-align: left;
+    }
+
+    .countdown-status {
+        color: var(--text-muted);
+        font-size: 12px;
+        line-height: 1.35;
+        text-align: center;
+    }
+
+    .countdown-values {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        gap: 8px;
+    }
+
+    .countdown-values span {
+        min-width: 48px;
+        padding: 6px 8px;
+        display: grid;
+        gap: 2px;
+        color: var(--text-muted);
+        font-size: 10px;
+        line-height: 1.1;
+        text-align: center;
+        border: 1px solid rgba(255, 215, 0, 0.22);
+        border-radius: 9px;
+        background: rgba(0, 0, 0, 0.55);
+    }
+
+    .countdown-values strong {
+        color: var(--gold);
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .panel,
+    .music-panel {
+        width: min(800px, 100%);
+        margin: 0 auto 18px;
+        padding: 22px;
+        background: var(--soft-panel);
+        border: 1px solid rgba(255, 215, 0, 0.35);
+        border-radius: 14px;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .button-grid {
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+        margin-top: 18px;
+    }
+
+    button,
+    input[type="text"],
+    select {
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    button {
+        width: min(340px, 100%);
+        padding: 13px 22px;
+        border: 2px solid var(--gold);
+        border-radius: 8px;
+        background: #000;
+        color: var(--gold);
+        font-size: 16px;
+        cursor: pointer;
+        transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+    }
+
+    button:hover:not(:disabled),
+    button:focus-visible:not(:disabled) {
+        background: var(--gold);
+        color: #000;
+        transform: scale(1.04);
+        outline: none;
+    }
+
+    button:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .secondary-button {
+        border-color: #ccc;
+        color: #ccc;
+    }
+
+    .danger-button {
+        border-color: var(--red);
+        color: #ffb5b5;
+    }
+
+    .music-panel {
+        padding: 14px 16px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 14px;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.72);
+    }
+
+    #musicToggleButton {
+        width: auto;
+        min-width: 190px;
+        margin: 0;
+        padding: 10px 16px;
+    }
+
+    .volume-control {
+        display: grid;
+        gap: 7px;
+        color: var(--text-muted);
+        font-size: 14px;
+        text-align: left;
+    }
+
+    #musicVolume {
+        width: 100%;
+        accent-color: var(--gold);
+        cursor: pointer;
+    }
+
+    #musicTime {
+        min-width: 175px;
+        color: var(--gold);
+        font-size: 14px;
+        text-align: right;
+    }
+
+    .quiz-topbar {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 18px;
+        color: var(--text-muted);
+        font-size: 15px;
+    }
+
+    #timer {
+        min-width: 95px;
+        padding: 8px 12px;
+        border: 1px solid rgba(255, 215, 0, 0.35);
+        border-radius: 999px;
+        color: var(--gold);
+        background: rgba(0, 0, 0, 0.45);
+    }
+
+    .joker-panel {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 12px;
+        align-items: center;
+        margin: 0 0 18px;
+        padding: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.45);
+    }
+
+    #fiftyFiftyButton {
+        width: auto;
+        min-width: 220px;
+        margin: 0;
+        padding: 10px 16px;
+    }
+
+    #jokerInfo {
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.4;
+        text-align: left;
+    }
+
+    #questionText {
+        margin: 18px 0;
+        font-size: clamp(20px, 4vw, 28px);
+        line-height: 1.35;
+    }
+
+    #answersContainer {
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+        margin: 18px 0;
+    }
+
+    .answer-button {
+        width: min(580px, 100%);
+        max-width: none;
+        min-height: 52px;
+    }
+
+    .answer-button.joker-removed {
+        opacity: 0.38;
+        border-color: #777;
+        color: #aaa;
+        background: #111;
+        text-decoration: line-through;
+    }
+
+    @keyframes blinkGreen {
+        0%, 100% { background-color: var(--green); }
+        50% { background-color: #fff; color: #000; }
+    }
+
+    @keyframes blinkRed {
+        0%, 100% { background-color: var(--red); }
+        50% { background-color: #fff; color: #000; }
+    }
+
+    .answer-button.correct {
+        animation: blinkGreen 0.55s ease 1;
+        background: var(--green);
+        color: #fff;
+        border-color: var(--green);
+    }
+
+    .answer-button.wrong {
+        animation: blinkRed 0.55s ease 1;
+        background: var(--red);
+        color: #fff;
+        border-color: var(--red);
+    }
+
+    #feedback {
+        min-height: 26px;
+        margin: 12px 0;
+        color: var(--text-muted);
+    }
+
+    input[type="text"],
+    select {
+        width: min(340px, 100%);
+        padding: 12px;
+        border: 2px solid var(--gold);
+        border-radius: 8px;
+        background: #000;
+        color: var(--gold);
+        font-size: 16px;
+        text-align: center;
+    }
+
+    input[type="text"]::placeholder {
+        color: rgba(255, 215, 0, 0.6);
+    }
+
+    .rank-card {
+        width: min(460px, 100%);
+        margin: 16px auto;
+        padding: 16px;
+        border: 2px solid var(--gold);
+        border-radius: 14px;
+        background: rgba(0, 0, 0, 0.55);
+        box-shadow: 0 0 18px rgba(255, 215, 0, 0.22);
+    }
+
+    .rank-card strong {
+        display: block;
+        margin-top: 6px;
+        font-size: clamp(26px, 5vw, 40px);
+        color: var(--gold);
+        text-shadow: 0 0 14px var(--gold), 0 0 24px #000;
+    }
+
+    .rank-card span {
+        display: block;
+        margin-top: 8px;
+        color: var(--text-muted);
+        line-height: 1.45;
+    }
+
+    .score-summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 18px 0;
+    }
+
+    .summary-card {
+        padding: 14px;
+        border: 1px solid rgba(255, 215, 0, 0.28);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.45);
+    }
+
+    .summary-card strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--gold);
+    }
+
+    .summary-card span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .leaderboard-tools {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        margin: 16px auto;
+        width: min(700px, 100%);
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.22);
+        background: rgba(0, 0, 0, 0.35);
+    }
+
+    table {
+        width: 100%;
+        min-width: 680px;
+        border-collapse: collapse;
+        color: var(--text-muted);
+        font-size: 14px;
+        text-align: left;
+    }
+
+    th,
+    td {
+        padding: 11px 10px;
+        border-bottom: 1px solid rgba(255, 215, 0, 0.14);
+    }
+
+    th {
+        color: var(--gold);
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .empty-score-row {
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .level-select-wrap {
+        margin: 16px 0;
+        padding: 14px;
+        border: 1px solid rgba(255, 215, 0, 0.24);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.42);
+    }
+
+    .level-select-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin: 12px 0;
+    }
+
+    .level-button {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    .level-button.selected {
+        background: var(--gold);
+        color: #000;
+        box-shadow: 0 0 14px rgba(255, 215, 0, 0.4);
+    }
+
+    .level-button.locked {
+        border-color: #777;
+        color: #999;
+        opacity: 0.55;
+    }
+
+    .game-hud {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: 16px 0;
+    }
+
+    .game-hud span {
+        padding: 10px;
+        border: 1px solid rgba(255, 215, 0, 0.28);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.48);
+        color: var(--text-muted);
+        font-size: 13px;
+    }
+
+    #gameAlert.alert-normal {
+        color: #9fffc4;
+    }
+
+    #gameAlert.alert-caution {
+        color: #ffe66d;
+    }
+
+    #gameAlert.alert-alert {
+        color: #ff8a8a;
+    }
+
+    #camoButton.active {
+        background: var(--blue);
+        color: #000;
+        border-color: var(--blue);
+        box-shadow: 0 0 18px rgba(58, 167, 255, 0.45);
+    }
+
+    .game-canvas-wrap {
+        width: 100%;
+        overflow: hidden;
+        border: 2px solid rgba(255, 215, 0, 0.42);
+        border-radius: 14px;
+        background: #050505;
+        box-shadow: inset 0 0 25px rgba(255, 215, 0, 0.08), 0 0 18px rgba(0, 0, 0, 0.65);
+    }
+
+    #stealthCanvas {
+        display: block;
+        width: 100%;
+        max-width: 760px;
+        height: auto;
+        margin: 0 auto;
+        background: radial-gradient(circle at center, #151515 0%, #070707 70%);
+        cursor: crosshair;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .game-help {
+        font-size: 13px;
+    }
+
+    #copyright {
+        margin-top: 28px;
+        font-size: 12px;
+        color: #ccc;
+    }
+
+    @media (max-width: 700px) {
         #overlay {
-            min-height: 100vh;
-            padding: 24px 16px 118px;
-            background: var(--panel);
-        }
-
-        main {
-            width: min(960px, 100%);
-            margin: 0 auto;
-        }
-
-        h1 {
-            margin: 0 0 18px;
-            font-size: clamp(28px, 5vw, 44px);
-            line-height: 1.15;
-            text-shadow: 0 0 15px var(--gold), 0 0 30px #000;
-        }
-
-        h2,
-        h3 {
-            margin-top: 0;
-            text-shadow: 0 0 10px #000;
-        }
-
-        p {
-            color: var(--text-muted);
-            line-height: 1.5;
+            padding: 18px 10px 150px;
         }
 
         .release-countdown {
-            position: fixed;
-            left: 50%;
-            bottom: 12px;
-            z-index: 50;
-            width: min(860px, calc(100% - 24px));
-            padding: 10px 14px;
-            display: grid;
-            grid-template-columns: 1.1fr 1fr auto;
-            gap: 12px;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 215, 0, 0.5);
-            border-radius: 14px;
-            box-shadow: 0 0 22px rgba(0, 0, 0, 0.75), 0 0 12px rgba(255, 215, 0, 0.18);
-            transform: translateX(-50%);
-            backdrop-filter: blur(6px);
+            bottom: 8px;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            padding: 10px;
         }
 
-        .countdown-title {
-            color: var(--gold);
-            font-size: 13px;
-            line-height: 1.35;
-            text-align: left;
-        }
-
+        .countdown-title,
         .countdown-status {
-            color: var(--text-muted);
-            font-size: 12px;
-            line-height: 1.35;
             text-align: center;
         }
 
         .countdown-values {
-            display: grid;
-            grid-template-columns: repeat(4, auto);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            width: 100%;
         }
 
         .countdown-values span {
-            min-width: 48px;
-            padding: 6px 8px;
-            display: grid;
-            gap: 2px;
-            color: var(--text-muted);
-            font-size: 10px;
-            line-height: 1.1;
-            text-align: center;
-            border: 1px solid rgba(255, 215, 0, 0.22);
-            border-radius: 9px;
-            background: rgba(0, 0, 0, 0.55);
-        }
-
-        .countdown-values strong {
-            color: var(--gold);
-            font-size: 16px;
-            line-height: 1;
+            min-width: 0;
         }
 
         .panel,
         .music-panel {
-            width: min(800px, 100%);
-            margin: 0 auto 18px;
-            padding: 22px;
-            background: var(--soft-panel);
-            border: 1px solid rgba(255, 215, 0, 0.35);
-            border-radius: 14px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .button-grid {
-            display: grid;
-            gap: 12px;
-            justify-items: center;
-            margin-top: 18px;
-        }
-
-        button,
-        input[type="text"],
-        select {
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        button {
-            width: min(340px, 100%);
-            padding: 13px 22px;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            background: #000;
-            color: var(--gold);
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
-        }
-
-        button:hover:not(:disabled),
-        button:focus-visible:not(:disabled) {
-            background: var(--gold);
-            color: #000;
-            transform: scale(1.04);
-            outline: none;
-        }
-
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .secondary-button {
-            border-color: #ccc;
-            color: #ccc;
-        }
-
-        .danger-button {
-            border-color: var(--red);
-            color: #ffb5b5;
-        }
-
-        .music-panel {
-            padding: 14px 16px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 14px;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.72);
-        }
-
-        #musicToggleButton {
-            width: auto;
-            min-width: 190px;
-            margin: 0;
-            padding: 10px 16px;
-        }
-
-        .volume-control {
-            display: grid;
-            gap: 7px;
-            color: var(--text-muted);
-            font-size: 14px;
-            text-align: left;
-        }
-
-        #musicVolume {
-            width: 100%;
-            accent-color: var(--gold);
-            cursor: pointer;
-        }
-
-        #musicTime {
-            min-width: 175px;
-            color: var(--gold);
-            font-size: 14px;
-            text-align: right;
-        }
-
-        .quiz-topbar {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 12px;
-            align-items: center;
-            margin-bottom: 18px;
-            color: var(--text-muted);
-            font-size: 15px;
-        }
-
-        #timer {
-            min-width: 95px;
-            padding: 8px 12px;
-            border: 1px solid rgba(255, 215, 0, 0.35);
-            border-radius: 999px;
-            color: var(--gold);
-            background: rgba(0, 0, 0, 0.45);
-        }
-
-        .joker-panel {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 12px;
-            align-items: center;
-            margin: 0 0 18px;
-            padding: 12px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.45);
-        }
-
-        #fiftyFiftyButton {
-            width: auto;
-            min-width: 220px;
-            margin: 0;
-            padding: 10px 16px;
-        }
-
-        #jokerInfo {
-            color: var(--text-muted);
-            font-size: 14px;
-            line-height: 1.4;
-            text-align: left;
-        }
-
-        #questionText {
-            margin: 18px 0;
-            font-size: clamp(20px, 4vw, 28px);
-            line-height: 1.35;
-        }
-
-        #answersContainer {
-            display: grid;
-            gap: 12px;
-            justify-items: center;
-            margin: 18px 0;
-        }
-
-        .answer-button {
-            width: min(580px, 100%);
-            max-width: none;
-            min-height: 52px;
-        }
-
-        .answer-button.joker-removed {
-            opacity: 0.38;
-            border-color: #777;
-            color: #aaa;
-            background: #111;
-            text-decoration: line-through;
-        }
-
-        @keyframes blinkGreen {
-            0%, 100% { background-color: var(--green); }
-            50% { background-color: #fff; color: #000; }
-        }
-
-        @keyframes blinkRed {
-            0%, 100% { background-color: var(--red); }
-            50% { background-color: #fff; color: #000; }
-        }
-
-        .answer-button.correct {
-            animation: blinkGreen 0.55s ease 1;
-            background: var(--green);
-            color: #fff;
-            border-color: var(--green);
-        }
-
-        .answer-button.wrong {
-            animation: blinkRed 0.55s ease 1;
-            background: var(--red);
-            color: #fff;
-            border-color: var(--red);
-        }
-
-        #feedback {
-            min-height: 26px;
-            margin: 12px 0;
-            color: var(--text-muted);
-        }
-
-        input[type="text"],
-        select {
-            width: min(340px, 100%);
-            padding: 12px;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            background: #000;
-            color: var(--gold);
-            font-size: 16px;
-            text-align: center;
-        }
-
-        input[type="text"]::placeholder {
-            color: rgba(255, 215, 0, 0.6);
-        }
-
-        .rank-card {
-            width: min(460px, 100%);
-            margin: 16px auto;
             padding: 16px;
-            border: 2px solid var(--gold);
-            border-radius: 14px;
-            background: rgba(0, 0, 0, 0.55);
-            box-shadow: 0 0 18px rgba(255, 215, 0, 0.22);
         }
 
-        .rank-card strong {
-            display: block;
-            margin-top: 6px;
-            font-size: clamp(26px, 5vw, 40px);
-            color: var(--gold);
-            text-shadow: 0 0 14px var(--gold), 0 0 24px #000;
-        }
-
-        .rank-card span {
-            display: block;
-            margin-top: 8px;
-            color: var(--text-muted);
-            line-height: 1.45;
-        }
-
-        .score-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 18px 0;
-        }
-
-        .summary-card {
-            padding: 14px;
-            border: 1px solid rgba(255, 215, 0, 0.28);
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.45);
-        }
-
-        .summary-card strong {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--gold);
-        }
-
-        .summary-card span {
-            display: block;
-            color: var(--text-muted);
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .leaderboard-tools {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 12px;
-            align-items: center;
-            margin: 16px auto;
-            width: min(700px, 100%);
-        }
-
-        .table-wrap {
-            width: 100%;
-            overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 215, 0, 0.22);
-            background: rgba(0, 0, 0, 0.35);
-        }
-
-        table {
-            width: 100%;
-            min-width: 680px;
-            border-collapse: collapse;
-            color: var(--text-muted);
-            font-size: 14px;
-            text-align: left;
-        }
-
-        th,
-        td {
-            padding: 11px 10px;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.14);
-        }
-
-        th {
-            color: var(--gold);
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .empty-score-row {
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        .level-select-wrap {
-            margin: 16px 0;
-            padding: 14px;
-            border: 1px solid rgba(255, 215, 0, 0.24);
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.42);
+        .music-panel,
+        .quiz-topbar,
+        .joker-panel,
+        .leaderboard-tools,
+        .score-summary,
+        .game-hud {
+            grid-template-columns: 1fr;
         }
 
         .level-select-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin: 12px 0;
+            grid-template-columns: repeat(2, 1fr);
         }
 
-        .level-button {
+        #musicToggleButton,
+        #fiftyFiftyButton {
             width: 100%;
-            min-width: 0;
-            padding: 10px 8px;
-            font-size: 13px;
         }
 
-        .level-button.selected {
-            background: var(--gold);
-            color: #000;
-            box-shadow: 0 0 14px rgba(255, 215, 0, 0.4);
+        #musicTime,
+        .volume-control,
+        #jokerInfo {
+            text-align: center;
         }
 
-        .level-button.locked {
-            border-color: #777;
-            color: #999;
-            opacity: 0.55;
+        #timer {
+            justify-self: center;
         }
+    }
+</style>
 
-        .game-hud {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 16px 0;
-        }
-
-        .game-hud span {
-            padding: 10px;
-            border: 1px solid rgba(255, 215, 0, 0.28);
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.48);
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        #gameAlert.alert-normal {
-            color: #9fffc4;
-        }
-
-        #gameAlert.alert-caution {
-            color: #ffe66d;
-        }
-
-        #gameAlert.alert-alert {
-            color: #ff8a8a;
-        }
-
-        #camoButton.active {
-            background: var(--blue);
-            color: #000;
-            border-color: var(--blue);
-            box-shadow: 0 0 18px rgba(58, 167, 255, 0.45);
-        }
-
-        .game-canvas-wrap {
-            width: 100%;
-            overflow: hidden;
-            border: 2px solid rgba(255, 215, 0, 0.42);
-            border-radius: 14px;
-            background: #050505;
-            box-shadow: inset 0 0 25px rgba(255, 215, 0, 0.08), 0 0 18px rgba(0, 0, 0, 0.65);
-        }
-
-        #stealthCanvas {
-            display: block;
-            width: 100%;
-            max-width: 760px;
-            height: auto;
-            margin: 0 auto;
-            background: radial-gradient(circle at center, #151515 0%, #070707 70%);
-            cursor: crosshair;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .game-help {
-            font-size: 13px;
-        }
-
-        #copyright {
-            margin-top: 28px;
-            font-size: 12px;
-            color: #ccc;
-        }
-
-        @media (max-width: 700px) {
-            #overlay {
-                padding: 18px 10px 150px;
-            }
-
-            .release-countdown {
-                bottom: 8px;
-                grid-template-columns: 1fr;
-                gap: 8px;
-                padding: 10px;
-            }
-
-            .countdown-title,
-            .countdown-status {
-                text-align: center;
-            }
-
-            .countdown-values {
-                grid-template-columns: repeat(4, 1fr);
-                width: 100%;
-            }
-
-            .countdown-values span {
-                min-width: 0;
-            }
-
-            .panel,
-            .music-panel {
-                padding: 16px;
-            }
-
-            .music-panel,
-            .quiz-topbar,
-            .joker-panel,
-            .leaderboard-tools,
-            .score-summary,
-            .game-hud {
-                grid-template-columns: 1fr;
-            }
-
-            .level-select-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            #musicToggleButton,
-            #fiftyFiftyButton {
-                width: 100%;
-            }
-
-            #musicTime,
-            .volume-control,
-            #jokerInfo {
-                text-align: center;
-            }
-
-            #timer {
-                justify-self: center;
-            }
-        }
-    </style>
-</head>
-
-<body>
+</head><body>
     <div id="overlay">
         <main>
-            <h1>MGS4: Guns of the Patriots – Quiz</h1>
+            <h1>MGS4: Guns of the Patriots – Quiz</h1><aside id="releaseCountdown" class="release-countdown" aria-label="Countdown bis zur Master Collection Volume 2">
+            <div class="countdown-title">METAL GEAR SOLID: Master Collection Vol. 2</div>
+            <div id="countdownStatus" class="countdown-status">Release-Countdown wird geladen...</div>
+            <div class="countdown-values">
+                <span><strong id="countdownDays">--</strong>Tage</span>
+                <span><strong id="countdownHours">--</strong>Std</span>
+                <span><strong id="countdownMinutes">--</strong>Min</span>
+                <span><strong id="countdownSeconds">--</strong>Sek</span>
+            </div>
+        </aside>
 
-            <aside id="releaseCountdown" class="release-countdown" aria-label="Countdown bis zur Master Collection Volume 2">
-                <div class="countdown-title">METAL GEAR SOLID: Master Collection Vol. 2</div>
-                <div id="countdownStatus" class="countdown-status">Release-Countdown wird geladen...</div>
-                <div class="countdown-values">
-                    <span><strong id="countdownDays">--</strong>Tage</span>
-                    <span><strong id="countdownHours">--</strong>Std</span>
-                    <span><strong id="countdownMinutes">--</strong>Min</span>
-                    <span><strong id="countdownSeconds">--</strong>Sek</span>
-                </div>
-            </aside>
+        <section id="musicControls" class="music-panel" aria-label="Musiksteuerung">
+            <button type="button" id="musicToggleButton">▶ Musik starten</button>
 
-            <section id="musicControls" class="music-panel" aria-label="Musiksteuerung">
-                <button type="button" id="musicToggleButton">▶ Musik starten</button>
+            <label class="volume-control" for="musicVolume">
+                Lautstärke: <span id="volumeValue">30%</span>
+                <input type="range" id="musicVolume" min="0" max="100" value="30" step="1">
+            </label>
 
-                <label class="volume-control" for="musicVolume">
-                    Lautstärke: <span id="volumeValue">30%</span>
-                    <input type="range" id="musicVolume" min="0" max="100" value="30" step="1">
+            <div id="musicTime">Restzeit: --:--</div>
+        </section>
+
+        <section id="difficultySelection" class="panel" aria-labelledby="difficultyTitle">
+            <h2 id="difficultyTitle">Schwierigkeitsgrad wählen</h2>
+            <p>Jede Runde enthält bis zu 20 zufällige Fragen aus dem gewählten Schwierigkeitsgrad.</p>
+
+            <div class="button-grid">
+                <button type="button" data-difficulty="easy">Easy</button>
+                <button type="button" data-difficulty="medium">Medium</button>
+                <button type="button" data-difficulty="hard">Hard</button>
+                <button type="button" id="openLeaderboardButton">🏆 Bestenliste anzeigen</button>
+                <button type="button" id="openMiniGameButton">🎮 MGS4 Mini-Spiel</button>
+                <button type="button" class="secondary-button" id="backToStartButton">⬅ Zurück zur Startseite</button>
+            </div>
+        </section>
+
+        <section id="quizContainer" class="panel hidden" aria-live="polite">
+            <div class="quiz-topbar">
+                <div id="progressText">Frage 1 von 20</div>
+                <div id="timer">⏱ 30s</div>
+            </div>
+
+            <div id="jokerPanel" class="joker-panel hidden">
+                <button type="button" id="fiftyFiftyButton">🃏 50:50-Joker</button>
+                <div id="jokerInfo">Entfernt zwei falsche Antworten. Nur auf Hard verfügbar.</div>
+            </div>
+
+            <div id="questionText"></div>
+            <div id="answersContainer"></div>
+            <div id="feedback"></div>
+
+            <button type="button" id="nextButton" class="hidden">▶ Nächste Frage</button>
+        </section>
+
+        <section id="scoreBoard" class="panel hidden" aria-labelledby="scoreTitle">
+            <h2 id="scoreTitle">Quiz beendet!</h2>
+            <p>Schwierigkeit: <span id="finalDifficulty"></span></p>
+            <p>Deine Punktzahl: <strong><span id="finalScore">0</span></strong></p>
+            <p>Genutzte Joker: <span id="finalJokersUsed">0</span></p>
+
+            <div id="rankResult" class="rank-card">
+                <span>Dein Rang:</span>
+                <strong id="finalRank">Rookie</strong>
+                <span id="finalRankDetails">0% der maximal möglichen Punkte erreicht.</span>
+            </div>
+
+            <label for="playerName">Trage deinen Namen ein:</label><br><br>
+            <input type="text" id="playerName" maxlength="24" placeholder="Dein Name" autocomplete="off">
+
+            <div class="button-grid">
+                <button type="button" id="saveScoreButton">✔ Speichern</button>
+                <button type="button" id="showLeaderboardAfterQuizButton">🏆 Bestenliste ansehen</button>
+                <button type="button" id="restartButton">↺ Neuer Versuch</button>
+                <button type="button" class="secondary-button" id="scoreMenuButton">← Zurück zum Hauptmenü</button>
+            </div>
+        </section>
+
+        <section id="leaderboardPanel" class="panel hidden" aria-labelledby="leaderboardTitle">
+            <h2 id="leaderboardTitle">🏆 Lokale Bestenliste</h2>
+            <p>Diese Bestenliste wird im Browser per LocalStorage gespeichert. Sie bleibt auf diesem Gerät erhalten, solange die Browserdaten nicht gelöscht werden.</p>
+
+            <div id="scoreSummary" class="score-summary"></div>
+
+            <div class="leaderboard-tools">
+                <label for="leaderboardFilter">
+                    Schwierigkeit filtern:<br><br>
+                    <select id="leaderboardFilter">
+                        <option value="all">Alle Schwierigkeitsgrade</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
                 </label>
 
-                <div id="musicTime">Restzeit: --:--</div>
-            </section>
+                <button type="button" class="danger-button" id="clearScoresButton">Bestenliste löschen</button>
+            </div>
 
-            <section id="difficultySelection" class="panel" aria-labelledby="difficultyTitle">
-                <h2 id="difficultyTitle">Schwierigkeitsgrad wählen</h2>
-                <p>Jede Runde enthält bis zu 20 zufällige Fragen aus dem gewählten Schwierigkeitsgrad.</p>
+            <div class="table-wrap">
+                <table aria-label="Bestenliste">
+                    <thead>
+                        <tr>
+                            <th>Platz</th>
+                            <th>Name</th>
+                            <th>Punkte</th>
+                            <th>Schwierigkeit</th>
+                            <th>Joker</th>
+                            <th>Rang</th>
+                            <th>Datum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderBoardTableBody"></tbody>
+                </table>
+            </div>
 
-                <div class="button-grid">
-                    <button type="button" data-difficulty="easy">Easy</button>
-                    <button type="button" data-difficulty="medium">Medium</button>
-                    <button type="button" data-difficulty="hard">Hard</button>
-                    <button type="button" id="openLeaderboardButton">🏆 Bestenliste anzeigen</button>
-                    <button type="button" id="openMiniGameButton">🎮 MGS4 Mini-Spiel</button>
-                    <button type="button" class="secondary-button" id="backToStartButton">⬅ Zurück zur Startseite</button>
-                </div>
-            </section>
+            <div class="button-grid">
+                <button type="button" id="leaderboardMenuButton">← Zurück zum Hauptmenü</button>
+            </div>
+        </section>
 
-            <section id="quizContainer" class="panel hidden" aria-live="polite">
-                <div class="quiz-topbar">
-                    <div id="progressText">Frage 1 von 20</div>
-                    <div id="timer">⏱ 30s</div>
-                </div>
+        <section id="miniGamePanel" class="panel hidden" aria-labelledby="miniGameTitle">
+            <h2 id="miniGameTitle">🎮 Shadow Moses Stealth Run</h2>
+            <p>Schleiche als Old Snake durch die Kampfzone, sammle Intel-Daten und erreiche Outer Haven. Spätere Level werden erst freigeschaltet, wenn du das vorherige Level geschafft hast.</p>
 
-                <div id="jokerPanel" class="joker-panel hidden">
-                    <button type="button" id="fiftyFiftyButton">🃏 50:50-Joker</button>
-                    <div id="jokerInfo">Entfernt zwei falsche Antworten. Nur auf Hard verfügbar.</div>
-                </div>
+            <div class="level-select-wrap">
+                <h3>Levelauswahl</h3>
+                <div id="miniGameLevelSelect" class="level-select-grid"></div>
+                <p id="levelInfo" class="game-help">Level 1 ist freigeschaltet. Schließe Level ab, um weitere Missionen freizuschalten.</p>
+            </div>
 
-                <div id="questionText"></div>
-                <div id="answersContainer"></div>
-                <div id="feedback"></div>
+            <div class="game-hud">
+                <span id="gameLevel">Level: 1</span>
+                <span id="gameScore">Intel: 0 / 5</span>
+                <span id="gameLives">Leben: 3</span>
+                <span id="gameTimer">Zeit: 60s</span>
+                <span id="gameAlert">Phase: Normal</span>
+                <span id="gameCamo">Tarnung: 100%</span>
+                <span id="gameStatus">Bereit</span>
+            </div>
 
-                <button type="button" id="nextButton" class="hidden">▶ Nächste Frage</button>
-            </section>
+            <div class="game-canvas-wrap">
+                <canvas id="stealthCanvas" width="760" height="430" aria-label="Metal Gear Solid 4 Mini-Spiel"></canvas>
+            </div>
 
-            <section id="scoreBoard" class="panel hidden" aria-labelledby="scoreTitle">
-                <h2 id="scoreTitle">Quiz beendet!</h2>
-                <p>Schwierigkeit: <span id="finalDifficulty"></span></p>
-                <p>Deine Punktzahl: <strong><span id="finalScore">0</span></strong></p>
-                <p>Genutzte Joker: <span id="finalJokersUsed">0</span></p>
+            <p class="game-help">Steuerung am PC: <strong>WASD</strong>, <strong>Pfeiltasten</strong> oder <strong>Maus</strong>. Auf Handy und Tablet steuerst du Old Snake per <strong>Touch</strong>. Tarnung: am PC <strong>Leertaste</strong> halten oder den Tarnungsbutton einmal drücken. Auf Mobile den Tarnungsbutton einmal antippen. Er funktioniert als Toggle: einmal aktivieren, nochmal deaktivieren. Das Spiel nutzt <strong>snake.png</strong> für Old Snake und <strong>gekko.png</strong> für die Gekko-Patrouillen.</p>
 
-                <div id="rankResult" class="rank-card">
-                    <span>Dein Rang:</span>
-                    <strong id="finalRank">Rookie</strong>
-                    <span id="finalRankDetails">0% der maximal möglichen Punkte erreicht.</span>
-                </div>
+            <div class="button-grid">
+                <button type="button" id="startMiniGameButton">▶ Gewähltes Level starten</button>
+                <button type="button" id="camoButton">🕶 Tarnung aktivieren</button>
+                <button type="button" class="secondary-button" id="miniGameMenuButton">← Zurück zum Hauptmenü</button>
+            </div>
+        </section>
+    </main>
 
-                <label for="playerName">Trage deinen Namen ein:</label><br><br>
-                <input type="text" id="playerName" maxlength="24" placeholder="Dein Name" autocomplete="off">
+    <audio id="bgMusic" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
 
-                <div class="button-grid">
-                    <button type="button" id="saveScoreButton">✔ Speichern</button>
-                    <button type="button" id="showLeaderboardAfterQuizButton">🏆 Bestenliste ansehen</button>
-                    <button type="button" id="restartButton">↺ Neuer Versuch</button>
-                    <button type="button" class="secondary-button" id="scoreMenuButton">← Zurück zum Hauptmenü</button>
-                </div>
-            </section>
-
-            <section id="leaderboardPanel" class="panel hidden" aria-labelledby="leaderboardTitle">
-                <h2 id="leaderboardTitle">🏆 Lokale Bestenliste</h2>
-                <p>Diese Bestenliste wird im Browser per LocalStorage gespeichert. Sie bleibt auf diesem Gerät erhalten, solange die Browserdaten nicht gelöscht werden.</p>
-
-                <div id="scoreSummary" class="score-summary"></div>
-
-                <div class="leaderboard-tools">
-                    <label for="leaderboardFilter">
-                        Schwierigkeit filtern:<br><br>
-                        <select id="leaderboardFilter">
-                            <option value="all">Alle Schwierigkeitsgrade</option>
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                        </select>
-                    </label>
-
-                    <button type="button" class="danger-button" id="clearScoresButton">Bestenliste löschen</button>
-                </div>
-
-                <div class="table-wrap">
-                    <table aria-label="Bestenliste">
-                        <thead>
-                            <tr>
-                                <th>Platz</th>
-                                <th>Name</th>
-                                <th>Punkte</th>
-                                <th>Schwierigkeit</th>
-                                <th>Joker</th>
-                                <th>Rang</th>
-                                <th>Datum</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderBoardTableBody"></tbody>
-                    </table>
-                </div>
-
-                <div class="button-grid">
-                    <button type="button" id="leaderboardMenuButton">← Zurück zum Hauptmenü</button>
-                </div>
-            </section>
-
-            <section id="miniGamePanel" class="panel hidden" aria-labelledby="miniGameTitle">
-                <h2 id="miniGameTitle">🎮 Shadow Moses Stealth Run</h2>
-                <p>Schleiche als Old Snake durch die Kampfzone, sammle Intel-Daten und erreiche Outer Haven. Spätere Level werden erst freigeschaltet, wenn du das vorherige Level geschafft hast.</p>
-
-                <div class="level-select-wrap">
-                    <h3>Levelauswahl</h3>
-                    <div id="miniGameLevelSelect" class="level-select-grid"></div>
-                    <p id="levelInfo" class="game-help">Level 1 ist freigeschaltet. Schließe Level ab, um weitere Missionen freizuschalten.</p>
-                </div>
-
-                <div class="game-hud">
-                    <span id="gameLevel">Level: 1</span>
-                    <span id="gameScore">Intel: 0 / 5</span>
-                    <span id="gameLives">Leben: 3</span>
-                    <span id="gameTimer">Zeit: 60s</span>
-                    <span id="gameAlert">Phase: Normal</span>
-                    <span id="gameCamo">Tarnung: 100%</span>
-                    <span id="gameStatus">Bereit</span>
-                </div>
-
-                <div class="game-canvas-wrap">
-                    <canvas id="stealthCanvas" width="760" height="430" aria-label="Metal Gear Solid 4 Mini-Spiel"></canvas>
-                </div>
-
-                <p class="game-help">Steuerung am PC: <strong>WASD</strong>, <strong>Pfeiltasten</strong> oder <strong>Maus</strong>. Auf Handy und Tablet steuerst du Old Snake per <strong>Touch</strong>. Tarnung: am PC <strong>Leertaste</strong> halten oder den Tarnungsbutton nutzen. Auf Mobile den Tarnungsbutton gedrückt halten. Das Spiel nutzt <strong>snake.png</strong> für Old Snake und <strong>gekko.png</strong> für die Gekko-Patrouillen.</p>
-
-                <div class="button-grid">
-                    <button type="button" id="startMiniGameButton">▶ Gewähltes Level starten</button>
-                    <button type="button" id="camoButton">🕶 Tarnung halten</button>
-                    <button type="button" class="secondary-button" id="miniGameMenuButton">← Zurück zum Hauptmenü</button>
-                </div>
-            </section>
-        </main>
-
-        <audio id="bgMusic" loop preload="auto">
-            <source src="music.mp3" type="audio/mpeg">
-        </audio>
-
-        <div id="copyright">
-            &copy; 2026 Fanprojekt – Metal Gear Solid Inhalte & Musik gehören Konami.
-        </div>
+    <div id="copyright">
+        &copy; 2026 Fanprojekt – Metal Gear Solid Inhalte & Musik gehören Konami.
     </div>
+</div>
 
-    <script>
-        "use strict";
+<script>
+    "use strict";
 
-        const RELEASE_TARGET_UTC = Date.UTC(2026, 7, 27, 14, 0, 0);
-        const TIME_PER_QUESTION = 30;
-        const QUESTIONS_PER_ROUND = 20;
-        const HIGHSCORE_KEY = "mgs4QuizHighscoresV3";
-        const GAME_PROGRESS_KEY = "mgs4MiniGameProgressV1";
-        const GAME_WIDTH = 760;
-        const GAME_HEIGHT = 430;
-        const LEGACY_HIGHSCORE_KEY = "mgs4QuizHighscoresV2";
-        const MAX_JOKERS_PER_ROUND = 5;
-        const JOKER_DIFFICULTY = "hard";
+    const RELEASE_TARGET_UTC = Date.UTC(2026, 7, 27, 14, 0, 0);
+    const TIME_PER_QUESTION = 30;
+    const QUESTIONS_PER_ROUND = 20;
+    const HIGHSCORE_KEY = "mgs4QuizHighscoresV3";
+    const GAME_PROGRESS_KEY = "mgs4MiniGameProgressV1";
+    const GAME_WIDTH = 760;
+    const GAME_HEIGHT = 430;
+    const LEGACY_HIGHSCORE_KEY = "mgs4QuizHighscoresV2";
+    const MAX_JOKERS_PER_ROUND = 5;
+    const JOKER_DIFFICULTY = "hard";
 
-        const LEVEL_LABELS = {
-            easy: "Easy",
-            medium: "Medium",
-            hard: "Hard"
-        };
+    const LEVEL_LABELS = {
+        easy: "Easy",
+        medium: "Medium",
+        hard: "Hard"
+    };
 
-        const SCORE_BASE = {
-            easy: 500,
-            medium: 750,
-            hard: 1000
-        };
+    const SCORE_BASE = {
+        easy: 500,
+        medium: 750,
+        hard: 1000
+    };
 
-        const RANKS = [
-            { minPercent: 95, name: "Big Boss", note: "Legendäre Leistung" },
-            { minPercent: 88, name: "Foxhound", note: "Elite-Soldat" },
-            { minPercent: 80, name: "Fox", note: "Sehr stark" },
-            { minPercent: 70, name: "Hound", note: "Starke Mission" },
-            { minPercent: 60, name: "Doberman", note: "Gute Leistung" },
-            { minPercent: 45, name: "Eagle", note: "Solider Einsatz" },
-            { minPercent: 30, name: "Crocodile", note: "Ausbaufähig" },
-            { minPercent: 0, name: "Rookie", note: "Weiter trainieren" }
-        ];
+    const RANKS = [
+        { minPercent: 95, name: "Big Boss", note: "Legendäre Leistung" },
+        { minPercent: 88, name: "Foxhound", note: "Elite-Soldat" },
+        { minPercent: 80, name: "Fox", note: "Sehr stark" },
+        { minPercent: 70, name: "Hound", note: "Starke Mission" },
+        { minPercent: 60, name: "Doberman", note: "Gute Leistung" },
+        { minPercent: 45, name: "Eagle", note: "Solider Einsatz" },
+        { minPercent: 30, name: "Crocodile", note: "Ausbaufähig" },
+        { minPercent: 0, name: "Rookie", note: "Weiter trainieren" }
+    ];
 
-        const questionPool = [
-            // Easy – Grundlagen, Figuren, offensichtliche Storypunkte
-            { difficulty: "easy", text: "Wie wird Solid Snake in MGS4 meistens genannt?", answers: ["Old Snake", "Naked Snake", "Solidus Snake", "Venom Snake"], correct: 0 },
-            { difficulty: "easy", text: "In welchem Jahr spielt die Haupthandlung von MGS4?", answers: ["2014", "2005", "2024", "1999"], correct: 0 },
-            { difficulty: "easy", text: "Wer ist Snakes wichtigster technischer Partner?", answers: ["Otacon", "Volgin", "The Boss", "Skull Face"], correct: 0 },
-            { difficulty: "easy", text: "Wie heißt Snakes mobiles Flugzeug-Hauptquartier?", answers: ["Nomad", "Outer Heaven", "Mother Base", "Big Shell"], correct: 0 },
-            { difficulty: "easy", text: "Welche Tarnfunktion nutzt Snakes Anzug in MGS4?", answers: ["OctoCamo", "Active Sonar", "FoxCamo", "Solid Suit"], correct: 0 },
-            { difficulty: "easy", text: "Welche kleine Roboter-Unterstützung steuert Otacon?", answers: ["Metal Gear Mk. II", "Metal Gear ZEKE", "Metal Gear D", "TX-55"], correct: 0 },
-            { difficulty: "easy", text: "Wie heißt der Hauptgegner von MGS4?", answers: ["Liquid Ocelot", "Psycho Mantis", "Vulcan Raven", "Decoy Octopus"], correct: 0 },
-            { difficulty: "easy", text: "Welche Einheit wird von Meryl Silverburgh angeführt?", answers: ["Rat Patrol Team 01", "Diamond Dogs", "Dead Cell", "FOX"], correct: 0 },
-            { difficulty: "easy", text: "Wie lautet Johnnys Spitzname im Team von Meryl?", answers: ["Akiba", "Raikov", "Sigint", "Ocelot"], correct: 0 },
-            { difficulty: "easy", text: "Wer verkauft Snake Waffen und entfernt ID-Sperren von Waffen?", answers: ["Drebin", "Roy Campbell", "Rosemary", "Mei Ling"], correct: 0 },
-            { difficulty: "easy", text: "Was sind Gekkos in MGS4?", answers: ["Unbemannte zweibeinige Kampfmaschinen", "Codec-Geräte", "Medizinische Nanomaschinen", "Ein Tarnanzug-Modell"], correct: 0 },
-            { difficulty: "easy", text: "Welche bekannte Basis aus Metal Gear Solid 1 besucht Snake erneut?", answers: ["Shadow Moses", "Groznyj Grad", "Camp Omega", "Mother Base"], correct: 0 },
-            { difficulty: "easy", text: "Welcher Cyborg-Ninja hilft Snake mehrfach im Spiel?", answers: ["Raiden", "Gray Fox", "Solidus", "Vamp"], correct: 0 },
-            { difficulty: "easy", text: "Wie heißt das Mädchen, das auf der Nomad lebt?", answers: ["Sunny", "Emma", "Olga", "Cécile"], correct: 0 },
-            { difficulty: "easy", text: "Wer ist Big Mama in Wahrheit?", answers: ["EVA", "Naomi Hunter", "The Boss", "Sniper Wolf"], correct: 0 },
-            { difficulty: "easy", text: "Welche geheime Macht kontrolliert die Welt im Hintergrund?", answers: ["Die Patriots", "FOXHOUND", "MSF", "Cobra Unit"], correct: 0 },
-            { difficulty: "easy", text: "Was ist Outer Haven?", answers: ["Eine riesige seegestützte Kriegsfestung", "Ein Dorf in Südamerika", "Snakes Tarnanzug", "Ein Codec-Kanal"], correct: 0 },
-            { difficulty: "easy", text: "Wie heißt die Boss-Einheit mit Laughing Octopus, Raging Raven, Crying Wolf und Screaming Mantis?", answers: ["Beauty and the Beast Corps", "Dead Cell", "Cobra Unit", "FOX Unit"], correct: 0 },
-            { difficulty: "easy", text: "Welches gesundheitliche Hauptproblem hat Snake in MGS4?", answers: ["Beschleunigtes Altern", "Gedächtnisverlust", "Blindheit", "Parasitenbefall"], correct: 0 },
-            { difficulty: "easy", text: "Wer ist Snakes früherer Kommandant und Kontakt in MGS4?", answers: ["Roy Campbell", "Kaz Miller", "Zero", "Major Raikov"], correct: 0 },
+    const questionPool = [
+        // Easy – Grundlagen, Figuren, offensichtliche Storypunkte
+        { difficulty: "easy", text: "Wie wird Solid Snake in MGS4 meistens genannt?", answers: ["Old Snake", "Naked Snake", "Solidus Snake", "Venom Snake"], correct: 0 },
+        { difficulty: "easy", text: "In welchem Jahr spielt die Haupthandlung von MGS4?", answers: ["2014", "2005", "2024", "1999"], correct: 0 },
+        { difficulty: "easy", text: "Wer ist Snakes wichtigster technischer Partner?", answers: ["Otacon", "Volgin", "The Boss", "Skull Face"], correct: 0 },
+        { difficulty: "easy", text: "Wie heißt Snakes mobiles Flugzeug-Hauptquartier?", answers: ["Nomad", "Outer Heaven", "Mother Base", "Big Shell"], correct: 0 },
+        { difficulty: "easy", text: "Welche Tarnfunktion nutzt Snakes Anzug in MGS4?", answers: ["OctoCamo", "Active Sonar", "FoxCamo", "Solid Suit"], correct: 0 },
+        { difficulty: "easy", text: "Welche kleine Roboter-Unterstützung steuert Otacon?", answers: ["Metal Gear Mk. II", "Metal Gear ZEKE", "Metal Gear D", "TX-55"], correct: 0 },
+        { difficulty: "easy", text: "Wie heißt der Hauptgegner von MGS4?", answers: ["Liquid Ocelot", "Psycho Mantis", "Vulcan Raven", "Decoy Octopus"], correct: 0 },
+        { difficulty: "easy", text: "Welche Einheit wird von Meryl Silverburgh angeführt?", answers: ["Rat Patrol Team 01", "Diamond Dogs", "Dead Cell", "FOX"], correct: 0 },
+        { difficulty: "easy", text: "Wie lautet Johnnys Spitzname im Team von Meryl?", answers: ["Akiba", "Raikov", "Sigint", "Ocelot"], correct: 0 },
+        { difficulty: "easy", text: "Wer verkauft Snake Waffen und entfernt ID-Sperren von Waffen?", answers: ["Drebin", "Roy Campbell", "Rosemary", "Mei Ling"], correct: 0 },
+        { difficulty: "easy", text: "Was sind Gekkos in MGS4?", answers: ["Unbemannte zweibeinige Kampfmaschinen", "Codec-Geräte", "Medizinische Nanomaschinen", "Ein Tarnanzug-Modell"], correct: 0 },
+        { difficulty: "easy", text: "Welche bekannte Basis aus Metal Gear Solid 1 besucht Snake erneut?", answers: ["Shadow Moses", "Groznyj Grad", "Camp Omega", "Mother Base"], correct: 0 },
+        { difficulty: "easy", text: "Welcher Cyborg-Ninja hilft Snake mehrfach im Spiel?", answers: ["Raiden", "Gray Fox", "Solidus", "Vamp"], correct: 0 },
+        { difficulty: "easy", text: "Wie heißt das Mädchen, das auf der Nomad lebt?", answers: ["Sunny", "Emma", "Olga", "Cécile"], correct: 0 },
+        { difficulty: "easy", text: "Wer ist Big Mama in Wahrheit?", answers: ["EVA", "Naomi Hunter", "The Boss", "Sniper Wolf"], correct: 0 },
+        { difficulty: "easy", text: "Welche geheime Macht kontrolliert die Welt im Hintergrund?", answers: ["Die Patriots", "FOXHOUND", "MSF", "Cobra Unit"], correct: 0 },
+        { difficulty: "easy", text: "Was ist Outer Haven?", answers: ["Eine riesige seegestützte Kriegsfestung", "Ein Dorf in Südamerika", "Snakes Tarnanzug", "Ein Codec-Kanal"], correct: 0 },
+        { difficulty: "easy", text: "Wie heißt die Boss-Einheit mit Laughing Octopus, Raging Raven, Crying Wolf und Screaming Mantis?", answers: ["Beauty and the Beast Corps", "Dead Cell", "Cobra Unit", "FOX Unit"], correct: 0 },
+        { difficulty: "easy", text: "Welches gesundheitliche Hauptproblem hat Snake in MGS4?", answers: ["Beschleunigtes Altern", "Gedächtnisverlust", "Blindheit", "Parasitenbefall"], correct: 0 },
+        { difficulty: "easy", text: "Wer ist Snakes früherer Kommandant und Kontakt in MGS4?", answers: ["Roy Campbell", "Kaz Miller", "Zero", "Major Raikov"], correct: 0 },
 
-            // Medium – Storystruktur, Systeme, Boss-Zuordnung
-            { difficulty: "medium", text: "Wofür steht SOP in MGS4?", answers: ["Sons of the Patriots", "System of Peace", "Soldiers of Outer Paradise", "Snake Operation Program"], correct: 0 },
-            { difficulty: "medium", text: "Wofür steht PMC im Kontext der Kriegswirtschaft?", answers: ["Private Military Company", "Patriot Main Computer", "Portable Metal Cannon", "Public Mission Command"], correct: 0 },
-            { difficulty: "medium", text: "In welchem Akt beginnt Snake seine Mission im Nahen Osten?", answers: ["Akt 1", "Akt 2", "Akt 4", "Akt 5"], correct: 0 },
-            { difficulty: "medium", text: "In welchem Akt reist Snake nach Südamerika?", answers: ["Akt 2", "Akt 1", "Akt 3", "Akt 5"], correct: 0 },
-            { difficulty: "medium", text: "Welcher Akt spielt größtenteils in Osteuropa?", answers: ["Akt 3", "Akt 1", "Akt 4", "Akt 5"], correct: 0 },
-            { difficulty: "medium", text: "Welcher Akt bringt Snake zurück nach Shadow Moses?", answers: ["Akt 4", "Akt 2", "Akt 3", "Akt 5"], correct: 0 },
-            { difficulty: "medium", text: "Welcher Akt findet auf Outer Haven statt?", answers: ["Akt 5", "Akt 1", "Akt 2", "Akt 4"], correct: 0 },
-            { difficulty: "medium", text: "Welcher B&B-Boss ist der erste große Beauty-and-the-Beast-Kampf?", answers: ["Laughing Octopus", "Crying Wolf", "Screaming Mantis", "Raging Raven"], correct: 0 },
-            { difficulty: "medium", text: "Welche B&B-Bossin kämpft in Osteuropa mit Flugtechnik?", answers: ["Raging Raven", "Laughing Octopus", "Crying Wolf", "Fortune"], correct: 0 },
-            { difficulty: "medium", text: "Welche B&B-Bossin jagt Snake in Shadow Moses?", answers: ["Crying Wolf", "Screaming Mantis", "Laughing Octopus", "The Pain"], correct: 0 },
-            { difficulty: "medium", text: "Wer ist der letzte Beauty-and-the-Beast-Boss auf Outer Haven?", answers: ["Screaming Mantis", "Raging Raven", "Crying Wolf", "Vamp"], correct: 0 },
-            { difficulty: "medium", text: "Welche Wissenschaftlerin ist besonders mit FOXDIE und Nanomaschinen verbunden?", answers: ["Naomi Hunter", "Mei Ling", "Para-Medic", "Amanda Valenciano"], correct: 0 },
-            { difficulty: "medium", text: "Wie heißt EVAs Widerstandsbewegung in Osteuropa?", answers: ["Paradise Lost Army", "Militaires Sans Frontières", "Outer Heaven", "Philanthropy"], correct: 0 },
-            { difficulty: "medium", text: "Womit kann Snake Vamp im Bosskampf dauerhaft schwächen?", answers: ["Mit der Spritze", "Mit einer Betäubungsgranate", "Mit einem Codec-Befehl", "Mit OctoCamo"], correct: 0 },
-            { difficulty: "medium", text: "Was ermöglicht OctoCamo im Spiel hauptsächlich?", answers: ["Anpassung an Oberflächen und Muster", "Teleportation", "Gedankenlesen", "Unendliche Munition"], correct: 0 },
-            { difficulty: "medium", text: "Wer injiziert Snake zu Beginn neue Nanomaschinen?", answers: ["Drebin", "Meryl", "Sunny", "Mei Ling"], correct: 0 },
-            { difficulty: "medium", text: "Was kontrolliert das SOP-System bei Soldaten?", answers: ["Kampfdaten, Waffenfreigaben und Emotionen", "Nur die Funkfrequenz", "Nur den Treibstoffverbrauch", "Nur die Kleidung"], correct: 0 },
-            { difficulty: "medium", text: "Welchen KI-Kern will Liquid Ocelot mit Outer Haven nutzen?", answers: ["GW", "The Joy", "Mammal Pod", "Metal Gear ZEKE"], correct: 0 },
-            { difficulty: "medium", text: "Wer heiratet Meryl im Epilog?", answers: ["Johnny Sasaki", "Raiden", "Otacon", "Drebin"], correct: 0 },
-            { difficulty: "medium", text: "Welche Spezialeinheit begegnet Snake wiederholt als Elite-Soldatinnen von Liquid Ocelot?", answers: ["FROGs / Haven Troopers", "Cobra Unit", "Ocelot Unit", "Diamond Dogs"], correct: 0 },
+        // Medium – Storystruktur, Systeme, Boss-Zuordnung
+        { difficulty: "medium", text: "Wofür steht SOP in MGS4?", answers: ["Sons of the Patriots", "System of Peace", "Soldiers of Outer Paradise", "Snake Operation Program"], correct: 0 },
+        { difficulty: "medium", text: "Wofür steht PMC im Kontext der Kriegswirtschaft?", answers: ["Private Military Company", "Patriot Main Computer", "Portable Metal Cannon", "Public Mission Command"], correct: 0 },
+        { difficulty: "medium", text: "In welchem Akt beginnt Snake seine Mission im Nahen Osten?", answers: ["Akt 1", "Akt 2", "Akt 4", "Akt 5"], correct: 0 },
+        { difficulty: "medium", text: "In welchem Akt reist Snake nach Südamerika?", answers: ["Akt 2", "Akt 1", "Akt 3", "Akt 5"], correct: 0 },
+        { difficulty: "medium", text: "Welcher Akt spielt größtenteils in Osteuropa?", answers: ["Akt 3", "Akt 1", "Akt 4", "Akt 5"], correct: 0 },
+        { difficulty: "medium", text: "Welcher Akt bringt Snake zurück nach Shadow Moses?", answers: ["Akt 4", "Akt 2", "Akt 3", "Akt 5"], correct: 0 },
+        { difficulty: "medium", text: "Welcher Akt findet auf Outer Haven statt?", answers: ["Akt 5", "Akt 1", "Akt 2", "Akt 4"], correct: 0 },
+        { difficulty: "medium", text: "Welcher B&B-Boss ist der erste große Beauty-and-the-Beast-Kampf?", answers: ["Laughing Octopus", "Crying Wolf", "Screaming Mantis", "Raging Raven"], correct: 0 },
+        { difficulty: "medium", text: "Welche B&B-Bossin kämpft in Osteuropa mit Flugtechnik?", answers: ["Raging Raven", "Laughing Octopus", "Crying Wolf", "Fortune"], correct: 0 },
+        { difficulty: "medium", text: "Welche B&B-Bossin jagt Snake in Shadow Moses?", answers: ["Crying Wolf", "Screaming Mantis", "Laughing Octopus", "The Pain"], correct: 0 },
+        { difficulty: "medium", text: "Wer ist der letzte Beauty-and-the-Beast-Boss auf Outer Haven?", answers: ["Screaming Mantis", "Raging Raven", "Crying Wolf", "Vamp"], correct: 0 },
+        { difficulty: "medium", text: "Welche Wissenschaftlerin ist besonders mit FOXDIE und Nanomaschinen verbunden?", answers: ["Naomi Hunter", "Mei Ling", "Para-Medic", "Amanda Valenciano"], correct: 0 },
+        { difficulty: "medium", text: "Wie heißt EVAs Widerstandsbewegung in Osteuropa?", answers: ["Paradise Lost Army", "Militaires Sans Frontières", "Outer Heaven", "Philanthropy"], correct: 0 },
+        { difficulty: "medium", text: "Womit kann Snake Vamp im Bosskampf dauerhaft schwächen?", answers: ["Mit der Spritze", "Mit einer Betäubungsgranate", "Mit einem Codec-Befehl", "Mit OctoCamo"], correct: 0 },
+        { difficulty: "medium", text: "Was ermöglicht OctoCamo im Spiel hauptsächlich?", answers: ["Anpassung an Oberflächen und Muster", "Teleportation", "Gedankenlesen", "Unendliche Munition"], correct: 0 },
+        { difficulty: "medium", text: "Wer injiziert Snake zu Beginn neue Nanomaschinen?", answers: ["Drebin", "Meryl", "Sunny", "Mei Ling"], correct: 0 },
+        { difficulty: "medium", text: "Was kontrolliert das SOP-System bei Soldaten?", answers: ["Kampfdaten, Waffenfreigaben und Emotionen", "Nur die Funkfrequenz", "Nur den Treibstoffverbrauch", "Nur die Kleidung"], correct: 0 },
+        { difficulty: "medium", text: "Welchen KI-Kern will Liquid Ocelot mit Outer Haven nutzen?", answers: ["GW", "The Joy", "Mammal Pod", "Metal Gear ZEKE"], correct: 0 },
+        { difficulty: "medium", text: "Wer heiratet Meryl im Epilog?", answers: ["Johnny Sasaki", "Raiden", "Otacon", "Drebin"], correct: 0 },
+        { difficulty: "medium", text: "Welche Spezialeinheit begegnet Snake wiederholt als Elite-Soldatinnen von Liquid Ocelot?", answers: ["FROGs / Haven Troopers", "Cobra Unit", "Ocelot Unit", "Diamond Dogs"], correct: 0 },
 
-            // Hard – Detailwissen, Spoiler, Akttitel, KI-Systeme
-            { difficulty: "hard", text: "Wie heißen die fünf Patriots-KIs?", answers: ["GW, TJ, TR, AL und JD", "GW, FOX, REX, RAY und ZEKE", "JD, EVA, SOP, MSF und FOX", "AI Pod, Mammal Pod, Reptile Pod, ZEKE und Sahelanthropus"], correct: 0 },
-            { difficulty: "hard", text: "Welche Patriots-KI ist der zentrale Kern des Netzwerks?", answers: ["JD", "GW", "AL", "TR"], correct: 0 },
-            { difficulty: "hard", text: "Wessen Körper wird in MGS4 zeitweise für Big Boss' Körper gehalten?", answers: ["Solidus Snake", "Liquid Snake", "The Sorrow", "Gray Fox"], correct: 0 },
-            { difficulty: "hard", text: "Wie wird Liquid Ocelots Liquid-Persönlichkeit im Kern erklärt?", answers: ["Durch Selbsthypnose, Psychotherapie und Nanomaschinen", "Durch echte Geisterbesessenheit", "Durch eine KI im Codec", "Durch den Sorrow-Puppenfluch"], correct: 0 },
-            { difficulty: "hard", text: "Welche Puppe ermöglicht Screaming Mantis die Kontrolle über lebende Personen?", answers: ["Mantis-Puppe", "Sorrow-Puppe", "Snake-Puppe", "Raven-Puppe"], correct: 0 },
-            { difficulty: "hard", text: "Welche Puppe ist bei Screaming Mantis mit der Kontrolle über Tote verbunden?", answers: ["Sorrow-Puppe", "Mantis-Puppe", "Octopus-Puppe", "Wolf-Puppe"], correct: 0 },
-            { difficulty: "hard", text: "Welches Metal Gear steuert Snake in Shadow Moses?", answers: ["Metal Gear REX", "Metal Gear RAY", "Metal Gear ZEKE", "Sahelanthropus"], correct: 0 },
-            { difficulty: "hard", text: "Gegen welches Metal Gear kämpft REX in MGS4?", answers: ["Metal Gear RAY", "Metal Gear ZEKE", "TX-55", "Shagohod"], correct: 0 },
-            { difficulty: "hard", text: "Wer kämpft in Shadow Moses gegen Vamp, während Snake Gekkos abwehrt?", answers: ["Raiden", "Meryl", "Drebin", "Roy Campbell"], correct: 0 },
-            { difficulty: "hard", text: "Wie heißt Rose und Raidens Sohn?", answers: ["John", "Jack", "David", "George"], correct: 0 },
-            { difficulty: "hard", text: "Wie heißt Drebins Affe?", answers: ["Little Gray", "Sunny Boy", "Jack Junior", "Metal Monkey"], correct: 0 },
-            { difficulty: "hard", text: "Wie lautet der Titel von Akt 1?", answers: ["Liquid Sun", "Solid Sun", "Twin Suns", "Old Sun"], correct: 0 },
-            { difficulty: "hard", text: "Wie lautet der Titel von Akt 2?", answers: ["Solid Sun", "Liquid Sun", "Third Sun", "Naked Sin"], correct: 0 },
-            { difficulty: "hard", text: "Wie lautet der Titel von Akt 3?", answers: ["Third Sun", "Old Sun", "Twin Suns", "Liquid Sun"], correct: 0 },
-            { difficulty: "hard", text: "Wie lautet der Titel von Akt 4?", answers: ["Twin Suns", "Solid Sun", "Old Sun", "Third Sun"], correct: 0 },
-            { difficulty: "hard", text: "Wie lautet der Titel von Akt 5?", answers: ["Old Sun", "Liquid Sun", "Twin Suns", "Solid Sun"], correct: 0 },
-            { difficulty: "hard", text: "Warum altert Snake in MGS4 so schnell?", answers: ["Seine Klon-DNA hat eine künstlich verkürzte Lebensspanne", "Er wurde von Vamp gebissen", "OctoCamo entzieht ihm Lebensenergie", "Er benutzt zu oft den Codec"], correct: 0 },
-            { difficulty: "hard", text: "Welches Programm beendet am Ende die Kontrolle der Patriots, ohne die ganze Zivilisation zu zerstören?", answers: ["FOXALIVE", "FOXDIE", "S3 Plan", "Les Enfants Terribles"], correct: 0 },
-            { difficulty: "hard", text: "Wodurch stirbt Big Boss am Ende von MGS4?", answers: ["Durch FOXDIE", "Durch REX", "Durch Vamp", "Durch die Sorrow-Puppe"], correct: 0 },
-            { difficulty: "hard", text: "Was ist Snakes letzte große Aufgabe im Mikrowellen-Korridor von Outer Haven?", answers: ["Den Serverraum erreichen, damit Mk. III das System infiltrieren kann", "Einen Hubschrauber starten", "Shadow Moses sprengen", "RAY reparieren"], correct: 0 }
-        ];
+        // Hard – Detailwissen, Spoiler, Akttitel, KI-Systeme
+        { difficulty: "hard", text: "Wie heißen die fünf Patriots-KIs?", answers: ["GW, TJ, TR, AL und JD", "GW, FOX, REX, RAY und ZEKE", "JD, EVA, SOP, MSF und FOX", "AI Pod, Mammal Pod, Reptile Pod, ZEKE und Sahelanthropus"], correct: 0 },
+        { difficulty: "hard", text: "Welche Patriots-KI ist der zentrale Kern des Netzwerks?", answers: ["JD", "GW", "AL", "TR"], correct: 0 },
+        { difficulty: "hard", text: "Wessen Körper wird in MGS4 zeitweise für Big Boss' Körper gehalten?", answers: ["Solidus Snake", "Liquid Snake", "The Sorrow", "Gray Fox"], correct: 0 },
+        { difficulty: "hard", text: "Wie wird Liquid Ocelots Liquid-Persönlichkeit im Kern erklärt?", answers: ["Durch Selbsthypnose, Psychotherapie und Nanomaschinen", "Durch echte Geisterbesessenheit", "Durch eine KI im Codec", "Durch den Sorrow-Puppenfluch"], correct: 0 },
+        { difficulty: "hard", text: "Welche Puppe ermöglicht Screaming Mantis die Kontrolle über lebende Personen?", answers: ["Mantis-Puppe", "Sorrow-Puppe", "Snake-Puppe", "Raven-Puppe"], correct: 0 },
+        { difficulty: "hard", text: "Welche Puppe ist bei Screaming Mantis mit der Kontrolle über Tote verbunden?", answers: ["Sorrow-Puppe", "Mantis-Puppe", "Octopus-Puppe", "Wolf-Puppe"], correct: 0 },
+        { difficulty: "hard", text: "Welches Metal Gear steuert Snake in Shadow Moses?", answers: ["Metal Gear REX", "Metal Gear RAY", "Metal Gear ZEKE", "Sahelanthropus"], correct: 0 },
+        { difficulty: "hard", text: "Gegen welches Metal Gear kämpft REX in MGS4?", answers: ["Metal Gear RAY", "Metal Gear ZEKE", "TX-55", "Shagohod"], correct: 0 },
+        { difficulty: "hard", text: "Wer kämpft in Shadow Moses gegen Vamp, während Snake Gekkos abwehrt?", answers: ["Raiden", "Meryl", "Drebin", "Roy Campbell"], correct: 0 },
+        { difficulty: "hard", text: "Wie heißt Rose und Raidens Sohn?", answers: ["John", "Jack", "David", "George"], correct: 0 },
+        { difficulty: "hard", text: "Wie heißt Drebins Affe?", answers: ["Little Gray", "Sunny Boy", "Jack Junior", "Metal Monkey"], correct: 0 },
+        { difficulty: "hard", text: "Wie lautet der Titel von Akt 1?", answers: ["Liquid Sun", "Solid Sun", "Twin Suns", "Old Sun"], correct: 0 },
+        { difficulty: "hard", text: "Wie lautet der Titel von Akt 2?", answers: ["Solid Sun", "Liquid Sun", "Third Sun", "Naked Sin"], correct: 0 },
+        { difficulty: "hard", text: "Wie lautet der Titel von Akt 3?", answers: ["Third Sun", "Old Sun", "Twin Suns", "Liquid Sun"], correct: 0 },
+        { difficulty: "hard", text: "Wie lautet der Titel von Akt 4?", answers: ["Twin Suns", "Solid Sun", "Old Sun", "Third Sun"], correct: 0 },
+        { difficulty: "hard", text: "Wie lautet der Titel von Akt 5?", answers: ["Old Sun", "Liquid Sun", "Twin Suns", "Solid Sun"], correct: 0 },
+        { difficulty: "hard", text: "Warum altert Snake in MGS4 so schnell?", answers: ["Seine Klon-DNA hat eine künstlich verkürzte Lebensspanne", "Er wurde von Vamp gebissen", "OctoCamo entzieht ihm Lebensenergie", "Er benutzt zu oft den Codec"], correct: 0 },
+        { difficulty: "hard", text: "Welches Programm beendet am Ende die Kontrolle der Patriots, ohne die ganze Zivilisation zu zerstören?", answers: ["FOXALIVE", "FOXDIE", "S3 Plan", "Les Enfants Terribles"], correct: 0 },
+        { difficulty: "hard", text: "Wodurch stirbt Big Boss am Ende von MGS4?", answers: ["Durch FOXDIE", "Durch REX", "Durch Vamp", "Durch die Sorrow-Puppe"], correct: 0 },
+        { difficulty: "hard", text: "Was ist Snakes letzte große Aufgabe im Mikrowellen-Korridor von Outer Haven?", answers: ["Den Serverraum erreichen, damit Mk. III das System infiltrieren kann", "Einen Hubschrauber starten", "Shadow Moses sprengen", "RAY reparieren"], correct: 0 }
+    ];
 
-        let selectedQuestions = [];
-        let currentQuestionIndex = 0;
-        let currentDifficulty = "easy";
-        let score = 0;
-        let secondsLeft = TIME_PER_QUESTION;
-        let timerId = null;
-        let answerLocked = false;
-        let scoreSaved = false;
-        let jokersLeft = 0;
-        let jokerUsedThisQuestion = false;
-        let gameRunning = false;
-        let gameAnimationId = null;
-        let gameStartTime = 0;
-        let gameTimeLeft = 60;
-        let gameScoreValue = 0;
-        let gameLivesValue = 3;
-        let gameMessage = "Bereit";
-        let selectedMiniGameLevel = 1;
-        let unlockedMiniGameLevel = 1;
-        let alertPhase = "normal";
-        let alertCountdown = 0;
-        let cautionCountdown = 0;
-        let isCamouflaged = false;
-        let camoEnergy = 100;
-        let snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
-        let goal = { x: 700, y: 185, width: 38, height: 70 };
-        let intelItems = [];
-        let gekkos = [];
-        let obstacles = [];
-        let cameras = [];
-        const pressedKeys = new Set();
-        let mouseTarget = null;
+    let selectedQuestions = [];
+    let currentQuestionIndex = 0;
+    let currentDifficulty = "easy";
+    let score = 0;
+    let secondsLeft = TIME_PER_QUESTION;
+    let timerId = null;
+    let answerLocked = false;
+    let scoreSaved = false;
+    let jokersLeft = 0;
+    let jokerUsedThisQuestion = false;
+    let gameRunning = false;
+    let gameAnimationId = null;
+    let gameStartTime = 0;
+    let gameTimeLeft = 60;
+    let gameScoreValue = 0;
+    let gameLivesValue = 3;
+    let gameMessage = "Bereit";
+    let selectedMiniGameLevel = 1;
+    let unlockedMiniGameLevel = 1;
+    let alertPhase = "normal";
+    let alertCountdown = 0;
+    let cautionCountdown = 0;
+    let isCamouflaged = false;
+    let camoEnergy = 100;
+    let snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
+    let goal = { x: 700, y: 185, width: 38, height: 70 };
+    let intelItems = [];
+    let gekkos = [];
+    let obstacles = [];
+    let cameras = [];
+    const pressedKeys = new Set();
+    let mouseTarget = null;
 
-        const miniGameLevels = [
-            { id: 1, name: "Shadow Moses Dock", time: 65, lives: 3, intel: [[145, 78], [260, 330], [382, 135], [515, 310], [610, 92]], goal: [700, 185, 38, 70], snake: [45, 205], obstacles: [[118, 180, 55, 55], [295, 58, 70, 45], [442, 230, 70, 50], [575, 350, 55, 42]], gekkos: [[190,105,28,62,82,2,0,130,330,80,130], [350,250,30,66,86,0,2.2,325,390,155,350], [540,175,31,68,88,2.4,0,455,665,145,205]], cameras: [] },
-            { id: 2, name: "SOP Checkpoint", time: 62, lives: 3, intel: [[120, 330], [230, 80], [390, 340], [535, 115], [650, 305]], goal: [705, 45, 34, 70], snake: [45, 365], obstacles: [[145,150,95,42], [330,60,52,135], [455,275,120,42], [610,145,50,125]], gekkos: [[245,265,29,64,84,2.3,0,150,360,245,290], [500,115,31,68,88,0,2.3,475,535,70,245]], cameras: [[350,215,0.25,1.2,0.018,150,90]] },
-            { id: 3, name: "Nomad Signal", time: 60, lives: 3, intel: [[118, 72], [220, 360], [365, 90], [520, 355], [675, 210]], goal: [700, 330, 38, 70], snake: [42, 45], obstacles: [[120,125,55,170], [245,35,90,45], [360,205,72,110], [535,75,55,185], [600,300,60,45]], gekkos: [[220,330,29,64,84,2.4,0,140,350,305,355], [420,105,31,68,88,2,0,355,565,80,130], [590,260,30,66,86,0,2.1,560,625,175,340]], cameras: [[470,55,1.2,2.2,0.02,155,85]] },
-            { id: 4, name: "PMC Lager", time: 58, lives: 3, intel: [[95, 205], [225, 70], [355, 350], [565, 80], [650, 300]], goal: [698, 185, 40, 70], snake: [42, 365], obstacles: [[95,100,120,42], [260,175,55,165], [405,55,95,45], [500,245,150,42], [625,115,50,95]], gekkos: [[195,250,30,66,86,0,2.5,160,220,150,350], [410,145,31,68,88,2.5,0,330,560,120,170], [600,350,32,70,90,2.2,0,500,690,325,375]], cameras: [[315,60,0.6,1.8,0.02,150,80], [580,210,2.8,4.0,0.018,145,80]] },
-            { id: 5, name: "Beauty & Beast Spur", time: 56, lives: 3, intel: [[130, 340], [245, 155], [390, 55], [525, 250], [665, 105]], goal: [700, 45, 38, 70], snake: [45, 385], obstacles: [[100,230,70,45], [205,45,45,185], [345,145,125,42], [455,310,70,80], [600,180,55,140]], gekkos: [[155,115,30,66,86,2.5,0,90,265,90,140], [360,315,32,70,90,0,2.6,335,390,210,385], [575,115,32,70,90,2.6,0,480,690,90,140]], cameras: [[300,255,3.4,4.6,0.022,160,85], [650,255,4.0,5.1,0.018,145,90]] },
-            { id: 6, name: "Shadow Moses Hangar", time: 54, lives: 3, intel: [[100, 70], [230, 365], [365, 205], [535, 65], [650, 340]], goal: [700, 185, 38, 70], snake: [42, 205], obstacles: [[135,145,55,145], [255,65,115,42], [315,300,110,45], [480,130,55,170], [600,45,50,100], [610,285,55,80]], gekkos: [[225,105,31,68,88,2.5,0,130,355,80,130], [430,355,33,72,92,2.4,0,330,560,330,380], [585,205,33,72,92,0,2.6,560,620,120,300]], cameras: [[365,165,0.1,1.3,0.024,160,90], [560,365,4.0,5.2,0.02,155,85]] },
-            { id: 7, name: "RAY Wartungsdeck", time: 52, lives: 3, intel: [[110, 355], [250, 230], [360, 75], [520, 365], [665, 160]], goal: [700, 330, 38, 70], snake: [42, 45], obstacles: [[100,110,150,42], [210,285,45,110], [340,155,55,170], [465,70,130,45], [580,230,60,125]], gekkos: [[170,220,32,70,90,0,2.6,145,195,140,330], [410,80,34,72,94,2.6,0,315,545,55,105], [600,345,34,74,94,2.5,0,500,690,320,370]], cameras: [[300,365,4.7,5.9,0.024,155,90], [660,70,1.7,2.8,0.02,155,85]] },
-            { id: 8, name: "Outer Haven Zugang", time: 50, lives: 3, intel: [[100, 195], [205, 55], [350, 345], [510, 105], [650, 325]], goal: [702, 45, 36, 70], snake: [42, 380], obstacles: [[95,260,110,42], [250,105,55,145], [370,40,105,42], [425,260,50,135], [570,150,130,45], [620,365,60,38]], gekkos: [[210,350,33,72,92,2.7,0,120,330,325,375], [380,165,34,74,94,0,2.8,350,410,80,280], [615,95,35,76,96,2.6,0,510,700,70,120]], cameras: [[155,110,0.1,1.4,0.024,155,90], [535,300,3.7,4.9,0.026,165,85], [675,235,3.9,5.0,0.018,150,80]] },
-            { id: 9, name: "Mikrowellen-Korridor", time: 48, lives: 2, intel: [[115, 75], [230, 355], [380, 115], [535, 330], [650, 85]], goal: [700, 185, 38, 70], snake: [42, 205], obstacles: [[105,150,80,42], [205,245,105,42], [320,45,55,145], [445,220,55,150], [560,50,120,42], [595,300,70,45]], gekkos: [[205,110,34,74,94,2.8,0,115,310,85,135], [370,330,35,76,96,2.7,0,300,520,305,355], [570,180,36,78,98,0,2.8,540,600,105,290]], cameras: [[290,185,2.7,4.0,0.028,165,90], [500,105,0.2,1.5,0.025,165,85], [655,260,3.6,5.1,0.022,155,85]] },
-            { id: 10, name: "Big Boss Finale", time: 45, lives: 2, intel: [[105, 350], [220, 70], [350, 230], [505, 75], [650, 345]], goal: [700, 45, 38, 70], snake: [42, 385], obstacles: [[90,115,115,42], [145,250,55,105], [270,160,120,42], [410,45,55,145], [455,275,120,42], [590,150,55,150], [640,370,55,35]], gekkos: [[180,320,35,76,96,2.9,0,100,310,295,345], [355,90,36,78,98,2.8,0,260,510,65,115], [520,230,36,78,98,0,3.0,490,550,130,335], [655,110,34,74,94,0,2.5,630,690,70,230]], cameras: [[255,235,3.1,4.5,0.03,170,90], [470,370,4.2,5.5,0.026,165,85], [650,260,3.5,5.0,0.025,170,85]] }
-        ];
+    const miniGameLevels = [
+        { id: 1, name: "Shadow Moses Dock", time: 65, lives: 3, intel: [[145, 78], [260, 330], [382, 135], [515, 310], [610, 92]], goal: [700, 185, 38, 70], snake: [45, 205], obstacles: [[118, 180, 55, 55], [295, 58, 70, 45], [442, 230, 70, 50], [575, 350, 55, 42]], gekkos: [[190,105,28,62,82,2,0,130,330,80,130], [350,250,30,66,86,0,2.2,325,390,155,350], [540,175,31,68,88,2.4,0,455,665,145,205]], cameras: [] },
+        { id: 2, name: "SOP Checkpoint", time: 62, lives: 3, intel: [[120, 330], [230, 80], [390, 340], [535, 115], [650, 305]], goal: [705, 45, 34, 70], snake: [45, 365], obstacles: [[145,150,95,42], [330,60,52,135], [455,275,120,42], [610,145,50,125]], gekkos: [[245,265,29,64,84,2.3,0,150,360,245,290], [500,115,31,68,88,0,2.3,475,535,70,245]], cameras: [[350,215,0.25,1.2,0.018,150,90]] },
+        { id: 3, name: "Nomad Signal", time: 60, lives: 3, intel: [[118, 72], [220, 360], [365, 90], [520, 355], [675, 210]], goal: [700, 330, 38, 70], snake: [42, 45], obstacles: [[120,125,55,170], [245,35,90,45], [360,205,72,110], [535,75,55,185], [600,300,60,45]], gekkos: [[220,330,29,64,84,2.4,0,140,350,305,355], [420,105,31,68,88,2,0,355,565,80,130], [590,260,30,66,86,0,2.1,560,625,175,340]], cameras: [[470,55,1.2,2.2,0.02,155,85]] },
+        { id: 4, name: "PMC Lager", time: 58, lives: 3, intel: [[95, 205], [225, 70], [355, 350], [565, 80], [650, 300]], goal: [698, 185, 40, 70], snake: [42, 365], obstacles: [[95,100,120,42], [260,175,55,165], [405,55,95,45], [500,245,150,42], [625,115,50,95]], gekkos: [[195,250,30,66,86,0,2.5,160,220,150,350], [410,145,31,68,88,2.5,0,330,560,120,170], [600,350,32,70,90,2.2,0,500,690,325,375]], cameras: [[315,60,0.6,1.8,0.02,150,80], [580,210,2.8,4.0,0.018,145,80]] },
+        { id: 5, name: "Beauty & Beast Spur", time: 56, lives: 3, intel: [[130, 340], [245, 155], [390, 55], [525, 250], [665, 105]], goal: [700, 45, 38, 70], snake: [45, 385], obstacles: [[100,230,70,45], [205,45,45,185], [345,145,125,42], [455,310,70,80], [600,180,55,140]], gekkos: [[155,115,30,66,86,2.5,0,90,265,90,140], [360,315,32,70,90,0,2.6,335,390,210,385], [575,115,32,70,90,2.6,0,480,690,90,140]], cameras: [[300,255,3.4,4.6,0.022,160,85], [650,255,4.0,5.1,0.018,145,90]] },
+        { id: 6, name: "Shadow Moses Hangar", time: 54, lives: 3, intel: [[100, 70], [230, 365], [365, 205], [535, 65], [650, 340]], goal: [700, 185, 38, 70], snake: [42, 205], obstacles: [[135,145,55,145], [255,65,115,42], [315,300,110,45], [480,130,55,170], [600,45,50,100], [610,285,55,80]], gekkos: [[225,105,31,68,88,2.5,0,130,355,80,130], [430,355,33,72,92,2.4,0,330,560,330,380], [585,205,33,72,92,0,2.6,560,620,120,300]], cameras: [[365,165,0.1,1.3,0.024,160,90], [560,365,4.0,5.2,0.02,155,85]] },
+        { id: 7, name: "RAY Wartungsdeck", time: 52, lives: 3, intel: [[110, 355], [250, 230], [360, 75], [520, 365], [665, 160]], goal: [700, 330, 38, 70], snake: [42, 45], obstacles: [[100,110,150,42], [210,285,45,110], [340,155,55,170], [465,70,130,45], [580,230,60,125]], gekkos: [[170,220,32,70,90,0,2.6,145,195,140,330], [410,80,34,72,94,2.6,0,315,545,55,105], [600,345,34,74,94,2.5,0,500,690,320,370]], cameras: [[300,365,4.7,5.9,0.024,155,90], [660,70,1.7,2.8,0.02,155,85]] },
+        { id: 8, name: "Outer Haven Zugang", time: 50, lives: 3, intel: [[100, 195], [205, 55], [350, 345], [510, 105], [650, 325]], goal: [702, 45, 36, 70], snake: [42, 380], obstacles: [[95,260,110,42], [250,105,55,145], [370,40,105,42], [425,260,50,135], [570,150,130,45], [620,365,60,38]], gekkos: [[210,350,33,72,92,2.7,0,120,330,325,375], [380,165,34,74,94,0,2.8,350,410,80,280], [615,95,35,76,96,2.6,0,510,700,70,120]], cameras: [[155,110,0.1,1.4,0.024,155,90], [535,300,3.7,4.9,0.026,165,85], [675,235,3.9,5.0,0.018,150,80]] },
+        { id: 9, name: "Mikrowellen-Korridor", time: 48, lives: 2, intel: [[115, 75], [230, 355], [380, 115], [535, 330], [650, 85]], goal: [700, 185, 38, 70], snake: [42, 205], obstacles: [[105,150,80,42], [205,245,105,42], [320,45,55,145], [445,220,55,150], [560,50,120,42], [595,300,70,45]], gekkos: [[205,110,34,74,94,2.8,0,115,310,85,135], [370,330,35,76,96,2.7,0,300,520,305,355], [570,180,36,78,98,0,2.8,540,600,105,290]], cameras: [[290,185,2.7,4.0,0.028,165,90], [500,105,0.2,1.5,0.025,165,85], [655,260,3.6,5.1,0.022,155,85]] },
+        { id: 10, name: "Big Boss Finale", time: 45, lives: 2, intel: [[105, 350], [220, 70], [350, 230], [505, 75], [650, 345]], goal: [700, 45, 38, 70], snake: [42, 385], obstacles: [[90,115,115,42], [145,250,55,105], [270,160,120,42], [410,45,55,145], [455,275,120,42], [590,150,55,150], [640,370,55,35]], gekkos: [[180,320,35,76,96,2.9,0,100,310,295,345], [355,90,36,78,98,2.8,0,260,510,65,115], [520,230,36,78,98,0,3.0,490,550,130,335], [655,110,34,74,94,0,2.5,630,690,70,230]], cameras: [[255,235,3.1,4.5,0.03,170,90], [470,370,4.2,5.5,0.026,165,85], [650,260,3.5,5.0,0.025,170,85]] }
+    ];
 
-        const difficultySelection = document.getElementById("difficultySelection");
-        const quizContainer = document.getElementById("quizContainer");
-        const scoreBoard = document.getElementById("scoreBoard");
-        const leaderboardPanel = document.getElementById("leaderboardPanel");
-        const miniGamePanel = document.getElementById("miniGamePanel");
-        const progressText = document.getElementById("progressText");
-        const timerDisplay = document.getElementById("timer");
-        const questionText = document.getElementById("questionText");
-        const answersContainer = document.getElementById("answersContainer");
-        const feedback = document.getElementById("feedback");
-        const nextButton = document.getElementById("nextButton");
-        const jokerPanel = document.getElementById("jokerPanel");
-        const fiftyFiftyButton = document.getElementById("fiftyFiftyButton");
-        const jokerInfo = document.getElementById("jokerInfo");
-        const finalDifficulty = document.getElementById("finalDifficulty");
-        const finalScore = document.getElementById("finalScore");
-        const finalJokersUsed = document.getElementById("finalJokersUsed");
-        const finalRank = document.getElementById("finalRank");
-        const finalRankDetails = document.getElementById("finalRankDetails");
-        const playerName = document.getElementById("playerName");
-        const saveScoreButton = document.getElementById("saveScoreButton");
-        const leaderboardFilter = document.getElementById("leaderboardFilter");
-        const leaderBoardTableBody = document.getElementById("leaderBoardTableBody");
-        const scoreSummary = document.getElementById("scoreSummary");
-        const bgMusic = document.getElementById("bgMusic");
-        const musicToggleButton = document.getElementById("musicToggleButton");
-        const musicVolume = document.getElementById("musicVolume");
-        const volumeValue = document.getElementById("volumeValue");
-        const musicTime = document.getElementById("musicTime");
-        const stealthCanvas = document.getElementById("stealthCanvas");
-        const stealthCtx = stealthCanvas.getContext("2d");
-        const snakeSprite = new Image();
-        const gekkoSprite = new Image();
-        snakeSprite.src = "snake.png";
-        gekkoSprite.src = "gekko.png";
-        const gameLevel = document.getElementById("gameLevel");
-        const gameScore = document.getElementById("gameScore");
-        const gameLives = document.getElementById("gameLives");
-        const gameTimer = document.getElementById("gameTimer");
-        const gameAlert = document.getElementById("gameAlert");
-        const gameCamo = document.getElementById("gameCamo");
-        const gameStatus = document.getElementById("gameStatus");
-        const miniGameLevelSelect = document.getElementById("miniGameLevelSelect");
-        const levelInfo = document.getElementById("levelInfo");
-        const camoButton = document.getElementById("camoButton");
-        const countdownStatus = document.getElementById("countdownStatus");
-        const countdownDays = document.getElementById("countdownDays");
-        const countdownHours = document.getElementById("countdownHours");
-        const countdownMinutes = document.getElementById("countdownMinutes");
-        const countdownSeconds = document.getElementById("countdownSeconds");
+    const difficultySelection = document.getElementById("difficultySelection");
+    const quizContainer = document.getElementById("quizContainer");
+    const scoreBoard = document.getElementById("scoreBoard");
+    const leaderboardPanel = document.getElementById("leaderboardPanel");
+    const miniGamePanel = document.getElementById("miniGamePanel");
+    const progressText = document.getElementById("progressText");
+    const timerDisplay = document.getElementById("timer");
+    const questionText = document.getElementById("questionText");
+    const answersContainer = document.getElementById("answersContainer");
+    const feedback = document.getElementById("feedback");
+    const nextButton = document.getElementById("nextButton");
+    const jokerPanel = document.getElementById("jokerPanel");
+    const fiftyFiftyButton = document.getElementById("fiftyFiftyButton");
+    const jokerInfo = document.getElementById("jokerInfo");
+    const finalDifficulty = document.getElementById("finalDifficulty");
+    const finalScore = document.getElementById("finalScore");
+    const finalJokersUsed = document.getElementById("finalJokersUsed");
+    const finalRank = document.getElementById("finalRank");
+    const finalRankDetails = document.getElementById("finalRankDetails");
+    const playerName = document.getElementById("playerName");
+    const saveScoreButton = document.getElementById("saveScoreButton");
+    const leaderboardFilter = document.getElementById("leaderboardFilter");
+    const leaderBoardTableBody = document.getElementById("leaderBoardTableBody");
+    const scoreSummary = document.getElementById("scoreSummary");
+    const bgMusic = document.getElementById("bgMusic");
+    const musicToggleButton = document.getElementById("musicToggleButton");
+    const musicVolume = document.getElementById("musicVolume");
+    const volumeValue = document.getElementById("volumeValue");
+    const musicTime = document.getElementById("musicTime");
+    const stealthCanvas = document.getElementById("stealthCanvas");
+    const stealthCtx = stealthCanvas.getContext("2d");
+    const snakeSprite = new Image();
+    const gekkoSprite = new Image();
+    snakeSprite.src = "snake.png";
+    gekkoSprite.src = "gekko.png";
+    const gameLevel = document.getElementById("gameLevel");
+    const gameScore = document.getElementById("gameScore");
+    const gameLives = document.getElementById("gameLives");
+    const gameTimer = document.getElementById("gameTimer");
+    const gameAlert = document.getElementById("gameAlert");
+    const gameCamo = document.getElementById("gameCamo");
+    const gameStatus = document.getElementById("gameStatus");
+    const miniGameLevelSelect = document.getElementById("miniGameLevelSelect");
+    const levelInfo = document.getElementById("levelInfo");
+    const camoButton = document.getElementById("camoButton");
+    const countdownStatus = document.getElementById("countdownStatus");
+    const countdownDays = document.getElementById("countdownDays");
+    const countdownHours = document.getElementById("countdownHours");
+    const countdownMinutes = document.getElementById("countdownMinutes");
+    const countdownSeconds = document.getElementById("countdownSeconds");
 
-        document.querySelectorAll("[data-difficulty]").forEach((button) => {
-            button.addEventListener("click", () => startQuiz(button.dataset.difficulty));
+    document.querySelectorAll("[data-difficulty]").forEach((button) => {
+        button.addEventListener("click", () => startQuiz(button.dataset.difficulty));
+    });
+
+    document.getElementById("backToStartButton").addEventListener("click", goBack);
+    document.getElementById("openLeaderboardButton").addEventListener("click", openLeaderboard);
+    document.getElementById("openMiniGameButton").addEventListener("click", openMiniGame);
+    document.getElementById("showLeaderboardAfterQuizButton").addEventListener("click", openLeaderboard);
+    document.getElementById("leaderboardMenuButton").addEventListener("click", showMainMenu);
+    document.getElementById("scoreMenuButton").addEventListener("click", showMainMenu);
+    document.getElementById("restartButton").addEventListener("click", restartQuiz);
+    document.getElementById("startMiniGameButton").addEventListener("click", startMiniGame);
+    document.getElementById("miniGameMenuButton").addEventListener("click", showMainMenu);
+    camoButton.addEventListener("click", toggleCamouflageButton);
+    camoButton.addEventListener("touchstart", (event) => {
+        event.preventDefault();
+        toggleCamouflageButton();
+    }, { passive: false });
+    document.getElementById("clearScoresButton").addEventListener("click", clearScores);
+    nextButton.addEventListener("click", nextQuestion);
+    saveScoreButton.addEventListener("click", saveScoreLocal);
+    fiftyFiftyButton.addEventListener("click", useFiftyFiftyJoker);
+    leaderboardFilter.addEventListener("change", renderLeaderboard);
+
+    bgMusic.volume = Number(musicVolume.value) / 100;
+    updateMusicButton();
+    updateMusicVolumeLabel();
+    updateMusicTime();
+
+    musicToggleButton.addEventListener("click", toggleMusic);
+    musicVolume.addEventListener("input", updateMusicVolume);
+    bgMusic.addEventListener("loadedmetadata", updateMusicTime);
+    bgMusic.addEventListener("durationchange", updateMusicTime);
+    bgMusic.addEventListener("timeupdate", updateMusicTime);
+    bgMusic.addEventListener("play", updateMusicButton);
+    bgMusic.addEventListener("pause", updateMusicButton);
+
+    window.addEventListener("keydown", handleGameKeyDown);
+    window.addEventListener("keyup", handleGameKeyUp);
+    stealthCanvas.addEventListener("mousemove", handleGameMouseMove);
+    stealthCanvas.addEventListener("mouseleave", () => mouseTarget = null);
+    stealthCanvas.addEventListener("click", () => {
+        if (!gameRunning) startMiniGame();
+    });
+    stealthCanvas.addEventListener("touchstart", handleGameTouch, { passive: false });
+    stealthCanvas.addEventListener("touchmove", handleGameTouch, { passive: false });
+    stealthCanvas.addEventListener("touchend", handleGameTouchEnd, { passive: false });
+    stealthCanvas.addEventListener("touchcancel", handleGameTouchEnd, { passive: false });
+
+    [snakeSprite, gekkoSprite].forEach((sprite) => {
+        sprite.addEventListener("load", () => {
+            if (!miniGamePanel.classList.contains("hidden")) {
+                gameRunning ? drawMiniGame() : drawMiniGameIntro();
+            }
         });
 
-        document.getElementById("backToStartButton").addEventListener("click", goBack);
-        document.getElementById("openLeaderboardButton").addEventListener("click", openLeaderboard);
-        document.getElementById("openMiniGameButton").addEventListener("click", openMiniGame);
-        document.getElementById("showLeaderboardAfterQuizButton").addEventListener("click", openLeaderboard);
-        document.getElementById("leaderboardMenuButton").addEventListener("click", showMainMenu);
-        document.getElementById("scoreMenuButton").addEventListener("click", showMainMenu);
-        document.getElementById("restartButton").addEventListener("click", restartQuiz);
-        document.getElementById("startMiniGameButton").addEventListener("click", startMiniGame);
-        document.getElementById("miniGameMenuButton").addEventListener("click", showMainMenu);
-        camoButton.addEventListener("mousedown", () => setCamouflage(true));
-        camoButton.addEventListener("mouseup", () => setCamouflage(false));
-        camoButton.addEventListener("mouseleave", () => setCamouflage(false));
-        camoButton.addEventListener("touchstart", (event) => { event.preventDefault(); setCamouflage(true); }, { passive: false });
-        camoButton.addEventListener("touchend", (event) => { event.preventDefault(); setCamouflage(false); }, { passive: false });
-        camoButton.addEventListener("touchcancel", (event) => { event.preventDefault(); setCamouflage(false); }, { passive: false });
-        document.getElementById("clearScoresButton").addEventListener("click", clearScores);
-        nextButton.addEventListener("click", nextQuestion);
-        saveScoreButton.addEventListener("click", saveScoreLocal);
-        fiftyFiftyButton.addEventListener("click", useFiftyFiftyJoker);
-        leaderboardFilter.addEventListener("change", renderLeaderboard);
-
-        bgMusic.volume = Number(musicVolume.value) / 100;
-        updateMusicButton();
-        updateMusicVolumeLabel();
-        updateMusicTime();
-
-        musicToggleButton.addEventListener("click", toggleMusic);
-        musicVolume.addEventListener("input", updateMusicVolume);
-        bgMusic.addEventListener("loadedmetadata", updateMusicTime);
-        bgMusic.addEventListener("durationchange", updateMusicTime);
-        bgMusic.addEventListener("timeupdate", updateMusicTime);
-        bgMusic.addEventListener("play", updateMusicButton);
-        bgMusic.addEventListener("pause", updateMusicButton);
-
-        window.addEventListener("keydown", handleGameKeyDown);
-        window.addEventListener("keyup", handleGameKeyUp);
-        stealthCanvas.addEventListener("mousemove", handleGameMouseMove);
-        stealthCanvas.addEventListener("mouseleave", () => mouseTarget = null);
-        stealthCanvas.addEventListener("click", () => {
-            if (!gameRunning) startMiniGame();
+        sprite.addEventListener("error", () => {
+            console.warn("Sprite konnte nicht geladen werden:", sprite.src);
         });
-        stealthCanvas.addEventListener("touchstart", handleGameTouch, { passive: false });
-        stealthCanvas.addEventListener("touchmove", handleGameTouch, { passive: false });
-        stealthCanvas.addEventListener("touchend", handleGameTouchEnd, { passive: false });
-        stealthCanvas.addEventListener("touchcancel", handleGameTouchEnd, { passive: false });
+    });
 
-        [snakeSprite, gekkoSprite].forEach((sprite) => {
-            sprite.addEventListener("load", () => {
-                if (!miniGamePanel.classList.contains("hidden")) {
-                    gameRunning ? drawMiniGame() : drawMiniGameIntro();
-                }
-            });
+    startReleaseCountdown();
+    migrateLegacyScores();
+    validateQuestionPool();
 
-            sprite.addEventListener("error", () => {
-                console.warn("Sprite konnte nicht geladen werden:", sprite.src);
-            });
+    function startReleaseCountdown() {
+        updateReleaseCountdown();
+        window.setInterval(updateReleaseCountdown, 1000);
+    }
+
+    function updateReleaseCountdown() {
+        const distance = RELEASE_TARGET_UTC - Date.now();
+
+        if (distance <= 0) {
+            countdownStatus.textContent = "Veröffentlichung erreicht!";
+            countdownDays.textContent = "0";
+            countdownHours.textContent = "00";
+            countdownMinutes.textContent = "00";
+            countdownSeconds.textContent = "00";
+            return;
+        }
+
+        const totalSeconds = Math.floor(distance / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        countdownStatus.textContent = "bis 27.08.2026 · 16:00 Uhr deutscher Sommerzeit";
+        countdownDays.textContent = String(days);
+        countdownHours.textContent = String(hours).padStart(2, "0");
+        countdownMinutes.textContent = String(minutes).padStart(2, "0");
+        countdownSeconds.textContent = String(seconds).padStart(2, "0");
+    }
+
+    function showOnly(section) {
+        if (section !== miniGamePanel) {
+            stopMiniGame(false);
+        }
+
+        difficultySelection.classList.add("hidden");
+        quizContainer.classList.add("hidden");
+        scoreBoard.classList.add("hidden");
+        leaderboardPanel.classList.add("hidden");
+        miniGamePanel.classList.add("hidden");
+        section.classList.remove("hidden");
+    }
+
+    function showMainMenu() {
+        clearTimer();
+        showOnly(difficultySelection);
+    }
+
+    function startQuiz(level) {
+        if (!LEVEL_LABELS[level]) {
+            console.error("Unbekannter Schwierigkeitsgrad:", level);
+            return;
+        }
+
+        clearTimer();
+        currentDifficulty = level;
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreSaved = false;
+        saveScoreButton.disabled = false;
+        saveScoreButton.textContent = "✔ Speichern";
+        playerName.value = "";
+
+        const filteredQuestions = questionPool.filter((question) => question.difficulty === level);
+        selectedQuestions = shuffleArray([...filteredQuestions]).slice(0, Math.min(QUESTIONS_PER_ROUND, filteredQuestions.length));
+        jokersLeft = level === JOKER_DIFFICULTY ? Math.min(MAX_JOKERS_PER_ROUND, Math.ceil(selectedQuestions.length / 4)) : 0;
+        jokerUsedThisQuestion = false;
+
+        if (selectedQuestions.length === 0) {
+            alert("Für diesen Schwierigkeitsgrad wurden keine Fragen gefunden.");
+            return;
+        }
+
+        showOnly(quizContainer);
+        showQuestion();
+    }
+
+    function showQuestion() {
+        clearTimer();
+        answerLocked = false;
+        jokerUsedThisQuestion = false;
+        feedback.textContent = "";
+        nextButton.classList.add("hidden");
+        answersContainer.replaceChildren();
+
+        const question = selectedQuestions[currentQuestionIndex];
+        progressText.textContent = `Frage ${currentQuestionIndex + 1} von ${selectedQuestions.length} · ${LEVEL_LABELS[currentDifficulty]}`;
+        questionText.textContent = question.text;
+
+        const shuffledAnswers = shuffleArray(question.answers.map((answer, index) => ({
+            text: answer,
+            isCorrect: index === question.correct
+        })));
+
+        shuffledAnswers.forEach((answer) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "answer-button";
+            button.textContent = answer.text;
+            button.dataset.correct = String(answer.isCorrect);
+            button.addEventListener("click", () => checkAnswer(button, answer.isCorrect));
+            answersContainer.appendChild(button);
         });
 
-        startReleaseCountdown();
-        migrateLegacyScores();
-        validateQuestionPool();
+        updateJokerPanel();
+        startTimer();
+    }
 
-        function startReleaseCountdown() {
-            updateReleaseCountdown();
-            window.setInterval(updateReleaseCountdown, 1000);
-        }
+    function startTimer() {
+        secondsLeft = TIME_PER_QUESTION;
+        updateTimerDisplay();
 
-        function updateReleaseCountdown() {
-            const distance = RELEASE_TARGET_UTC - Date.now();
-
-            if (distance <= 0) {
-                countdownStatus.textContent = "Veröffentlichung erreicht!";
-                countdownDays.textContent = "0";
-                countdownHours.textContent = "00";
-                countdownMinutes.textContent = "00";
-                countdownSeconds.textContent = "00";
-                return;
-            }
-
-            const totalSeconds = Math.floor(distance / 1000);
-            const days = Math.floor(totalSeconds / 86400);
-            const hours = Math.floor((totalSeconds % 86400) / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-
-            countdownStatus.textContent = "bis 27.08.2026 · 16:00 Uhr deutscher Sommerzeit";
-            countdownDays.textContent = String(days);
-            countdownHours.textContent = String(hours).padStart(2, "0");
-            countdownMinutes.textContent = String(minutes).padStart(2, "0");
-            countdownSeconds.textContent = String(seconds).padStart(2, "0");
-        }
-
-        function showOnly(section) {
-            if (section !== miniGamePanel) {
-                stopMiniGame(false);
-            }
-
-            difficultySelection.classList.add("hidden");
-            quizContainer.classList.add("hidden");
-            scoreBoard.classList.add("hidden");
-            leaderboardPanel.classList.add("hidden");
-            miniGamePanel.classList.add("hidden");
-            section.classList.remove("hidden");
-        }
-
-        function showMainMenu() {
-            clearTimer();
-            showOnly(difficultySelection);
-        }
-
-        function startQuiz(level) {
-            if (!LEVEL_LABELS[level]) {
-                console.error("Unbekannter Schwierigkeitsgrad:", level);
-                return;
-            }
-
-            clearTimer();
-            currentDifficulty = level;
-            currentQuestionIndex = 0;
-            score = 0;
-            scoreSaved = false;
-            saveScoreButton.disabled = false;
-            saveScoreButton.textContent = "✔ Speichern";
-            playerName.value = "";
-
-            const filteredQuestions = questionPool.filter((question) => question.difficulty === level);
-            selectedQuestions = shuffleArray([...filteredQuestions]).slice(0, Math.min(QUESTIONS_PER_ROUND, filteredQuestions.length));
-            jokersLeft = level === JOKER_DIFFICULTY ? Math.min(MAX_JOKERS_PER_ROUND, Math.ceil(selectedQuestions.length / 4)) : 0;
-            jokerUsedThisQuestion = false;
-
-            if (selectedQuestions.length === 0) {
-                alert("Für diesen Schwierigkeitsgrad wurden keine Fragen gefunden.");
-                return;
-            }
-
-            showOnly(quizContainer);
-            showQuestion();
-        }
-
-        function showQuestion() {
-            clearTimer();
-            answerLocked = false;
-            jokerUsedThisQuestion = false;
-            feedback.textContent = "";
-            nextButton.classList.add("hidden");
-            answersContainer.replaceChildren();
-
-            const question = selectedQuestions[currentQuestionIndex];
-            progressText.textContent = `Frage ${currentQuestionIndex + 1} von ${selectedQuestions.length} · ${LEVEL_LABELS[currentDifficulty]}`;
-            questionText.textContent = question.text;
-
-            const shuffledAnswers = shuffleArray(question.answers.map((answer, index) => ({
-                text: answer,
-                isCorrect: index === question.correct
-            })));
-
-            shuffledAnswers.forEach((answer) => {
-                const button = document.createElement("button");
-                button.type = "button";
-                button.className = "answer-button";
-                button.textContent = answer.text;
-                button.dataset.correct = String(answer.isCorrect);
-                button.addEventListener("click", () => checkAnswer(button, answer.isCorrect));
-                answersContainer.appendChild(button);
-            });
-
-            updateJokerPanel();
-            startTimer();
-        }
-
-        function startTimer() {
-            secondsLeft = TIME_PER_QUESTION;
+        timerId = window.setInterval(() => {
+            secondsLeft -= 1;
             updateTimerDisplay();
 
-            timerId = window.setInterval(() => {
-                secondsLeft -= 1;
-                updateTimerDisplay();
-
-                if (secondsLeft <= 0) {
-                    clearTimer();
-                    markTimeOut();
-                }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            timerDisplay.textContent = `⏱ ${secondsLeft}s`;
-        }
-
-        function clearTimer() {
-            if (timerId !== null) {
-                window.clearInterval(timerId);
-                timerId = null;
+            if (secondsLeft <= 0) {
+                clearTimer();
+                markTimeOut();
             }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        timerDisplay.textContent = `⏱ ${secondsLeft}s`;
+    }
+
+    function clearTimer() {
+        if (timerId !== null) {
+            window.clearInterval(timerId);
+            timerId = null;
         }
+    }
 
-        function checkAnswer(clickedButton, isCorrect) {
-            if (answerLocked || clickedButton.classList.contains("joker-removed")) return;
+    function checkAnswer(clickedButton, isCorrect) {
+        if (answerLocked || clickedButton.classList.contains("joker-removed")) return;
 
-            answerLocked = true;
-            clearTimer();
+        answerLocked = true;
+        clearTimer();
 
-            const buttons = answersContainer.querySelectorAll("button");
-            buttons.forEach((button) => button.disabled = true);
+        const buttons = answersContainer.querySelectorAll("button");
+        buttons.forEach((button) => button.disabled = true);
 
-            if (isCorrect) {
-                clickedButton.classList.add("correct");
-                const points = calculatePoints();
-                score += points;
-                feedback.textContent = `Richtig! +${points} Punkte`;
-            } else {
-                clickedButton.classList.add("wrong");
-                highlightCorrectAnswer();
-                feedback.textContent = "Falsch! Die richtige Antwort wurde markiert.";
-            }
-
-            nextButton.classList.remove("hidden");
-            updateJokerPanel();
-        }
-
-        function markTimeOut() {
-            if (answerLocked) return;
-
-            answerLocked = true;
-            answersContainer.querySelectorAll("button").forEach((button) => button.disabled = true);
+        if (isCorrect) {
+            clickedButton.classList.add("correct");
+            const points = calculatePoints();
+            score += points;
+            feedback.textContent = `Richtig! +${points} Punkte`;
+        } else {
+            clickedButton.classList.add("wrong");
             highlightCorrectAnswer();
-            feedback.textContent = "Zeit abgelaufen! Die richtige Antwort wurde markiert.";
-            nextButton.classList.remove("hidden");
-            updateJokerPanel();
+            feedback.textContent = "Falsch! Die richtige Antwort wurde markiert.";
         }
 
-        function highlightCorrectAnswer() {
-            answersContainer.querySelectorAll("button").forEach((button) => {
-                if (button.dataset.correct === "true") {
-                    button.classList.add("correct");
-                }
-            });
-        }
+        nextButton.classList.remove("hidden");
+        updateJokerPanel();
+    }
 
-        function calculatePoints() {
-            return SCORE_BASE[currentDifficulty] + (secondsLeft * 10);
-        }
+    function markTimeOut() {
+        if (answerLocked) return;
 
-        function useFiftyFiftyJoker() {
-            if (currentDifficulty !== JOKER_DIFFICULTY || answerLocked || jokerUsedThisQuestion || jokersLeft <= 0) {
-                return;
+        answerLocked = true;
+        answersContainer.querySelectorAll("button").forEach((button) => button.disabled = true);
+        highlightCorrectAnswer();
+        feedback.textContent = "Zeit abgelaufen! Die richtige Antwort wurde markiert.";
+        nextButton.classList.remove("hidden");
+        updateJokerPanel();
+    }
+
+    function highlightCorrectAnswer() {
+        answersContainer.querySelectorAll("button").forEach((button) => {
+            if (button.dataset.correct === "true") {
+                button.classList.add("correct");
             }
+        });
+    }
 
-            const wrongButtons = Array.from(answersContainer.querySelectorAll(".answer-button"))
-                .filter((button) => button.dataset.correct !== "true" && !button.classList.contains("joker-removed"));
+    function calculatePoints() {
+        return SCORE_BASE[currentDifficulty] + (secondsLeft * 10);
+    }
 
-            shuffleArray(wrongButtons).slice(0, 2).forEach((button) => {
-                button.disabled = true;
-                button.classList.add("joker-removed");
-                button.textContent = "❌ Falsche Antwort entfernt";
-            });
-
-            jokersLeft -= 1;
-            jokerUsedThisQuestion = true;
-            feedback.textContent = `50:50-Joker eingesetzt. Du hast noch ${jokersLeft} Joker übrig.`;
-            updateJokerPanel();
+    function useFiftyFiftyJoker() {
+        if (currentDifficulty !== JOKER_DIFFICULTY || answerLocked || jokerUsedThisQuestion || jokersLeft <= 0) {
+            return;
         }
 
-        function updateJokerPanel() {
-            const jokerAvailableForLevel = currentDifficulty === JOKER_DIFFICULTY;
-            jokerPanel.classList.toggle("hidden", !jokerAvailableForLevel);
+        const wrongButtons = Array.from(answersContainer.querySelectorAll(".answer-button"))
+            .filter((button) => button.dataset.correct !== "true" && !button.classList.contains("joker-removed"));
 
-            if (!jokerAvailableForLevel) return;
+        shuffleArray(wrongButtons).slice(0, 2).forEach((button) => {
+            button.disabled = true;
+            button.classList.add("joker-removed");
+            button.textContent = "❌ Falsche Antwort entfernt";
+        });
 
-            fiftyFiftyButton.textContent = `🃏 50:50-Joker (${jokersLeft} übrig)`;
-            fiftyFiftyButton.disabled = answerLocked || jokerUsedThisQuestion || jokersLeft <= 0;
+        jokersLeft -= 1;
+        jokerUsedThisQuestion = true;
+        feedback.textContent = `50:50-Joker eingesetzt. Du hast noch ${jokersLeft} Joker übrig.`;
+        updateJokerPanel();
+    }
 
-            if (jokersLeft <= 0) {
-                jokerInfo.textContent = "Keine Joker mehr übrig.";
-            } else if (jokerUsedThisQuestion) {
-                jokerInfo.textContent = "Joker für diese Frage bereits benutzt. Pro Frage ist nur ein 50:50-Joker möglich.";
-            } else {
-                jokerInfo.textContent = `Entfernt zwei falsche Antworten. Maximal ${MAX_JOKERS_PER_ROUND} Joker pro Hard-Runde.`;
-            }
+    function updateJokerPanel() {
+        const jokerAvailableForLevel = currentDifficulty === JOKER_DIFFICULTY;
+        jokerPanel.classList.toggle("hidden", !jokerAvailableForLevel);
+
+        if (!jokerAvailableForLevel) return;
+
+        fiftyFiftyButton.textContent = `🃏 50:50-Joker (${jokersLeft} übrig)`;
+        fiftyFiftyButton.disabled = answerLocked || jokerUsedThisQuestion || jokersLeft <= 0;
+
+        if (jokersLeft <= 0) {
+            jokerInfo.textContent = "Keine Joker mehr übrig.";
+        } else if (jokerUsedThisQuestion) {
+            jokerInfo.textContent = "Joker für diese Frage bereits benutzt. Pro Frage ist nur ein 50:50-Joker möglich.";
+        } else {
+            jokerInfo.textContent = `Entfernt zwei falsche Antworten. Maximal ${MAX_JOKERS_PER_ROUND} Joker pro Hard-Runde.`;
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex += 1;
+
+        if (currentQuestionIndex < selectedQuestions.length) {
+            showQuestion();
+        } else {
+            endQuiz();
+        }
+    }
+
+    function endQuiz() {
+        clearTimer();
+        showOnly(scoreBoard);
+        const rank = calculateRank(score, currentDifficulty, selectedQuestions.length);
+
+        finalDifficulty.textContent = LEVEL_LABELS[currentDifficulty];
+        finalScore.textContent = String(score);
+        finalJokersUsed.textContent = String(getJokersUsed());
+        finalRank.textContent = rank.name;
+        finalRankDetails.textContent = `${rank.percent}% der maximal möglichen Punkte erreicht · ${rank.note}`;
+    }
+
+    function saveScoreLocal() {
+        if (scoreSaved) return;
+
+        const cleanName = playerName.value.trim() || "Unbekannt";
+        const scores = getScores();
+
+        scores.push({
+            name: cleanName,
+            score,
+            difficulty: currentDifficulty,
+            difficultyLabel: LEVEL_LABELS[currentDifficulty],
+            jokersUsed: getJokersUsed(),
+            rank: calculateRank(score, currentDifficulty, selectedQuestions.length).name,
+            rankPercent: calculateRank(score, currentDifficulty, selectedQuestions.length).percent,
+            questions: selectedQuestions.length,
+            date: new Date().toLocaleDateString("de-DE"),
+            timestamp: Date.now()
+        });
+
+        scores.sort(sortScores);
+        localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(scores.slice(0, 100)));
+
+        scoreSaved = true;
+        saveScoreButton.disabled = true;
+        saveScoreButton.textContent = "✔ Gespeichert";
+    }
+
+    function getJokersUsed() {
+        if (currentDifficulty !== JOKER_DIFFICULTY) return 0;
+        return MAX_JOKERS_PER_ROUND - jokersLeft;
+    }
+
+    function getMaxScore(difficulty, questionCount) {
+        const base = SCORE_BASE[difficulty] || SCORE_BASE.easy;
+        return (base + (TIME_PER_QUESTION * 10)) * Math.max(1, questionCount);
+    }
+
+    function calculateRank(points, difficulty, questionCount) {
+        const maxScore = getMaxScore(difficulty, questionCount);
+        const percent = Math.min(100, Math.max(0, Math.round((points / maxScore) * 100)));
+        const rank = RANKS.find((entry) => percent >= entry.minPercent) || RANKS[RANKS.length - 1];
+
+        return {
+            name: rank.name,
+            note: rank.note,
+            percent
+        };
+    }
+
+    function openLeaderboard() {
+        clearTimer();
+        renderLeaderboard();
+        showOnly(leaderboardPanel);
+    }
+
+    function renderLeaderboard() {
+        const filter = leaderboardFilter.value;
+        const allScores = getScores().sort(sortScores);
+        const scores = filter === "all" ? allScores : allScores.filter((entry) => entry.difficulty === filter);
+
+        renderScoreSummary(allScores);
+        leaderBoardTableBody.replaceChildren();
+
+        if (scores.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 7;
+            cell.className = "empty-score-row";
+            cell.textContent = "Noch keine Einträge vorhanden.";
+            row.appendChild(cell);
+            leaderBoardTableBody.appendChild(row);
+            return;
         }
 
-        function nextQuestion() {
-            currentQuestionIndex += 1;
+        scores.slice(0, 20).forEach((entry, index) => {
+            const row = document.createElement("tr");
+            const cells = [
+                `#${index + 1}`,
+                entry.name || "Unbekannt",
+                `${entry.score || 0}`,
+                LEVEL_LABELS[entry.difficulty] || entry.difficultyLabel || "Unbekannt",
+                `${Number(entry.jokersUsed || 0)} / ${entry.difficulty === JOKER_DIFFICULTY ? MAX_JOKERS_PER_ROUND : 0}`,
+                entry.rank || calculateRank(Number(entry.score || 0), entry.difficulty || "easy", Number(entry.questions || QUESTIONS_PER_ROUND)).name,
+                entry.date || "ohne Datum"
+            ];
 
-            if (currentQuestionIndex < selectedQuestions.length) {
-                showQuestion();
-            } else {
-                endQuiz();
-            }
-        }
-
-        function endQuiz() {
-            clearTimer();
-            showOnly(scoreBoard);
-            const rank = calculateRank(score, currentDifficulty, selectedQuestions.length);
-
-            finalDifficulty.textContent = LEVEL_LABELS[currentDifficulty];
-            finalScore.textContent = String(score);
-            finalJokersUsed.textContent = String(getJokersUsed());
-            finalRank.textContent = rank.name;
-            finalRankDetails.textContent = `${rank.percent}% der maximal möglichen Punkte erreicht · ${rank.note}`;
-        }
-
-        function saveScoreLocal() {
-            if (scoreSaved) return;
-
-            const cleanName = playerName.value.trim() || "Unbekannt";
-            const scores = getScores();
-
-            scores.push({
-                name: cleanName,
-                score,
-                difficulty: currentDifficulty,
-                difficultyLabel: LEVEL_LABELS[currentDifficulty],
-                jokersUsed: getJokersUsed(),
-                rank: calculateRank(score, currentDifficulty, selectedQuestions.length).name,
-                rankPercent: calculateRank(score, currentDifficulty, selectedQuestions.length).percent,
-                questions: selectedQuestions.length,
-                date: new Date().toLocaleDateString("de-DE"),
-                timestamp: Date.now()
-            });
-
-            scores.sort(sortScores);
-            localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(scores.slice(0, 100)));
-
-            scoreSaved = true;
-            saveScoreButton.disabled = true;
-            saveScoreButton.textContent = "✔ Gespeichert";
-        }
-
-        function getJokersUsed() {
-            if (currentDifficulty !== JOKER_DIFFICULTY) return 0;
-            return MAX_JOKERS_PER_ROUND - jokersLeft;
-        }
-
-        function getMaxScore(difficulty, questionCount) {
-            const base = SCORE_BASE[difficulty] || SCORE_BASE.easy;
-            return (base + (TIME_PER_QUESTION * 10)) * Math.max(1, questionCount);
-        }
-
-        function calculateRank(points, difficulty, questionCount) {
-            const maxScore = getMaxScore(difficulty, questionCount);
-            const percent = Math.min(100, Math.max(0, Math.round((points / maxScore) * 100)));
-            const rank = RANKS.find((entry) => percent >= entry.minPercent) || RANKS[RANKS.length - 1];
-
-            return {
-                name: rank.name,
-                note: rank.note,
-                percent
-            };
-        }
-
-        function openLeaderboard() {
-            clearTimer();
-            renderLeaderboard();
-            showOnly(leaderboardPanel);
-        }
-
-        function renderLeaderboard() {
-            const filter = leaderboardFilter.value;
-            const allScores = getScores().sort(sortScores);
-            const scores = filter === "all" ? allScores : allScores.filter((entry) => entry.difficulty === filter);
-
-            renderScoreSummary(allScores);
-            leaderBoardTableBody.replaceChildren();
-
-            if (scores.length === 0) {
-                const row = document.createElement("tr");
+            cells.forEach((value) => {
                 const cell = document.createElement("td");
-                cell.colSpan = 7;
-                cell.className = "empty-score-row";
-                cell.textContent = "Noch keine Einträge vorhanden.";
+                cell.textContent = value;
                 row.appendChild(cell);
-                leaderBoardTableBody.appendChild(row);
-                return;
-            }
-
-            scores.slice(0, 20).forEach((entry, index) => {
-                const row = document.createElement("tr");
-                const cells = [
-                    `#${index + 1}`,
-                    entry.name || "Unbekannt",
-                    `${entry.score || 0}`,
-                    LEVEL_LABELS[entry.difficulty] || entry.difficultyLabel || "Unbekannt",
-                    `${Number(entry.jokersUsed || 0)} / ${entry.difficulty === JOKER_DIFFICULTY ? MAX_JOKERS_PER_ROUND : 0}`,
-                    entry.rank || calculateRank(Number(entry.score || 0), entry.difficulty || "easy", Number(entry.questions || QUESTIONS_PER_ROUND)).name,
-                    entry.date || "ohne Datum"
-                ];
-
-                cells.forEach((value) => {
-                    const cell = document.createElement("td");
-                    cell.textContent = value;
-                    row.appendChild(cell);
-                });
-
-                leaderBoardTableBody.appendChild(row);
-            });
-        }
-
-        function renderScoreSummary(scores) {
-            scoreSummary.replaceChildren();
-
-            Object.entries(LEVEL_LABELS).forEach(([level, label]) => {
-                const best = scores
-                    .filter((entry) => entry.difficulty === level)
-                    .sort(sortScores)[0];
-
-                const card = document.createElement("div");
-                card.className = "summary-card";
-
-                const title = document.createElement("strong");
-                title.textContent = label;
-
-                const detail = document.createElement("span");
-                detail.textContent = best
-                    ? `${best.name || "Unbekannt"}: ${best.score || 0} Punkte am ${best.date || "ohne Datum"}`
-                    : "Noch kein Eintrag";
-
-                card.appendChild(title);
-                card.appendChild(detail);
-                scoreSummary.appendChild(card);
-            });
-        }
-
-        function getScores() {
-            try {
-                const parsed = JSON.parse(localStorage.getItem(HIGHSCORE_KEY) || "[]");
-                return Array.isArray(parsed) ? parsed : [];
-            } catch (error) {
-                console.warn("Highscores konnten nicht gelesen werden:", error);
-                return [];
-            }
-        }
-
-        function sortScores(a, b) {
-            if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
-            return (b.timestamp || 0) - (a.timestamp || 0);
-        }
-
-        function migrateLegacyScores() {
-            if (localStorage.getItem(HIGHSCORE_KEY)) return;
-
-            try {
-                const legacy = JSON.parse(localStorage.getItem(LEGACY_HIGHSCORE_KEY) || "[]");
-                if (!Array.isArray(legacy) || legacy.length === 0) return;
-
-                const migrated = legacy.map((entry) => ({
-                    name: entry.name || "Unbekannt",
-                    score: Number(entry.score || 0),
-                    difficulty: entry.difficulty || "easy",
-                    difficultyLabel: LEVEL_LABELS[entry.difficulty] || "Easy",
-                    jokersUsed: Number(entry.jokersUsed || 0),
-                    questions: Number(entry.questions || QUESTIONS_PER_ROUND),
-                    date: entry.date || "ohne Datum",
-                    rank: entry.rank || calculateRank(Number(entry.score || 0), entry.difficulty || "easy", Number(entry.questions || QUESTIONS_PER_ROUND)).name,
-                    rankPercent: Number(entry.rankPercent || calculateRank(Number(entry.score || 0), entry.difficulty || "easy", Number(entry.questions || QUESTIONS_PER_ROUND)).percent),
-                    timestamp: Number(entry.timestamp || Date.now())
-                }));
-
-                migrated.sort(sortScores);
-                localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(migrated.slice(0, 100)));
-            } catch (error) {
-                console.warn("Alte Highscores konnten nicht übernommen werden:", error);
-            }
-        }
-
-        function clearScores() {
-            const confirmed = window.confirm("Möchtest du die lokale Bestenliste wirklich löschen?");
-            if (!confirmed) return;
-
-            localStorage.removeItem(HIGHSCORE_KEY);
-            renderLeaderboard();
-        }
-
-        function openMiniGame() {
-            clearTimer();
-            loadMiniGameProgress();
-            showOnly(miniGamePanel);
-            renderMiniGameLevelSelect();
-            resetMiniGame();
-            drawMiniGameIntro();
-        }
-
-        function loadMiniGameProgress() {
-            try {
-                const saved = JSON.parse(localStorage.getItem(GAME_PROGRESS_KEY) || "{}");
-                unlockedMiniGameLevel = Math.min(miniGameLevels.length, Math.max(1, Number(saved.unlockedLevel || 1)));
-            } catch (error) {
-                unlockedMiniGameLevel = 1;
-            }
-
-            if (selectedMiniGameLevel > unlockedMiniGameLevel) {
-                selectedMiniGameLevel = unlockedMiniGameLevel;
-            }
-        }
-
-        function saveMiniGameProgress(completedLevel) {
-            const nextUnlocked = Math.min(miniGameLevels.length, Math.max(unlockedMiniGameLevel, completedLevel + 1));
-            unlockedMiniGameLevel = nextUnlocked;
-            localStorage.setItem(GAME_PROGRESS_KEY, JSON.stringify({ unlockedLevel: unlockedMiniGameLevel, updatedAt: Date.now() }));
-            renderMiniGameLevelSelect();
-        }
-
-        function renderMiniGameLevelSelect() {
-            miniGameLevelSelect.replaceChildren();
-
-            miniGameLevels.forEach((level) => {
-                const button = document.createElement("button");
-                button.type = "button";
-                button.className = "level-button";
-                button.textContent = level.id <= unlockedMiniGameLevel ? `Level ${level.id}` : `🔒 Level ${level.id}`;
-                button.disabled = level.id > unlockedMiniGameLevel;
-                button.classList.toggle("selected", level.id === selectedMiniGameLevel);
-                button.classList.toggle("locked", level.id > unlockedMiniGameLevel);
-                button.title = level.name;
-                button.addEventListener("click", () => {
-                    selectedMiniGameLevel = level.id;
-                    resetMiniGame();
-                    renderMiniGameLevelSelect();
-                    drawMiniGameIntro();
-                });
-                miniGameLevelSelect.appendChild(button);
             });
 
-            const currentLevel = getCurrentLevel();
-            levelInfo.textContent = `${currentLevel.name} · Freigeschaltet bis Level ${unlockedMiniGameLevel} von ${miniGameLevels.length}`;
+            leaderBoardTableBody.appendChild(row);
+        });
+    }
+
+    function renderScoreSummary(scores) {
+        scoreSummary.replaceChildren();
+
+        Object.entries(LEVEL_LABELS).forEach(([level, label]) => {
+            const best = scores
+                .filter((entry) => entry.difficulty === level)
+                .sort(sortScores)[0];
+
+            const card = document.createElement("div");
+            card.className = "summary-card";
+
+            const title = document.createElement("strong");
+            title.textContent = label;
+
+            const detail = document.createElement("span");
+            detail.textContent = best
+                ? `${best.name || "Unbekannt"}: ${best.score || 0} Punkte am ${best.date || "ohne Datum"}`
+                : "Noch kein Eintrag";
+
+            card.appendChild(title);
+            card.appendChild(detail);
+            scoreSummary.appendChild(card);
+        });
+    }
+
+    function getScores() {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(HIGHSCORE_KEY) || "[]");
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            console.warn("Highscores konnten nicht gelesen werden:", error);
+            return [];
+        }
+    }
+
+    function sortScores(a, b) {
+        if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+        return (b.timestamp || 0) - (a.timestamp || 0);
+    }
+
+    function migrateLegacyScores() {
+        if (localStorage.getItem(HIGHSCORE_KEY)) return;
+
+        try {
+            const legacy = JSON.parse(localStorage.getItem(LEGACY_HIGHSCORE_KEY) || "[]");
+            if (!Array.isArray(legacy) || legacy.length === 0) return;
+
+            const migrated = legacy.map((entry) => ({
+                name: entry.name || "Unbekannt",
+                score: Number(entry.score || 0),
+                difficulty: entry.difficulty || "easy",
+                difficultyLabel: LEVEL_LABELS[entry.difficulty] || "Easy",
+                jokersUsed: Number(entry.jokersUsed || 0),
+                questions: Number(entry.questions || QUESTIONS_PER_ROUND),
+                date: entry.date || "ohne Datum",
+                rank: entry.rank || calculateRank(Number(entry.score || 0), entry.difficulty || "easy", Number(entry.questions || QUESTIONS_PER_ROUND)).name,
+                rankPercent: Number(entry.rankPercent || calculateRank(Number(entry.score || 0), entry.difficulty || "easy", Number(entry.questions || QUESTIONS_PER_ROUND)).percent),
+                timestamp: Number(entry.timestamp || Date.now())
+            }));
+
+            migrated.sort(sortScores);
+            localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(migrated.slice(0, 100)));
+        } catch (error) {
+            console.warn("Alte Highscores konnten nicht übernommen werden:", error);
+        }
+    }
+
+    function clearScores() {
+        const confirmed = window.confirm("Möchtest du die lokale Bestenliste wirklich löschen?");
+        if (!confirmed) return;
+
+        localStorage.removeItem(HIGHSCORE_KEY);
+        renderLeaderboard();
+    }
+
+    function openMiniGame() {
+        clearTimer();
+        loadMiniGameProgress();
+        showOnly(miniGamePanel);
+        renderMiniGameLevelSelect();
+        resetMiniGame();
+        drawMiniGameIntro();
+    }
+
+    function loadMiniGameProgress() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(GAME_PROGRESS_KEY) || "{}");
+            unlockedMiniGameLevel = Math.min(miniGameLevels.length, Math.max(1, Number(saved.unlockedLevel || 1)));
+        } catch (error) {
+            unlockedMiniGameLevel = 1;
         }
 
-        function getCurrentLevel() {
-            return miniGameLevels.find((level) => level.id === selectedMiniGameLevel) || miniGameLevels[0];
+        if (selectedMiniGameLevel > unlockedMiniGameLevel) {
+            selectedMiniGameLevel = unlockedMiniGameLevel;
         }
+    }
 
-        function resetMiniGame() {
-            stopMiniGame(false);
+    function saveMiniGameProgress(completedLevel) {
+        const nextUnlocked = Math.min(miniGameLevels.length, Math.max(unlockedMiniGameLevel, completedLevel + 1));
+        unlockedMiniGameLevel = nextUnlocked;
+        localStorage.setItem(GAME_PROGRESS_KEY, JSON.stringify({ unlockedLevel: unlockedMiniGameLevel, updatedAt: Date.now() }));
+        renderMiniGameLevelSelect();
+    }
 
-            const level = getCurrentLevel();
-            gameRunning = false;
-            gameTimeLeft = level.time;
-            gameScoreValue = 0;
-            gameLivesValue = level.lives;
-            gameMessage = "Bereit";
-            alertPhase = "normal";
-            alertCountdown = 0;
-            cautionCountdown = 0;
-            isCamouflaged = false;
-            camoEnergy = 100;
-            snake = { x: level.snake[0], y: level.snake[1], size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
-            mouseTarget = null;
-            pressedKeys.clear();
+    function renderMiniGameLevelSelect() {
+        miniGameLevelSelect.replaceChildren();
 
-            goal = { x: level.goal[0], y: level.goal[1], width: level.goal[2], height: level.goal[3] };
-            intelItems = level.intel.map(([x, y]) => ({ x, y, size: 12, collected: false }));
-            obstacles = level.obstacles.map(([x, y, width, height]) => ({ x, y, width, height }));
-            gekkos = level.gekkos.map(([x, y, size, spriteWidth, spriteHeight, vx, vy, minX, maxX, minY, maxY]) => ({ x, y, size, spriteWidth, spriteHeight, vx, vy, minX, maxX, minY, maxY }));
-            cameras = level.cameras.map(([x, y, minAngle, maxAngle, speed, range, fov]) => ({ x, y, minAngle, maxAngle, angle: minAngle, speed, range, fov: fov * Math.PI / 180, direction: 1 }));
-
-            updateGameHud();
-        }
-
-        function startMiniGame() {
-            resetMiniGame();
-            gameRunning = true;
-            gameStartTime = performance.now();
-            gameMessage = "Schleichen!";
-            updateGameHud();
-            gameLoop();
-        }
-
-        function stopMiniGame(keepFrame) {
-            gameRunning = false;
-            if (gameAnimationId !== null) {
-                cancelAnimationFrame(gameAnimationId);
-                gameAnimationId = null;
-            }
-            if (!keepFrame && stealthCtx) {
-                stealthCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-            }
-        }
-
-        function handleGameKeyDown(event) {
-            const key = event.key.toLowerCase();
-            if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
-                pressedKeys.add(key);
-                mouseTarget = null;
-                if (!miniGamePanel.classList.contains("hidden")) event.preventDefault();
-            }
-
-            if ((key === " " || key === "spacebar") && !miniGamePanel.classList.contains("hidden")) {
-                setCamouflage(true);
-                event.preventDefault();
-            }
-        }
-
-        function handleGameKeyUp(event) {
-            const key = event.key.toLowerCase();
-            pressedKeys.delete(key);
-
-            if (key === " " || key === "spacebar") {
-                setCamouflage(false);
-            }
-        }
-
-        function handleGameMouseMove(event) {
-            if (miniGamePanel.classList.contains("hidden")) return;
-            setGameTargetFromClientPosition(event.clientX, event.clientY);
-        }
-
-        function handleGameTouch(event) {
-            if (miniGamePanel.classList.contains("hidden")) return;
-            event.preventDefault();
-
-            const touch = event.touches[0] || event.changedTouches[0];
-            if (!touch) return;
-
-            if (!gameRunning) startMiniGame();
-            setGameTargetFromClientPosition(touch.clientX, touch.clientY);
-        }
-
-        function handleGameTouchEnd(event) {
-            if (miniGamePanel.classList.contains("hidden")) return;
-            event.preventDefault();
-            mouseTarget = null;
-        }
-
-        function setGameTargetFromClientPosition(clientX, clientY) {
-            const rect = stealthCanvas.getBoundingClientRect();
-            const scaleX = GAME_WIDTH / rect.width;
-            const scaleY = GAME_HEIGHT / rect.height;
-
-            mouseTarget = {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top) * scaleY
-            };
-        }
-
-        function setCamouflage(active) {
-            if (active && camoEnergy <= 0) {
-                isCamouflaged = false;
-            } else {
-                isCamouflaged = active;
-            }
-            camoButton.classList.toggle("active", isCamouflaged);
-        }
-
-        function gameLoop() {
-            if (!gameRunning) return;
-
-            const elapsed = Math.floor((performance.now() - gameStartTime) / 1000);
-            gameTimeLeft = Math.max(0, getCurrentLevel().time - elapsed);
-
-            updateCamouflage();
-            updateAlertPhase();
-            updateSnakeMovement();
-            updateGekkos();
-            updateCameras();
-            checkIntelCollection();
-            checkDetection();
-            if (!gameRunning) return;
-
-            checkGekkoCollisions();
-            if (!gameRunning) return;
-
-            checkGoalReached();
-            if (!gameRunning) return;
-
-            drawMiniGame();
-            updateGameHud();
-
-            if (gameTimeLeft <= 0) {
-                endMiniGame(false, "Zeit abgelaufen! Snake wurde entdeckt.");
-                return;
-            }
-
-            gameAnimationId = requestAnimationFrame(gameLoop);
-        }
-
-        function updateCamouflage() {
-            if (isCamouflaged && camoEnergy > 0) {
-                camoEnergy = Math.max(0, camoEnergy - 0.24);
-                snake.speed = 1.75;
-                if (camoEnergy <= 0) setCamouflage(false);
-            } else {
-                camoEnergy = Math.min(100, camoEnergy + 0.08);
-                snake.speed = 3.1;
-            }
-        }
-
-        function updateAlertPhase() {
-            if (alertPhase === "alert") {
-                alertCountdown = Math.max(0, alertCountdown - 1 / 60);
-                if (alertCountdown <= 0) {
-                    alertPhase = "caution";
-                    cautionCountdown = 12;
-                    gameMessage = "Vorsichtsphase: Feinde suchen weiter.";
-                }
-            } else if (alertPhase === "caution") {
-                cautionCountdown = Math.max(0, cautionCountdown - 1 / 60);
-                if (cautionCountdown <= 0) {
-                    alertPhase = "normal";
-                    gameMessage = "Normalphase: Gebiet ruhig.";
-                }
-            }
-        }
-
-        function updateSnakeMovement() {
-            let dx = 0;
-            let dy = 0;
-
-            if (pressedKeys.has("w") || pressedKeys.has("arrowup")) dy -= 1;
-            if (pressedKeys.has("s") || pressedKeys.has("arrowdown")) dy += 1;
-            if (pressedKeys.has("a") || pressedKeys.has("arrowleft")) dx -= 1;
-            if (pressedKeys.has("d") || pressedKeys.has("arrowright")) dx += 1;
-
-            if (mouseTarget) {
-                const targetDx = mouseTarget.x - snake.x;
-                const targetDy = mouseTarget.y - snake.y;
-                const distance = Math.hypot(targetDx, targetDy);
-
-                if (distance > 4) {
-                    dx = targetDx / distance;
-                    dy = targetDy / distance;
-                }
-            }
-
-            if (dx !== 0 || dy !== 0) {
-                const length = Math.hypot(dx, dy) || 1;
-                moveSnake((dx / length) * snake.speed, 0);
-                moveSnake(0, (dy / length) * snake.speed);
-            }
-
-            snake.x = clamp(snake.x, snake.size, GAME_WIDTH - snake.size);
-            snake.y = clamp(snake.y, snake.size, GAME_HEIGHT - snake.size);
-        }
-
-        function moveSnake(dx, dy) {
-            snake.x += dx;
-            if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.x -= dx;
-            snake.y += dy;
-            if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.y -= dy;
-        }
-
-        function updateGekkos() {
-            const speedBonus = alertPhase === "alert" ? 1.45 : alertPhase === "caution" ? 1.18 : 1;
-
-            gekkos.forEach((gekko) => {
-                gekko.x += gekko.vx * speedBonus;
-                gekko.y += gekko.vy * speedBonus;
-
-                if (gekko.x < gekko.minX || gekko.x > gekko.maxX) gekko.vx *= -1;
-                if (gekko.y < gekko.minY || gekko.y > gekko.maxY) gekko.vy *= -1;
+        miniGameLevels.forEach((level) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "level-button";
+            button.textContent = level.id <= unlockedMiniGameLevel ? `Level ${level.id}` : `🔒 Level ${level.id}`;
+            button.disabled = level.id > unlockedMiniGameLevel;
+            button.classList.toggle("selected", level.id === selectedMiniGameLevel);
+            button.classList.toggle("locked", level.id > unlockedMiniGameLevel);
+            button.title = level.name;
+            button.addEventListener("click", () => {
+                selectedMiniGameLevel = level.id;
+                resetMiniGame();
+                renderMiniGameLevelSelect();
+                drawMiniGameIntro();
             });
+            miniGameLevelSelect.appendChild(button);
+        });
+
+        const currentLevel = getCurrentLevel();
+        levelInfo.textContent = `${currentLevel.name} · Freigeschaltet bis Level ${unlockedMiniGameLevel} von ${miniGameLevels.length}`;
+    }
+
+    function getCurrentLevel() {
+        return miniGameLevels.find((level) => level.id === selectedMiniGameLevel) || miniGameLevels[0];
+    }
+
+    function resetMiniGame() {
+        stopMiniGame(false);
+
+        const level = getCurrentLevel();
+        gameRunning = false;
+        gameTimeLeft = level.time;
+        gameScoreValue = 0;
+        gameLivesValue = level.lives;
+        gameMessage = "Bereit";
+        alertPhase = "normal";
+        alertCountdown = 0;
+        cautionCountdown = 0;
+        isCamouflaged = false;
+        camoEnergy = 100;
+        snake = { x: level.snake[0], y: level.snake[1], size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
+        mouseTarget = null;
+        pressedKeys.clear();
+
+        goal = { x: level.goal[0], y: level.goal[1], width: level.goal[2], height: level.goal[3] };
+        intelItems = level.intel.map(([x, y]) => ({ x, y, size: 12, collected: false }));
+        obstacles = level.obstacles.map(([x, y, width, height]) => ({ x, y, width, height }));
+        gekkos = level.gekkos.map(([x, y, size, spriteWidth, spriteHeight, vx, vy, minX, maxX, minY, maxY]) => ({ x, y, size, spriteWidth, spriteHeight, vx, vy, minX, maxX, minY, maxY }));
+        cameras = level.cameras.map(([x, y, minAngle, maxAngle, speed, range, fov]) => ({ x, y, minAngle, maxAngle, angle: minAngle, speed, range, fov: fov * Math.PI / 180, direction: 1 }));
+
+        updateGameHud();
+    }
+
+    function startMiniGame() {
+        resetMiniGame();
+        gameRunning = true;
+        gameStartTime = performance.now();
+        gameMessage = "Schleichen!";
+        updateGameHud();
+        gameLoop();
+    }
+
+    function stopMiniGame(keepFrame) {
+        gameRunning = false;
+        if (gameAnimationId !== null) {
+            cancelAnimationFrame(gameAnimationId);
+            gameAnimationId = null;
         }
-
-        function updateCameras() {
-            cameras.forEach((camera) => {
-                camera.angle += camera.speed * camera.direction;
-                if (camera.angle > camera.maxAngle || camera.angle < camera.minAngle) {
-                    camera.direction *= -1;
-                    camera.angle = clamp(camera.angle, camera.minAngle, camera.maxAngle);
-                }
-            });
-        }
-
-        function checkIntelCollection() {
-            intelItems.forEach((item) => {
-                if (!item.collected && circleDistance(snake, item) < snake.size + item.size) {
-                    item.collected = true;
-                    gameScoreValue += 1;
-                    gameMessage = "Intel gesichert";
-                }
-            });
-        }
-
-        function checkDetection() {
-            if (isCamouflaged) return;
-
-            for (const gekko of gekkos) {
-                if (circleDistance(snake, gekko) < gekko.size + 48 && hasLineOfSight(gekko.x, gekko.y, snake.x, snake.y)) {
-                    triggerAlert("Gekko hat Snake entdeckt!");
-                    return;
-                }
-            }
-
-            for (const camera of cameras) {
-                if (isPointInCameraCone(camera, snake.x, snake.y) && hasLineOfSight(camera.x, camera.y, snake.x, snake.y)) {
-                    triggerAlert("Überwachungskamera hat Snake entdeckt!");
-                    return;
-                }
-            }
-        }
-
-        function triggerAlert(message) {
-            if (alertPhase !== "alert") {
-                gameLivesValue = Math.max(0, gameLivesValue - 1);
-            }
-
-            alertPhase = "alert";
-            alertCountdown = 10;
-            cautionCountdown = 0;
-            gameMessage = `${message} Alarmphase!`;
-
-            if (gameLivesValue <= 0) {
-                endMiniGame(false, "Mission gescheitert! Alarm ausgelöst und keine Leben mehr übrig.");
-            }
-        }
-
-        function checkGekkoCollisions() {
-            for (const gekko of gekkos) {
-                if (circleDistance(snake, gekko) < snake.size + gekko.size - 2) {
-                    gameLivesValue -= 1;
-                    gameMessage = "Gekko-Kontakt! Zurück in Deckung!";
-                    snake.x = getCurrentLevel().snake[0];
-                    snake.y = getCurrentLevel().snake[1];
-                    mouseTarget = null;
-                    alertPhase = "alert";
-                    alertCountdown = 8;
-
-                    if (gameLivesValue <= 0) {
-                        endMiniGame(false, "Mission gescheitert! Snake wurde überwältigt.");
-                    }
-                    break;
-                }
-            }
-        }
-
-        function checkGoalReached() {
-            const inGoal = snake.x > goal.x && snake.x < goal.x + goal.width && snake.y > goal.y && snake.y < goal.y + goal.height;
-            const allIntelCollected = intelItems.every((item) => item.collected);
-
-            if (inGoal && allIntelCollected) {
-                endMiniGame(true, `Level ${selectedMiniGameLevel} abgeschlossen!`);
-            } else if (inGoal && !allIntelCollected) {
-                gameMessage = "Erst alle Intel-Daten sammeln!";
-            }
-        }
-
-        function endMiniGame(success, message) {
-            gameRunning = false;
-            setCamouflage(false);
-            if (gameAnimationId !== null) {
-                cancelAnimationFrame(gameAnimationId);
-                gameAnimationId = null;
-            }
-
-            if (success) {
-                saveMiniGameProgress(selectedMiniGameLevel);
-            }
-
-            gameMessage = success ? `${message} Rang: ${getMiniGameRank()}` : message;
-            updateGameHud();
-            drawMiniGame();
-            drawGameEndOverlay(success);
-        }
-
-        function getMiniGameRank() {
-            if (gameLivesValue === getCurrentLevel().lives && gameTimeLeft >= Math.floor(getCurrentLevel().time * 0.55) && alertPhase === "normal") return "Big Boss";
-            if (gameLivesValue >= Math.max(1, getCurrentLevel().lives - 1) && gameTimeLeft >= Math.floor(getCurrentLevel().time * 0.35)) return "Foxhound";
-            if (gameLivesValue >= 1) return "Fox";
-            return "Rookie";
-        }
-
-        function drawMiniGameIntro() {
-            drawMiniGameBackground();
-            stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
-            stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-            stealthCtx.fillStyle = "#ffd700";
-            stealthCtx.font = "24px Orbitron, sans-serif";
-            stealthCtx.textAlign = "center";
-            stealthCtx.fillText(`Level ${selectedMiniGameLevel}: ${getCurrentLevel().name}`, GAME_WIDTH / 2, 150);
-            stealthCtx.fillStyle = "#d8d8d8";
-            stealthCtx.font = "14px Orbitron, sans-serif";
-            stealthCtx.fillText("Sammle alle Intel-Daten und erreiche Outer Haven.", GAME_WIDTH / 2, 195);
-            stealthCtx.fillText("Kisten und Hindernisse blockieren deinen Weg.", GAME_WIDTH / 2, 225);
-            stealthCtx.fillText("Nutze Tarnung gegen Sichtkegel, Kameras und Gekkos.", GAME_WIDTH / 2, 255);
-        }
-
-        function drawMiniGame() {
-            drawMiniGameBackground();
-            drawCameraCones();
-            drawGoal();
-            drawIntel();
-            drawGekkos();
-            drawSnake();
-        }
-
-        function drawMiniGameBackground() {
+        if (!keepFrame && stealthCtx) {
             stealthCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-            stealthCtx.fillStyle = "#080808";
-            stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        }
+    }
 
-            stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.08)";
-            stealthCtx.lineWidth = 1;
-            for (let x = 0; x < GAME_WIDTH; x += 38) {
-                stealthCtx.beginPath();
-                stealthCtx.moveTo(x, 0);
-                stealthCtx.lineTo(x, GAME_HEIGHT);
-                stealthCtx.stroke();
-            }
-            for (let y = 0; y < GAME_HEIGHT; y += 38) {
-                stealthCtx.beginPath();
-                stealthCtx.moveTo(0, y);
-                stealthCtx.lineTo(GAME_WIDTH, y);
-                stealthCtx.stroke();
-            }
-
-            stealthCtx.fillStyle = "rgba(255, 215, 0, 0.08)";
-            stealthCtx.fillRect(0, 0, 92, GAME_HEIGHT);
-            stealthCtx.fillRect(650, 0, 110, GAME_HEIGHT);
-
-            obstacles.forEach((obstacle) => drawCrate(obstacle.x, obstacle.y, obstacle.width, obstacle.height));
-            drawCameras();
+    function handleGameKeyDown(event) {
+        const key = event.key.toLowerCase();
+        if (["w", "a", "s", "d", "arrowup", "arrowleft", "arrowdown", "arrowright"].includes(key)) {
+            pressedKeys.add(key);
+            mouseTarget = null;
+            if (!miniGamePanel.classList.contains("hidden")) event.preventDefault();
         }
 
-        function drawCrate(x, y, width, height) {
-            stealthCtx.fillStyle = "rgba(80, 80, 80, 0.65)";
-            stealthCtx.fillRect(x, y, width, height);
-            stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.22)";
-            stealthCtx.strokeRect(x, y, width, height);
+        if ((key === " " || key === "spacebar") && !miniGamePanel.classList.contains("hidden")) {
+            setCamouflage(true);
+            event.preventDefault();
+        }
+    }
+
+    function handleGameKeyUp(event) {
+        const key = event.key.toLowerCase();
+        pressedKeys.delete(key);
+
+        if (key === " " || key === "spacebar") {
+            setCamouflage(false);
+        }
+    }
+
+    function handleGameMouseMove(event) {
+        if (miniGamePanel.classList.contains("hidden")) return;
+        setGameTargetFromClientPosition(event.clientX, event.clientY);
+    }
+
+    function handleGameTouch(event) {
+        if (miniGamePanel.classList.contains("hidden")) return;
+        event.preventDefault();
+
+        const touch = event.touches[0] || event.changedTouches[0];
+        if (!touch) return;
+
+        if (!gameRunning) startMiniGame();
+        setGameTargetFromClientPosition(touch.clientX, touch.clientY);
+    }
+
+    function handleGameTouchEnd(event) {
+        if (miniGamePanel.classList.contains("hidden")) return;
+        event.preventDefault();
+        mouseTarget = null;
+    }
+
+    function setGameTargetFromClientPosition(clientX, clientY) {
+        const rect = stealthCanvas.getBoundingClientRect();
+        const scaleX = GAME_WIDTH / rect.width;
+        const scaleY = GAME_HEIGHT / rect.height;
+
+        mouseTarget = {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    function toggleCamouflageButton() {
+        setCamouflage(!isCamouflaged);
+    }
+
+    function setCamouflage(active) {
+        if (active && camoEnergy <= 0) {
+            isCamouflaged = false;
+            gameMessage = "Tarnenergie leer. Kurz warten, bis sie sich auflädt.";
+        } else {
+            isCamouflaged = active;
+        }
+
+        camoButton.classList.toggle("active", isCamouflaged);
+        camoButton.textContent = isCamouflaged ? "🕶 Tarnung deaktivieren" : "🕶 Tarnung aktivieren";
+    }
+
+    function gameLoop() {
+        if (!gameRunning) return;
+
+        const elapsed = Math.floor((performance.now() - gameStartTime) / 1000);
+        gameTimeLeft = Math.max(0, getCurrentLevel().time - elapsed);
+
+        updateCamouflage();
+        updateAlertPhase();
+        updateSnakeMovement();
+        updateGekkos();
+        updateCameras();
+        checkIntelCollection();
+        checkDetection();
+        if (!gameRunning) return;
+
+        checkGekkoCollisions();
+        if (!gameRunning) return;
+
+        checkGoalReached();
+        if (!gameRunning) return;
+
+        drawMiniGame();
+        updateGameHud();
+
+        if (gameTimeLeft <= 0) {
+            endMiniGame(false, "Zeit abgelaufen! Snake wurde entdeckt.");
+            return;
+        }
+
+        gameAnimationId = requestAnimationFrame(gameLoop);
+    }
+
+    function updateCamouflage() {
+        if (isCamouflaged && camoEnergy > 0) {
+            camoEnergy = Math.max(0, camoEnergy - 0.24);
+            snake.speed = 1.75;
+            if (camoEnergy <= 0) setCamouflage(false);
+        } else {
+            camoEnergy = Math.min(100, camoEnergy + 0.08);
+            snake.speed = 3.1;
+        }
+    }
+
+    function updateAlertPhase() {
+        if (alertPhase === "alert") {
+            alertCountdown = Math.max(0, alertCountdown - 1 / 60);
+            if (alertCountdown <= 0) {
+                alertPhase = "caution";
+                cautionCountdown = 12;
+                gameMessage = "Vorsichtsphase: Feinde suchen weiter.";
+            }
+        } else if (alertPhase === "caution") {
+            cautionCountdown = Math.max(0, cautionCountdown - 1 / 60);
+            if (cautionCountdown <= 0) {
+                alertPhase = "normal";
+                gameMessage = "Normalphase: Gebiet ruhig.";
+            }
+        }
+    }
+
+    function updateSnakeMovement() {
+        let dx = 0;
+        let dy = 0;
+
+        if (pressedKeys.has("w") || pressedKeys.has("arrowup")) dy -= 1;
+        if (pressedKeys.has("s") || pressedKeys.has("arrowdown")) dy += 1;
+        if (pressedKeys.has("a") || pressedKeys.has("arrowleft")) dx -= 1;
+        if (pressedKeys.has("d") || pressedKeys.has("arrowright")) dx += 1;
+
+        if (mouseTarget) {
+            const targetDx = mouseTarget.x - snake.x;
+            const targetDy = mouseTarget.y - snake.y;
+            const distance = Math.hypot(targetDx, targetDy);
+
+            if (distance > 4) {
+                dx = targetDx / distance;
+                dy = targetDy / distance;
+            }
+        }
+
+        if (dx !== 0 || dy !== 0) {
+            const length = Math.hypot(dx, dy) || 1;
+            moveSnake((dx / length) * snake.speed, 0);
+            moveSnake(0, (dy / length) * snake.speed);
+        }
+
+        snake.x = clamp(snake.x, snake.size, GAME_WIDTH - snake.size);
+        snake.y = clamp(snake.y, snake.size, GAME_HEIGHT - snake.size);
+    }
+
+    function moveSnake(dx, dy) {
+        snake.x += dx;
+        if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.x -= dx;
+        snake.y += dy;
+        if (collidesWithObstacles(snake.x, snake.y, snake.size)) snake.y -= dy;
+    }
+
+    function updateGekkos() {
+        const speedBonus = alertPhase === "alert" ? 1.45 : alertPhase === "caution" ? 1.18 : 1;
+
+        gekkos.forEach((gekko) => {
+            gekko.x += gekko.vx * speedBonus;
+            gekko.y += gekko.vy * speedBonus;
+
+            if (gekko.x < gekko.minX || gekko.x > gekko.maxX) gekko.vx *= -1;
+            if (gekko.y < gekko.minY || gekko.y > gekko.maxY) gekko.vy *= -1;
+        });
+    }
+
+    function updateCameras() {
+        cameras.forEach((camera) => {
+            camera.angle += camera.speed * camera.direction;
+            if (camera.angle > camera.maxAngle || camera.angle < camera.minAngle) {
+                camera.direction *= -1;
+                camera.angle = clamp(camera.angle, camera.minAngle, camera.maxAngle);
+            }
+        });
+    }
+
+    function checkIntelCollection() {
+        intelItems.forEach((item) => {
+            if (!item.collected && circleDistance(snake, item) < snake.size + item.size) {
+                item.collected = true;
+                gameScoreValue += 1;
+                gameMessage = "Intel gesichert";
+            }
+        });
+    }
+
+    function checkDetection() {
+        if (isCamouflaged) return;
+
+        for (const gekko of gekkos) {
+            if (circleDistance(snake, gekko) < gekko.size + 48 && hasLineOfSight(gekko.x, gekko.y, snake.x, snake.y)) {
+                triggerAlert("Gekko hat Snake entdeckt!");
+                return;
+            }
+        }
+
+        for (const camera of cameras) {
+            if (isPointInCameraCone(camera, snake.x, snake.y) && hasLineOfSight(camera.x, camera.y, snake.x, snake.y)) {
+                triggerAlert("Überwachungskamera hat Snake entdeckt!");
+                return;
+            }
+        }
+    }
+
+    function triggerAlert(message) {
+        if (alertPhase !== "alert") {
+            gameLivesValue = Math.max(0, gameLivesValue - 1);
+        }
+
+        alertPhase = "alert";
+        alertCountdown = 10;
+        cautionCountdown = 0;
+        gameMessage = `${message} Alarmphase!`;
+
+        if (gameLivesValue <= 0) {
+            endMiniGame(false, "Mission gescheitert! Alarm ausgelöst und keine Leben mehr übrig.");
+        }
+    }
+
+    function checkGekkoCollisions() {
+        for (const gekko of gekkos) {
+            if (circleDistance(snake, gekko) < snake.size + gekko.size - 2) {
+                gameLivesValue -= 1;
+                gameMessage = "Gekko-Kontakt! Zurück in Deckung!";
+                snake.x = getCurrentLevel().snake[0];
+                snake.y = getCurrentLevel().snake[1];
+                mouseTarget = null;
+                alertPhase = "alert";
+                alertCountdown = 8;
+
+                if (gameLivesValue <= 0) {
+                    endMiniGame(false, "Mission gescheitert! Snake wurde überwältigt.");
+                }
+                break;
+            }
+        }
+    }
+
+    function checkGoalReached() {
+        const inGoal = snake.x > goal.x && snake.x < goal.x + goal.width && snake.y > goal.y && snake.y < goal.y + goal.height;
+        const allIntelCollected = intelItems.every((item) => item.collected);
+
+        if (inGoal && allIntelCollected) {
+            endMiniGame(true, `Level ${selectedMiniGameLevel} abgeschlossen!`);
+        } else if (inGoal && !allIntelCollected) {
+            gameMessage = "Erst alle Intel-Daten sammeln!";
+        }
+    }
+
+    function endMiniGame(success, message) {
+        gameRunning = false;
+        setCamouflage(false);
+        if (gameAnimationId !== null) {
+            cancelAnimationFrame(gameAnimationId);
+            gameAnimationId = null;
+        }
+
+        if (success) {
+            saveMiniGameProgress(selectedMiniGameLevel);
+        }
+
+        gameMessage = success ? `${message} Rang: ${getMiniGameRank()}` : message;
+        updateGameHud();
+        drawMiniGame();
+        drawGameEndOverlay(success);
+    }
+
+    function getMiniGameRank() {
+        if (gameLivesValue === getCurrentLevel().lives && gameTimeLeft >= Math.floor(getCurrentLevel().time * 0.55) && alertPhase === "normal") return "Big Boss";
+        if (gameLivesValue >= Math.max(1, getCurrentLevel().lives - 1) && gameTimeLeft >= Math.floor(getCurrentLevel().time * 0.35)) return "Foxhound";
+        if (gameLivesValue >= 1) return "Fox";
+        return "Rookie";
+    }
+
+    function drawMiniGameIntro() {
+        drawMiniGameBackground();
+        stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        stealthCtx.fillStyle = "#ffd700";
+        stealthCtx.font = "24px Orbitron, sans-serif";
+        stealthCtx.textAlign = "center";
+        stealthCtx.fillText(`Level ${selectedMiniGameLevel}: ${getCurrentLevel().name}`, GAME_WIDTH / 2, 150);
+        stealthCtx.fillStyle = "#d8d8d8";
+        stealthCtx.font = "14px Orbitron, sans-serif";
+        stealthCtx.fillText("Sammle alle Intel-Daten und erreiche Outer Haven.", GAME_WIDTH / 2, 195);
+        stealthCtx.fillText("Kisten und Hindernisse blockieren deinen Weg.", GAME_WIDTH / 2, 225);
+        stealthCtx.fillText("Nutze Tarnung gegen Sichtkegel, Kameras und Gekkos.", GAME_WIDTH / 2, 255);
+    }
+
+    function drawMiniGame() {
+        drawMiniGameBackground();
+        drawCameraCones();
+        drawGoal();
+        drawIntel();
+        drawGekkos();
+        drawSnake();
+    }
+
+    function drawMiniGameBackground() {
+        stealthCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        stealthCtx.fillStyle = "#080808";
+        stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.08)";
+        stealthCtx.lineWidth = 1;
+        for (let x = 0; x < GAME_WIDTH; x += 38) {
             stealthCtx.beginPath();
-            stealthCtx.moveTo(x, y);
-            stealthCtx.lineTo(x + width, y + height);
-            stealthCtx.moveTo(x + width, y);
-            stealthCtx.lineTo(x, y + height);
+            stealthCtx.moveTo(x, 0);
+            stealthCtx.lineTo(x, GAME_HEIGHT);
+            stealthCtx.stroke();
+        }
+        for (let y = 0; y < GAME_HEIGHT; y += 38) {
+            stealthCtx.beginPath();
+            stealthCtx.moveTo(0, y);
+            stealthCtx.lineTo(GAME_WIDTH, y);
             stealthCtx.stroke();
         }
 
-        function drawCameras() {
-            cameras.forEach((camera) => {
-                stealthCtx.fillStyle = "#d8d8d8";
-                stealthCtx.beginPath();
-                stealthCtx.arc(camera.x, camera.y, 9, 0, Math.PI * 2);
-                stealthCtx.fill();
-                stealthCtx.strokeStyle = "#ffd700";
-                stealthCtx.stroke();
-            });
-        }
+        stealthCtx.fillStyle = "rgba(255, 215, 0, 0.08)";
+        stealthCtx.fillRect(0, 0, 92, GAME_HEIGHT);
+        stealthCtx.fillRect(650, 0, 110, GAME_HEIGHT);
 
-        function drawCameraCones() {
-            cameras.forEach((camera) => {
-                stealthCtx.fillStyle = alertPhase === "alert" ? "rgba(255, 60, 60, 0.18)" : "rgba(255, 215, 0, 0.12)";
-                stealthCtx.beginPath();
-                stealthCtx.moveTo(camera.x, camera.y);
-                stealthCtx.arc(camera.x, camera.y, camera.range, camera.angle - camera.fov / 2, camera.angle + camera.fov / 2);
-                stealthCtx.closePath();
-                stealthCtx.fill();
-            });
-        }
+        obstacles.forEach((obstacle) => drawCrate(obstacle.x, obstacle.y, obstacle.width, obstacle.height));
+        drawCameras();
+    }
 
-        function drawGoal() {
-            stealthCtx.fillStyle = "rgba(255, 215, 0, 0.18)";
-            stealthCtx.fillRect(goal.x, goal.y, goal.width, goal.height);
-            stealthCtx.strokeStyle = "#ffd700";
-            stealthCtx.strokeRect(goal.x, goal.y, goal.width, goal.height);
-            stealthCtx.fillStyle = "#ffd700";
-            stealthCtx.font = "11px Orbitron, sans-serif";
-            stealthCtx.textAlign = "center";
-            stealthCtx.fillText("HAVEN", goal.x + goal.width / 2, goal.y - 8);
-        }
+    function drawCrate(x, y, width, height) {
+        stealthCtx.fillStyle = "rgba(80, 80, 80, 0.65)";
+        stealthCtx.fillRect(x, y, width, height);
+        stealthCtx.strokeStyle = "rgba(255, 215, 0, 0.22)";
+        stealthCtx.strokeRect(x, y, width, height);
+        stealthCtx.beginPath();
+        stealthCtx.moveTo(x, y);
+        stealthCtx.lineTo(x + width, y + height);
+        stealthCtx.moveTo(x + width, y);
+        stealthCtx.lineTo(x, y + height);
+        stealthCtx.stroke();
+    }
 
-        function drawIntel() {
-            intelItems.forEach((item) => {
-                if (item.collected) return;
-                stealthCtx.fillStyle = "#3aa7ff";
-                stealthCtx.beginPath();
-                stealthCtx.arc(item.x, item.y, item.size, 0, Math.PI * 2);
-                stealthCtx.fill();
-                stealthCtx.fillStyle = "#ffffff";
-                stealthCtx.font = "10px Orbitron, sans-serif";
-                stealthCtx.textAlign = "center";
-                stealthCtx.fillText("i", item.x, item.y + 4);
-            });
-        }
-
-        function drawGekkos() {
-            gekkos.forEach((gekko) => {
-                stealthCtx.fillStyle = alertPhase === "alert" ? "rgba(255, 40, 40, 0.22)" : "rgba(184, 40, 40, 0.14)";
-                stealthCtx.beginPath();
-                stealthCtx.arc(gekko.x, gekko.y, gekko.size + 48, 0, Math.PI * 2);
-                stealthCtx.fill();
-
-                if (isSpriteReady(gekkoSprite)) {
-                    drawSprite(gekkoSprite, gekko.x, gekko.y, gekko.spriteWidth, gekko.spriteHeight, 1);
-                } else {
-                    drawGekkoFallback(gekko);
-                }
-
-                stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
-                stealthCtx.fillRect(gekko.x - 28, gekko.y + gekko.spriteHeight / 2 - 4, 56, 15);
-                stealthCtx.fillStyle = "#ffb5b5";
-                stealthCtx.font = "9px Orbitron, sans-serif";
-                stealthCtx.textAlign = "center";
-                stealthCtx.fillText("GEKKO", gekko.x, gekko.y + gekko.spriteHeight / 2 + 7);
-            });
-        }
-
-        function drawSnake() {
-            stealthCtx.fillStyle = isCamouflaged ? "rgba(58, 167, 255, 0.22)" : "rgba(21, 148, 71, 0.18)";
+    function drawCameras() {
+        cameras.forEach((camera) => {
+            stealthCtx.fillStyle = "#d8d8d8";
             stealthCtx.beginPath();
-            stealthCtx.arc(snake.x, snake.y, snake.size + 18, 0, Math.PI * 2);
+            stealthCtx.arc(camera.x, camera.y, 9, 0, Math.PI * 2);
+            stealthCtx.fill();
+            stealthCtx.strokeStyle = "#ffd700";
+            stealthCtx.stroke();
+        });
+    }
+
+    function drawCameraCones() {
+        cameras.forEach((camera) => {
+            stealthCtx.fillStyle = alertPhase === "alert" ? "rgba(255, 60, 60, 0.18)" : "rgba(255, 215, 0, 0.12)";
+            stealthCtx.beginPath();
+            stealthCtx.moveTo(camera.x, camera.y);
+            stealthCtx.arc(camera.x, camera.y, camera.range, camera.angle - camera.fov / 2, camera.angle + camera.fov / 2);
+            stealthCtx.closePath();
+            stealthCtx.fill();
+        });
+    }
+
+    function drawGoal() {
+        stealthCtx.fillStyle = "rgba(255, 215, 0, 0.18)";
+        stealthCtx.fillRect(goal.x, goal.y, goal.width, goal.height);
+        stealthCtx.strokeStyle = "#ffd700";
+        stealthCtx.strokeRect(goal.x, goal.y, goal.width, goal.height);
+        stealthCtx.fillStyle = "#ffd700";
+        stealthCtx.font = "11px Orbitron, sans-serif";
+        stealthCtx.textAlign = "center";
+        stealthCtx.fillText("HAVEN", goal.x + goal.width / 2, goal.y - 8);
+    }
+
+    function drawIntel() {
+        intelItems.forEach((item) => {
+            if (item.collected) return;
+            stealthCtx.fillStyle = "#3aa7ff";
+            stealthCtx.beginPath();
+            stealthCtx.arc(item.x, item.y, item.size, 0, Math.PI * 2);
+            stealthCtx.fill();
+            stealthCtx.fillStyle = "#ffffff";
+            stealthCtx.font = "10px Orbitron, sans-serif";
+            stealthCtx.textAlign = "center";
+            stealthCtx.fillText("i", item.x, item.y + 4);
+        });
+    }
+
+    function drawGekkos() {
+        gekkos.forEach((gekko) => {
+            stealthCtx.fillStyle = alertPhase === "alert" ? "rgba(255, 40, 40, 0.22)" : "rgba(184, 40, 40, 0.14)";
+            stealthCtx.beginPath();
+            stealthCtx.arc(gekko.x, gekko.y, gekko.size + 48, 0, Math.PI * 2);
             stealthCtx.fill();
 
-            if (isSpriteReady(snakeSprite)) {
-                drawSprite(snakeSprite, snake.x, snake.y, snake.spriteWidth, snake.spriteHeight, isCamouflaged ? 0.45 : 1);
+            if (isSpriteReady(gekkoSprite)) {
+                drawSprite(gekkoSprite, gekko.x, gekko.y, gekko.spriteWidth, gekko.spriteHeight, 1);
             } else {
-                drawSnakeFallback();
+                drawGekkoFallback(gekko);
             }
 
             stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
-            stealthCtx.fillRect(snake.x - 30, snake.y + snake.spriteHeight / 2 - 5, 60, 15);
-            stealthCtx.fillStyle = isCamouflaged ? "#3aa7ff" : "#ffd700";
+            stealthCtx.fillRect(gekko.x - 28, gekko.y + gekko.spriteHeight / 2 - 4, 56, 15);
+            stealthCtx.fillStyle = "#ffb5b5";
             stealthCtx.font = "9px Orbitron, sans-serif";
             stealthCtx.textAlign = "center";
-            stealthCtx.fillText(isCamouflaged ? "CAMO" : "OLD SNAKE", snake.x, snake.y + snake.spriteHeight / 2 + 7);
+            stealthCtx.fillText("GEKKO", gekko.x, gekko.y + gekko.spriteHeight / 2 + 7);
+        });
+    }
+
+    function drawSnake() {
+        stealthCtx.fillStyle = isCamouflaged ? "rgba(58, 167, 255, 0.22)" : "rgba(21, 148, 71, 0.18)";
+        stealthCtx.beginPath();
+        stealthCtx.arc(snake.x, snake.y, snake.size + 18, 0, Math.PI * 2);
+        stealthCtx.fill();
+
+        if (isSpriteReady(snakeSprite)) {
+            drawSprite(snakeSprite, snake.x, snake.y, snake.spriteWidth, snake.spriteHeight, isCamouflaged ? 0.45 : 1);
+        } else {
+            drawSnakeFallback();
         }
 
-        function isSpriteReady(sprite) {
-            return sprite.complete && sprite.naturalWidth > 0;
+        stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        stealthCtx.fillRect(snake.x - 30, snake.y + snake.spriteHeight / 2 - 5, 60, 15);
+        stealthCtx.fillStyle = isCamouflaged ? "#3aa7ff" : "#ffd700";
+        stealthCtx.font = "9px Orbitron, sans-serif";
+        stealthCtx.textAlign = "center";
+        stealthCtx.fillText(isCamouflaged ? "CAMO" : "OLD SNAKE", snake.x, snake.y + snake.spriteHeight / 2 + 7);
+    }
+
+    function isSpriteReady(sprite) {
+        return sprite.complete && sprite.naturalWidth > 0;
+    }
+
+    function drawSprite(sprite, centerX, centerY, width, height, alpha = 1) {
+        stealthCtx.save();
+        stealthCtx.globalAlpha = alpha;
+        stealthCtx.shadowColor = "rgba(255, 215, 0, 0.35)";
+        stealthCtx.shadowBlur = 8;
+        stealthCtx.drawImage(sprite, centerX - width / 2, centerY - height / 2, width, height);
+        stealthCtx.restore();
+    }
+
+    function drawSnakeFallback() {
+        stealthCtx.fillStyle = isCamouflaged ? "#3aa7ff" : "#159447";
+        stealthCtx.beginPath();
+        stealthCtx.arc(snake.x, snake.y, snake.size, 0, Math.PI * 2);
+        stealthCtx.fill();
+        stealthCtx.strokeStyle = "#ffd700";
+        stealthCtx.lineWidth = 2;
+        stealthCtx.stroke();
+    }
+
+    function drawGekkoFallback(gekko) {
+        stealthCtx.fillStyle = "#b82828";
+        stealthCtx.beginPath();
+        stealthCtx.arc(gekko.x, gekko.y, gekko.size, 0, Math.PI * 2);
+        stealthCtx.fill();
+        stealthCtx.strokeStyle = "#ffb5b5";
+        stealthCtx.lineWidth = 3;
+        stealthCtx.beginPath();
+        stealthCtx.moveTo(gekko.x - 12, gekko.y + 20);
+        stealthCtx.lineTo(gekko.x - 22, gekko.y + 34);
+        stealthCtx.moveTo(gekko.x + 12, gekko.y + 20);
+        stealthCtx.lineTo(gekko.x + 22, gekko.y + 34);
+        stealthCtx.stroke();
+    }
+
+    function drawGameEndOverlay(success) {
+        stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        stealthCtx.fillStyle = success ? "#ffd700" : "#ffb5b5";
+        stealthCtx.font = "24px Orbitron, sans-serif";
+        stealthCtx.textAlign = "center";
+        stealthCtx.fillText(success ? "MISSION ERFÜLLT" : "MISSION GESCHEITERT", GAME_WIDTH / 2, 165);
+        stealthCtx.fillStyle = "#d8d8d8";
+        stealthCtx.font = "14px Orbitron, sans-serif";
+        stealthCtx.fillText(gameMessage, GAME_WIDTH / 2, 210);
+        stealthCtx.fillText(success && selectedMiniGameLevel < miniGameLevels.length ? `Level ${selectedMiniGameLevel + 1} wurde freigeschaltet.` : "Drücke Start für einen neuen Versuch.", GAME_WIDTH / 2, 245);
+    }
+
+    function updateGameHud() {
+        gameLevel.textContent = `Level: ${selectedMiniGameLevel}`;
+        gameScore.textContent = `Intel: ${gameScoreValue} / ${intelItems.length || 5}`;
+        gameLives.textContent = `Leben: ${gameLivesValue}`;
+        gameTimer.textContent = `Zeit: ${gameTimeLeft}s`;
+        gameCamo.textContent = `Tarnung: ${Math.round(camoEnergy)}%`;
+
+        gameAlert.classList.remove("alert-normal", "alert-caution", "alert-alert");
+        if (alertPhase === "alert") {
+            gameAlert.textContent = `Phase: Alarm ${Math.ceil(alertCountdown)}s`;
+            gameAlert.classList.add("alert-alert");
+        } else if (alertPhase === "caution") {
+            gameAlert.textContent = `Phase: Vorsicht ${Math.ceil(cautionCountdown)}s`;
+            gameAlert.classList.add("alert-caution");
+        } else {
+            gameAlert.textContent = "Phase: Normal";
+            gameAlert.classList.add("alert-normal");
         }
 
-        function drawSprite(sprite, centerX, centerY, width, height, alpha = 1) {
-            stealthCtx.save();
-            stealthCtx.globalAlpha = alpha;
-            stealthCtx.shadowColor = "rgba(255, 215, 0, 0.35)";
-            stealthCtx.shadowBlur = 8;
-            stealthCtx.drawImage(sprite, centerX - width / 2, centerY - height / 2, width, height);
-            stealthCtx.restore();
-        }
+        gameStatus.textContent = gameMessage;
+    }
 
-        function drawSnakeFallback() {
-            stealthCtx.fillStyle = isCamouflaged ? "#3aa7ff" : "#159447";
-            stealthCtx.beginPath();
-            stealthCtx.arc(snake.x, snake.y, snake.size, 0, Math.PI * 2);
-            stealthCtx.fill();
-            stealthCtx.strokeStyle = "#ffd700";
-            stealthCtx.lineWidth = 2;
-            stealthCtx.stroke();
-        }
+    function collidesWithObstacles(x, y, radius) {
+        return obstacles.some((obstacle) => circleRectCollision(x, y, radius, obstacle));
+    }
 
-        function drawGekkoFallback(gekko) {
-            stealthCtx.fillStyle = "#b82828";
-            stealthCtx.beginPath();
-            stealthCtx.arc(gekko.x, gekko.y, gekko.size, 0, Math.PI * 2);
-            stealthCtx.fill();
-            stealthCtx.strokeStyle = "#ffb5b5";
-            stealthCtx.lineWidth = 3;
-            stealthCtx.beginPath();
-            stealthCtx.moveTo(gekko.x - 12, gekko.y + 20);
-            stealthCtx.lineTo(gekko.x - 22, gekko.y + 34);
-            stealthCtx.moveTo(gekko.x + 12, gekko.y + 20);
-            stealthCtx.lineTo(gekko.x + 22, gekko.y + 34);
-            stealthCtx.stroke();
-        }
+    function circleRectCollision(cx, cy, radius, rect) {
+        const nearestX = clamp(cx, rect.x, rect.x + rect.width);
+        const nearestY = clamp(cy, rect.y, rect.y + rect.height);
+        return Math.hypot(cx - nearestX, cy - nearestY) < radius;
+    }
 
-        function drawGameEndOverlay(success) {
-            stealthCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
-            stealthCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-            stealthCtx.fillStyle = success ? "#ffd700" : "#ffb5b5";
-            stealthCtx.font = "24px Orbitron, sans-serif";
-            stealthCtx.textAlign = "center";
-            stealthCtx.fillText(success ? "MISSION ERFÜLLT" : "MISSION GESCHEITERT", GAME_WIDTH / 2, 165);
-            stealthCtx.fillStyle = "#d8d8d8";
-            stealthCtx.font = "14px Orbitron, sans-serif";
-            stealthCtx.fillText(gameMessage, GAME_WIDTH / 2, 210);
-            stealthCtx.fillText(success && selectedMiniGameLevel < miniGameLevels.length ? `Level ${selectedMiniGameLevel + 1} wurde freigeschaltet.` : "Drücke Start für einen neuen Versuch.", GAME_WIDTH / 2, 245);
-        }
+    function isPointInCameraCone(camera, x, y) {
+        const dx = x - camera.x;
+        const dy = y - camera.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance > camera.range) return false;
 
-        function updateGameHud() {
-            gameLevel.textContent = `Level: ${selectedMiniGameLevel}`;
-            gameScore.textContent = `Intel: ${gameScoreValue} / ${intelItems.length || 5}`;
-            gameLives.textContent = `Leben: ${gameLivesValue}`;
-            gameTimer.textContent = `Zeit: ${gameTimeLeft}s`;
-            gameCamo.textContent = `Tarnung: ${Math.round(camoEnergy)}%`;
+        const angleToPoint = normalizeAngle(Math.atan2(dy, dx));
+        const cameraAngle = normalizeAngle(camera.angle);
+        const diff = Math.abs(shortestAngleDifference(angleToPoint, cameraAngle));
+        return diff <= camera.fov / 2;
+    }
 
-            gameAlert.classList.remove("alert-normal", "alert-caution", "alert-alert");
-            if (alertPhase === "alert") {
-                gameAlert.textContent = `Phase: Alarm ${Math.ceil(alertCountdown)}s`;
-                gameAlert.classList.add("alert-alert");
-            } else if (alertPhase === "caution") {
-                gameAlert.textContent = `Phase: Vorsicht ${Math.ceil(cautionCountdown)}s`;
-                gameAlert.classList.add("alert-caution");
-            } else {
-                gameAlert.textContent = "Phase: Normal";
-                gameAlert.classList.add("alert-normal");
-            }
+    function hasLineOfSight(x1, y1, x2, y2) {
+        return !obstacles.some((obstacle) => lineIntersectsRect(x1, y1, x2, y2, obstacle));
+    }
 
-            gameStatus.textContent = gameMessage;
-        }
+    function lineIntersectsRect(x1, y1, x2, y2, rect) {
+        return lineIntersectsLine(x1, y1, x2, y2, rect.x, rect.y, rect.x + rect.width, rect.y) ||
+            lineIntersectsLine(x1, y1, x2, y2, rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height) ||
+            lineIntersectsLine(x1, y1, x2, y2, rect.x + rect.width, rect.y + rect.height, rect.x, rect.y + rect.height) ||
+            lineIntersectsLine(x1, y1, x2, y2, rect.x, rect.y + rect.height, rect.x, rect.y);
+    }
 
-        function collidesWithObstacles(x, y, radius) {
-            return obstacles.some((obstacle) => circleRectCollision(x, y, radius, obstacle));
-        }
+    function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+        const denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+        if (denominator === 0) return false;
 
-        function circleRectCollision(cx, cy, radius, rect) {
-            const nearestX = clamp(cx, rect.x, rect.x + rect.width);
-            const nearestY = clamp(cy, rect.y, rect.y + rect.height);
-            return Math.hypot(cx - nearestX, cy - nearestY) < radius;
-        }
+        const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
+        const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator;
+        return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
+    }
 
-        function isPointInCameraCone(camera, x, y) {
-            const dx = x - camera.x;
-            const dy = y - camera.y;
-            const distance = Math.hypot(dx, dy);
-            if (distance > camera.range) return false;
+    function normalizeAngle(angle) {
+        while (angle < 0) angle += Math.PI * 2;
+        while (angle >= Math.PI * 2) angle -= Math.PI * 2;
+        return angle;
+    }
 
-            const angleToPoint = normalizeAngle(Math.atan2(dy, dx));
-            const cameraAngle = normalizeAngle(camera.angle);
-            const diff = Math.abs(shortestAngleDifference(angleToPoint, cameraAngle));
-            return diff <= camera.fov / 2;
-        }
+    function shortestAngleDifference(a, b) {
+        let diff = a - b;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        return diff;
+    }
 
-        function hasLineOfSight(x1, y1, x2, y2) {
-            return !obstacles.some((obstacle) => lineIntersectsRect(x1, y1, x2, y2, obstacle));
-        }
+    function circleDistance(a, b) {
+        return Math.hypot(a.x - b.x, a.y - b.y);
+    }
 
-        function lineIntersectsRect(x1, y1, x2, y2, rect) {
-            return lineIntersectsLine(x1, y1, x2, y2, rect.x, rect.y, rect.x + rect.width, rect.y) ||
-                lineIntersectsLine(x1, y1, x2, y2, rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height) ||
-                lineIntersectsLine(x1, y1, x2, y2, rect.x + rect.width, rect.y + rect.height, rect.x, rect.y + rect.height) ||
-                lineIntersectsLine(x1, y1, x2, y2, rect.x, rect.y + rect.height, rect.x, rect.y);
-        }
+    function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+    }
 
-        function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
-            const denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-            if (denominator === 0) return false;
+    function restartQuiz() {
+        clearTimer();
+        feedback.textContent = "";
+        answersContainer.replaceChildren();
+        questionText.textContent = "";
+        nextButton.classList.add("hidden");
+        jokerPanel.classList.add("hidden");
+        showMainMenu();
+    }
 
-            const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
-            const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator;
-            return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
-        }
+    function goBack() {
+        window.location.href = "index.html";
+    }
 
-        function normalizeAngle(angle) {
-            while (angle < 0) angle += Math.PI * 2;
-            while (angle >= Math.PI * 2) angle -= Math.PI * 2;
-            return angle;
-        }
-
-        function shortestAngleDifference(a, b) {
-            let diff = a - b;
-            while (diff < -Math.PI) diff += Math.PI * 2;
-            while (diff > Math.PI) diff -= Math.PI * 2;
-            return diff;
-        }
-
-        function circleDistance(a, b) {
-            return Math.hypot(a.x - b.x, a.y - b.y);
-        }
-
-        function clamp(value, min, max) {
-            return Math.min(max, Math.max(min, value));
-        }
-
-        function restartQuiz() {
-            clearTimer();
-            feedback.textContent = "";
-            answersContainer.replaceChildren();
-            questionText.textContent = "";
-            nextButton.classList.add("hidden");
-            jokerPanel.classList.add("hidden");
-            showMainMenu();
-        }
-
-        function goBack() {
-            window.location.href = "index.html";
-        }
-
-        function toggleMusic() {
-            if (bgMusic.paused) {
-                bgMusic.play().catch(() => {
-                    musicTime.textContent = "Musik konnte nicht gestartet werden.";
-                });
-            } else {
-                bgMusic.pause();
-                bgMusic.currentTime = 0;
-                updateMusicTime();
-            }
-        }
-
-        function updateMusicVolume() {
-            bgMusic.volume = Number(musicVolume.value) / 100;
-            updateMusicVolumeLabel();
-        }
-
-        function updateMusicVolumeLabel() {
-            volumeValue.textContent = `${musicVolume.value}%`;
-        }
-
-        function updateMusicButton() {
-            musicToggleButton.textContent = bgMusic.paused ? "▶ Musik starten" : "■ Musik stoppen";
-        }
-
-        function updateMusicTime() {
-            if (!Number.isFinite(bgMusic.duration) || bgMusic.duration <= 0) {
-                musicTime.textContent = "Restzeit: --:--";
-                return;
-            }
-
-            const remaining = Math.max(0, bgMusic.duration - bgMusic.currentTime);
-            musicTime.textContent = `Restzeit: ${formatTime(remaining)} · ${formatTime(bgMusic.currentTime)} / ${formatTime(bgMusic.duration)}`;
-        }
-
-        function formatTime(totalSeconds) {
-            const safeSeconds = Math.max(0, Math.floor(totalSeconds));
-            const minutes = Math.floor(safeSeconds / 60);
-            const seconds = safeSeconds % 60;
-            return `${minutes}:${String(seconds).padStart(2, "0")}`;
-        }
-
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i -= 1) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        function validateQuestionPool() {
-            const seenTexts = new Set();
-
-            questionPool.forEach((question, index) => {
-                const questionNumber = index + 1;
-
-                if (!question.text || !Array.isArray(question.answers) || question.answers.length !== 4) {
-                    console.warn(`Frage ${questionNumber} ist unvollständig oder hat nicht genau 4 Antworten.`);
-                }
-
-                if (!LEVEL_LABELS[question.difficulty]) {
-                    console.warn(`Frage ${questionNumber} hat keinen gültigen Schwierigkeitsgrad.`);
-                }
-
-                if (!Number.isInteger(question.correct) || question.correct < 0 || question.correct >= question.answers.length) {
-                    console.warn(`Frage ${questionNumber} hat einen ungültigen correct-Wert.`);
-                }
-
-                const normalizedText = String(question.text).trim().toLowerCase();
-                if (seenTexts.has(normalizedText)) {
-                    console.warn(`Doppelte Frage gefunden: ${question.text}`);
-                }
-                seenTexts.add(normalizedText);
+    function toggleMusic() {
+        if (bgMusic.paused) {
+            bgMusic.play().catch(() => {
+                musicTime.textContent = "Musik konnte nicht gestartet werden.";
             });
+        } else {
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            updateMusicTime();
         }
-    </script>
+    }
+
+    function updateMusicVolume() {
+        bgMusic.volume = Number(musicVolume.value) / 100;
+        updateMusicVolumeLabel();
+    }
+
+    function updateMusicVolumeLabel() {
+        volumeValue.textContent = `${musicVolume.value}%`;
+    }
+
+    function updateMusicButton() {
+        musicToggleButton.textContent = bgMusic.paused ? "▶ Musik starten" : "■ Musik stoppen";
+    }
+
+    function updateMusicTime() {
+        if (!Number.isFinite(bgMusic.duration) || bgMusic.duration <= 0) {
+            musicTime.textContent = "Restzeit: --:--";
+            return;
+        }
+
+        const remaining = Math.max(0, bgMusic.duration - bgMusic.currentTime);
+        musicTime.textContent = `Restzeit: ${formatTime(remaining)} · ${formatTime(bgMusic.currentTime)} / ${formatTime(bgMusic.duration)}`;
+    }
+
+    function formatTime(totalSeconds) {
+        const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+        const minutes = Math.floor(safeSeconds / 60);
+        const seconds = safeSeconds % 60;
+        return `${minutes}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function validateQuestionPool() {
+        const seenTexts = new Set();
+
+        questionPool.forEach((question, index) => {
+            const questionNumber = index + 1;
+
+            if (!question.text || !Array.isArray(question.answers) || question.answers.length !== 4) {
+                console.warn(`Frage ${questionNumber} ist unvollständig oder hat nicht genau 4 Antworten.`);
+            }
+
+            if (!LEVEL_LABELS[question.difficulty]) {
+                console.warn(`Frage ${questionNumber} hat keinen gültigen Schwierigkeitsgrad.`);
+            }
+
+            if (!Number.isInteger(question.correct) || question.correct < 0 || question.correct >= question.answers.length) {
+                console.warn(`Frage ${questionNumber} hat einen ungültigen correct-Wert.`);
+            }
+
+            const normalizedText = String(question.text).trim().toLowerCase();
+            if (seenTexts.has(normalizedText)) {
+                console.warn(`Doppelte Frage gefunden: ${question.text}`);
+            }
+            seenTexts.add(normalizedText);
+        });
+    }
+</script>
+
 </body>
 </html>
