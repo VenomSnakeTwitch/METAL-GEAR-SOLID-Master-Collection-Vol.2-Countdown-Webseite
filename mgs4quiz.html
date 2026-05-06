@@ -1,354 +1,986 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fan-Quiz zu Metal Gear Solid 4: Guns of the Patriots">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-<title>MGS4 Quiz – Metal Gear Solid 4</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+    <title>MGS4 Quiz – Metal Gear Solid 4</title>
 
-html, body {
-    margin:0; 
-    padding:0; 
-    font-family:'Orbitron', sans-serif; 
-    background: url("background.jpg") no-repeat center center fixed; 
-    background-size: cover; 
-    color: gold; 
-    text-align:center; 
-    overflow-x:hidden;
-}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
 
-#overlay {
-    background: rgba(0,0,0,0.85); 
-    min-height:100vh; 
-    padding:20px; 
-    box-sizing:border-box;
-}
+        :root {
+            --gold: #ffd700;
+            --dark: #050505;
+            --panel: rgba(0, 0, 0, 0.86);
+            --soft-panel: rgba(15, 15, 15, 0.92);
+            --text-muted: #d8d8d8;
+            --green: #159447;
+            --red: #b82828;
+        }
 
-h1 { 
-    font-size:36px; 
-    text-shadow: 0 0 15px gold,0 0 30px black; 
-    margin-bottom:20px; 
-}
+        * {
+            box-sizing: border-box;
+        }
 
-#timer { 
-    font-size:22px; 
-    margin-top:10px; 
-}
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: 'Orbitron', sans-serif;
+            background: url("background.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: var(--gold);
+            text-align: center;
+            overflow-x: hidden;
+        }
 
-.question { 
-    font-size:24px; 
-    margin:20px 0 10px 0; 
-}
+        #overlay {
+            min-height: 100vh;
+            padding: 24px 16px;
+            background: var(--panel);
+        }
 
-input[type=text]{ 
-    padding:8px; 
-    font-size:16px; 
-    width:200px; 
-}
+        main {
+            width: min(900px, 100%);
+            margin: 0 auto;
+        }
 
-/* Buttons Style für Quiz, Nächste Frage, Schwierigkeitsgrad, Highscore */
-.answers button,
-#nextButton,
-#difficultySelection button,
-#scoreBoard button {
-    background: black;
-    border: 2px solid gold;
-    color: gold;
-    padding: 12px 24px;
-    margin: 10px auto;
-    cursor: pointer;
-    font-size: 16px;
-    width: 60%;
-    max-width: 300px;
-    display: block;
-    transition: all 0.2s ease;
-    border-radius: 6px;
-}
+        h1 {
+            margin: 0 0 18px;
+            font-size: clamp(28px, 5vw, 44px);
+            line-height: 1.15;
+            text-shadow: 0 0 15px var(--gold), 0 0 30px #000;
+        }
 
-.answers button:hover,
-#nextButton:hover,
-#difficultySelection button:hover,
-#scoreBoard button:hover {
-    background: gold;
-    color: black;
-    transform: scale(1.05);
-}
+        h2,
+        h3 {
+            margin-top: 0;
+            text-shadow: 0 0 10px #000;
+        }
 
-/* Korrekte/Falsche Antwort Animation */
-@keyframes blinkGreen { 0%,100%{background-color:green;} 50%{background-color:white;} }
-@keyframes blinkRed { 0%,100%{background-color:red;} 50%{background-color:white;} }
+        p {
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
 
-button.correct { 
-    animation: blinkGreen 0.6s ease 1; 
-    color: white; 
-    border-color: green;
-}
+        .panel {
+            width: min(760px, 100%);
+            margin: 0 auto 18px;
+            padding: 22px;
+            background: var(--soft-panel);
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            border-radius: 14px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+        }
 
-button.wrong { 
-    animation: blinkRed 0.6s ease 1; 
-    color: white; 
-    border-color: red;
-}
+        .hidden {
+            display: none !important;
+        }
 
-/* Copyright Footer */
-#copyright {
-    margin-top: 30px;
-    font-size: 12px;
-    color: #ccc;
-}
-</style>
+        .button-grid {
+            display: grid;
+            gap: 12px;
+            justify-items: center;
+            margin-top: 18px;
+        }
+
+        button,
+        input[type="text"] {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        button {
+            width: min(320px, 100%);
+            padding: 13px 22px;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            background: #000;
+            color: var(--gold);
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+        }
+
+        button:hover:not(:disabled),
+        button:focus-visible:not(:disabled) {
+            background: var(--gold);
+            color: #000;
+            transform: scale(1.04);
+            outline: none;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        .secondary-button {
+            border-color: #ccc;
+            color: #ccc;
+        }
+
+        .quiz-topbar {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 18px;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        #timer {
+            min-width: 95px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            border-radius: 999px;
+            color: var(--gold);
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        #questionText {
+            margin: 18px 0;
+            font-size: clamp(20px, 4vw, 28px);
+            line-height: 1.35;
+        }
+
+        #answersContainer {
+            display: grid;
+            gap: 12px;
+            justify-items: center;
+            margin: 18px 0;
+        }
+
+        .answer-button {
+            width: min(560px, 100%);
+            max-width: none;
+            min-height: 52px;
+        }
+
+        @keyframes blinkGreen {
+            0%, 100% { background-color: var(--green); }
+            50% { background-color: #fff; color: #000; }
+        }
+
+        @keyframes blinkRed {
+            0%, 100% { background-color: var(--red); }
+            50% { background-color: #fff; color: #000; }
+        }
+
+        .answer-button.correct {
+            animation: blinkGreen 0.55s ease 1;
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
+        }
+
+        .answer-button.wrong {
+            animation: blinkRed 0.55s ease 1;
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+        }
+
+        #feedback {
+            min-height: 26px;
+            margin: 12px 0;
+            color: var(--text-muted);
+        }
+
+        input[type="text"] {
+            width: min(320px, 100%);
+            padding: 12px;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            background: #000;
+            color: var(--gold);
+            font-size: 16px;
+            text-align: center;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 215, 0, 0.6);
+        }
+
+        #leaderBoard {
+            width: min(520px, 100%);
+            margin: 14px auto 0;
+            padding: 0;
+            list-style-position: inside;
+            color: var(--text-muted);
+            text-align: left;
+        }
+
+        #leaderBoard li {
+            margin: 8px 0;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.18);
+        }
+
+        #copyright {
+            margin-top: 28px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        @media (max-width: 620px) {
+            #overlay {
+                padding: 18px 10px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+
+            .quiz-topbar {
+                grid-template-columns: 1fr;
+            }
+
+            #timer {
+                justify-self: center;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div id="overlay">
-<h1>MGS4: Guns of the Patriots – Quiz</h1>
+    <div id="overlay">
+        <main>
+            <h1>MGS4: Guns of the Patriots – Quiz</h1>
 
-<div id="difficultySelection">
-    <p>Wähle Schwierigkeitsgrad:</p>
-    
-    <button onclick="startQuiz('easy')">Easy</button>
-    <button onclick="startQuiz('medium')">Medium</button>
-    <button onclick="startQuiz('hard')">Hard</button>
+            <section id="difficultySelection" class="panel" aria-labelledby="difficultyTitle">
+                <h2 id="difficultyTitle">Schwierigkeitsgrad wählen</h2>
+                <p>Jede Runde enthält bis zu 20 zufällige Fragen aus dem gewählten Schwierigkeitsgrad.</p>
 
-    <br><br>
+                <div class="button-grid">
+                    <button type="button" data-difficulty="easy">Easy</button>
+                    <button type="button" data-difficulty="medium">Medium</button>
+                    <button type="button" data-difficulty="hard">Hard</button>
+                    <button type="button" class="secondary-button" id="backToStartButton">⬅ Zurück zur Startseite</button>
+                </div>
+            </section>
 
-    <button onclick="window.location.href='index.html'">
-        ⬅ Zurück zur Startseite
-    </button>
-</div>
+            <section id="quizContainer" class="panel hidden" aria-live="polite">
+                <div class="quiz-topbar">
+                    <div id="progressText">Frage 1 von 20</div>
+                    <div id="timer">⏱ 30s</div>
+                </div>
 
-<div id="quizContainer" style="display:none;">
-    <div id="timer">⏱ 30s</div>
-    <div id="questionContainer"></div>
-    <div class="answers" id="answersContainer"></div>
-    <button id="nextButton" onclick="nextQuestion()">▶ Nächste Frage</button>
-</div>
+                <div id="questionText"></div>
+                <div id="answersContainer"></div>
+                <div id="feedback"></div>
 
-<div id="scoreBoard">
-    <h2>Quiz beendet!</h2>
-    <p>Deine Punktzahl: <span id="finalScore"></span></p>
-    <p>Trage deinen Namen ein:</p>
-    <input type="text" id="playerName" placeholder="Dein Name">
-    <button onclick="saveScoreLocal()">✔ Speichern</button>
-    <h3>Highscore-Liste</h3>
-    <ul id="leaderBoard"></ul>
-    <br>
-    <button onclick="goBack()">← Zurück zur Hauptseite</button>
-    <br><br>
-    <button onclick="restartQuiz()">↺ Neuer Versuch</button>
-</div>
+                <button type="button" id="nextButton" class="hidden">▶ Nächste Frage</button>
+            </section>
 
-<audio id="bgMusic" loop autoplay>
-    <source src="music.mp3" type="audio/mpeg">
-</audio>
+            <section id="scoreBoard" class="panel hidden" aria-labelledby="scoreTitle">
+                <h2 id="scoreTitle">Quiz beendet!</h2>
+                <p>Schwierigkeit: <span id="finalDifficulty"></span></p>
+                <p>Deine Punktzahl: <strong><span id="finalScore">0</span></strong></p>
 
-<div id="copyright">
-    &copy; 2026 Fanprojekt – Metal Gear Solid Inhalte & Musik gehören Konami.
-</div>
-</div>
+                <label for="playerName">Trage deinen Namen ein:</label><br><br>
+                <input type="text" id="playerName" maxlength="24" placeholder="Dein Name" autocomplete="off">
 
-<script>
-// Musik
-const audio = document.getElementById("bgMusic"); 
-audio.volume=0.3;
-document.addEventListener("click", ()=>{ audio.play().catch(()=>{}); }, {once:true});
+                <div class="button-grid">
+                    <button type="button" id="saveScoreButton">✔ Speichern</button>
+                    <button type="button" id="restartButton">↺ Neuer Versuch</button>
+                    <button type="button" class="secondary-button" id="scoreBackButton">← Zurück zur Hauptseite</button>
+                </div>
 
-// Fragenpool – 100 echte MGS4 Fragen
-const questionPool = [
-{q:"Wie lautet Snakes Deckname in MGS4?", a:["Old Snake","Solid Snake","Liquid Snake","Naked Snake"], correct:0, difficulty:"easy"},
-{q:"In welcher Stadt beginnt MGS4?", a:["New York","Washington D.C.","Paris","London"], correct:1, difficulty:"easy"},
-{q:"Was sind ‚The Patriots‘?", a:["Geheime Organisation","Militärbasis","Nanomaschinen","Kampfroboter"], correct:0, difficulty:"medium"},
-{q:"Was ist Snakes medizinisches Problem?", a:["Beschleunigtes Altern","Amnesie","Blindheit","Allergie"], correct:0, difficulty:"medium"},
-{q:"Welchen Spitznamen trägt Liquid Ocelot?", a:["Liquid Ocelot","Revolver Ocelot","Solidus","Ocelot"], correct:1, difficulty:"easy"},
-{q:"Welches System kontrolliert die Militärwelt in MGS4?", a:["SOP","Gekko","FOXHOUND","Dead Cell"], correct:0, difficulty:"easy"},
-{q:"Was steht ‚SOP‘ für?", a:["Sons of Patriots","Solidus Operation","Snake of Patriots","System of Patriots"], correct:0, difficulty:"medium"},
-{q:"Wer hilft Snake technologisch?", a:["Otacon","Campbell","Meryl","Eva"], correct:0, difficulty:"easy"},
-{q:"Welche Figur ist Vamp?", a:["Kämpfer mit Heilfähigkeiten","Nanotechnologie‑Techniker","Codec‑Operator","Patriot‑KI"], correct:0, difficulty:"medium"},
-{q:"Welche Organisation jagt Snake in Europa?", a:["Dead Cell","FOXHOUND","MSF","Diamond Dogs"], correct:0, difficulty:"medium"},
-{q:"Was trägt Snake in MGS4 ständig bei sich?", a:["Stealth Camo","Jetpack","Flammenwerfer","Schwert"], correct:0, difficulty:"easy"},
-{q:"Wo findet der Showdown im Spiel statt?", a:["Outer Haven","Big Shell","Shadow Moses","Mother Base"], correct:0, difficulty:"hard"},
-{q:"Wer ist der Anführer von Dead Cell?", a:["Liquid Ocelot","Sniper Wolf","Psycho Mantis","Big Boss"], correct:0, difficulty:"hard"},
-{q:"Was ist ein ‚Gekko‘?", a:["Kampfroboter","Nanowaffe","Patriot‑KI","Kampfsuit"], correct:0, difficulty:"medium"},
-{q:"Welches Jahr ist in der Story verankert?", a:["2014","2008","2010","2012"], correct:0, difficulty:"easy"},
-{q:"Welche Waffe verwendet Snake häufig?", a:["SOCOM","FAMAS","AK‑47","M16"], correct:0, difficulty:"easy"},
-{q:"Wer ist Laughing Octopus?", a:["Dead Cell Mitglied","FOXHOUND Soldat","Patriot‑Agent","Otacon"], correct:0, difficulty:"hard"},
-{q:"Wie viele Kapitel hat MGS4?", a:["9","6","12","4"], correct:0, difficulty:"medium"},
-{q:"Wer ist Snakes Freund und Verbündeter?", a:["Otacon","Liquid","Raiden","Eva"], correct:0, difficulty:"easy"},
-{q:"Welche Figur besitzt Tentakel‑Fähigkeiten?", a:["Laughing Octopus","Psycho Mantis","Sniper Wolf","Raiden"], correct:0, difficulty:"hard"},
-{q:"Was ist Snakes Codec‑Partner in MGS4?", a:["Otacon","Campbell","Meryl","Raiden"], correct:0, difficulty:"easy"},
-{q:"Welche Figur nutzt Nanomaschinen?", a:["Snake","Otacon","Meryl","Campbell"], correct:0, difficulty:"medium"},
-{q:"Welche Region besucht Snake NICHT?", a:["Afrika","Antarktis","Europa","Asien"], correct:1, difficulty:"hard"},
-{q:"Welche Organisation hat die Kontrolle über SOP?", a:["The Patriots","DH","FOXHOUND","MSF"], correct:0, difficulty:"medium"},
-{q:"Warum altert Snake schneller?", a:["Genetische Kondition","Nanomaschinen","Virus","Kodex"], correct:0, difficulty:"medium"},
-{q:"Wer ist Solidus Snake?", a:["Ex‑US Präsident & Klon","Agent","Techniker","Nanomaschinen‑Forscher"], correct:0, difficulty:"hard"},
-{q:"Wie heißt Snakes Adoptivtochter?", a:["Sunny","Naomi","Svetlana","Eva"], correct:0, difficulty:"easy"},
-{q:"Welche Figur ist Psycho Mantis in MGS4?", a:["Gehirnleser","Schütze","Cyborg","Nanomaschinen‑Operator"], correct:0, difficulty:"medium"},
-{q:"Was ist Outer Haven?", a:["Patriots Flotte","Militärbasis","Stealth Suit","Codec System"], correct:0, difficulty:"hard"},
-{q:"Wer trainiert Snake in taktischen Einsätzen?", a:["Roy Campbell","Otacon","Meryl","Liquid"], correct:0, difficulty:"easy"},
-{q:"Welche Figur stirbt im Spiel?", a:["Big Boss","Snake","Ocelot","Otacon"], correct:0, difficulty:"medium"},
-{q:"Mit welcher Waffe zerstört Snake Gekko‑Einheiten?", a:["SOCOM","Sniper","RPG","Laser"], correct:2, difficulty:"medium"},
-{q:"Welche Figur nutzt Tarnfeld‑Technologie?", a:["Snake","Raiden","Liquid","Meryl"], correct:0, difficulty:"easy"},
-{q:"Wie heißt der Hauptkommandant von Dead Cell?", a:["Liquid Ocelot","Laughing Octopus","Raging Raven","Psycho Mantis"], correct:0, difficulty:"hard"},
-{q:"Was steht ‚MSF‘ für?", a:["Militaires Sans Frontières","Military Special Force","Mother Base Team","Metal Gear Squad"], correct:0, difficulty:"medium"},
-{q:"Welche Figur hat einen Scherenarm?", a:["Raging Raven","Laughing Octopus","Psycho Mantis","Snake"], correct:0, difficulty:"hard"},
-{q:"In welcher Stadt findet keiner der Hauptkämpfe statt?", a:["Paris","London","Venedig","New York"], correct:2, difficulty:"medium"},
-{q:"Wer ist Snakes Unterstützer im Nahkampf?", a:["Meryl","Otacon","Campbell","Raiden"], correct:0, difficulty:"easy"},
-{q:"Welche Figur nutzt Emotionsmanipulation?", a:["Psycho Mantis","Laughing Octopus","Otacon","Snake"], correct:0, difficulty:"hard"},
-{q:"Welche Figur ist Blade Wolf?", a:["Cyborg Ninja Gegner","Freund","Techniker","Drone"], correct:0, difficulty:"hard"},
-{q:"Wer war früher Teil von FOXHOUND?", a:["Revolver Ocelot","Raiden","Otacon","Meryl"], correct:0, difficulty:"medium"},
-{q:"Welche Figur besitzt Schnelligkeit und Sprungfähigkeiten?", a:["Blade Wolf","Snake","Otacon","Liquid"], correct:0, difficulty:"hard"},
-{q:"Wo befindet sich Snakes Basis in Afrika?", a:["Wüste","Stadt","Wald","Berg"], correct:0, difficulty:"medium"},
-{q:"Was ist ein ‚Gekko‘ primär?", a:["Patriot‑Roboter","Codec Gerät","Nanomaschine","Fahrzeug"], correct:0, difficulty:"medium"},
-{q:"Warum nutzt Snake Nanomaschinen?", a:["Kampfverbesserung","Arztbefehl","Zwang","Technik"], correct:0, difficulty:"easy"},
-{q:"Welche Figur hat psychische Kräfte?", a:["Psycho Mantis","Otacon","Snake","Campbell"], correct:0, difficulty:"medium"},
-{q:"Welche Figur kämpft im Paris‑Abschnitt?", a:["Sniper Wolf","Snake","Liquid","Otacon"], correct:0, difficulty:"medium"},
-{q:"Wer ist Naomi Hunter in MGS4?", a:["Wissenschaftlerin","Soldatin","Journalistin","Technikerin"], correct:0, difficulty:"medium"},
-{q:"Welche Figur kämpft mit Tentakeln?", a:["Laughing Octopus","Psycho Mantis","Snake","Liquid"], correct:0, difficulty:"hard"},
-{q:"Welche Figur arbeitet für Dead Cell?", a:["Raging Raven","Otacon","Campbell","Meryl"], correct:0, difficulty:"medium"},
-{q:"Was passiert, wenn Snake keine Nanomaschinen mehr hat?", a:["Schneller Tod","Unbesiegbarkeit","Teleportation","Unverwundbarkeit"], correct:0, difficulty:"medium"},
-{q:"Wie viele Kapitel hat MGS4?", a:["9","10","13","7"], correct:0, difficulty:"medium"},
-{q:"Was ist ‚Outer Haven‘ am Ende des Spiels?", a:["Patriot‑Schiff","Militärbasis","Versteck","Wüste"], correct:0, difficulty:"hard"},
-{q:"Welche Figur ist Revolver Ocelot in MGS4?", a:["Verbündeter & Antagonist","Nur Gegner","Nur Verbündeter","Nanomaschinen‑Forscher"], correct:0, difficulty:"medium"},
-{q:"Wer ist Big Boss am Ende?", a:["Snakes Vater & Mentor","Gegner","Nanomaschinen‑Test","Otacon"], correct:0, difficulty:"hard"},
-{q:"Welche Figur tritt als Unterstützer im Nahkampf auf?", a:["Meryl","Revolver Ocelot","Liquid","Vamp"], correct:0, difficulty:"medium"},
-{q:"Welche Figur hat Tarnkappenfähigkeiten?", a:["Laughing Octopus","Blade Wolf","Otacon","Raiden"], correct:0, difficulty:"medium"},
-{q:"Wer nutzt Scharfschützenfähigkeiten?", a:["Sniper Wolf","Snake","Liquid","Otacon"], correct:1, difficulty:"easy"},
-{q:"Welche Figur ist nanotechnologisch verstärkt?", a:["Snake","Raiden","Vamp","Campbell"], correct:0, difficulty:"medium"},
-{q:"Wer hilft Snake im Nahkampftechnik‑Abschnitt?", a:["Otacon","Meryl","Campbell","Raiden"], correct:1, difficulty:"medium"},
-{q:"Welche Figur war früher ein Geheimagent?", a:["Otacon","Liquid","Raiden","Snake"], correct:1, difficulty:"medium"},
-{q:"Wer verursacht die meisten Nanomaschinen‑Ausfälle?", a:["Liquid Ocelot","Snake","Otacon","Campbell"], correct:0, difficulty:"hard"},
-{q:"Welche Figur kämpft mit einem Jetpack?", a:["Blade Wolf","Snake","Raiden","Liquid"], correct:0, difficulty:"hard"},
-{q:"Welche Figur ist in Venedig?", a:["Snake","Otacon","Liquid","Raiden"], correct:0, difficulty:"medium"},
-{q:"Welche Figur nutzt Nanomachinen zur Heilung?", a:["Snake","Liquid","Vamp","Otacon"], correct:0, difficulty:"medium"},
-{q:"Welche Figur tritt in Amerika auf?", a:["Snake","Raiden","Otacon","Meryl"], correct:0, difficulty:"easy"},
-{q:"Wer ist Snakes Codec Partner?", a:["Otacon","Campbell","Meryl","Raiden"], correct:0, difficulty:"easy"},
-{q:"Wer nutzt Nanomaschinen für Heilung?", a:["Snake","Liquid","Vamp","Otacon"], correct:0, difficulty:"medium"},
-{q:"Wer kämpft in Venedig?", a:["Snake","Otacon","Raiden","Liquid"], correct:0, difficulty:"medium"},
-{q:"Wer ist Psycho Mantis?", a:["Gedankenleser","Soldat","Techniker","Nanomaschinen-Operator"], correct:0, difficulty:"medium"}
-];
+                <h3>Highscore-Liste</h3>
+                <ol id="leaderBoard"></ol>
+            </section>
+        </main>
 
-let questions = [], currentQuestion=0, score=0, timeLeft=30, timer, difficulty="easy";
-const questionContainer=document.getElementById("questionContainer");
-const answersContainer=document.getElementById("answersContainer");
-const nextButton=document.getElementById("nextButton");
-const quizContainer=document.getElementById("quizContainer");
-const scoreBoard=document.getElementById("scoreBoard");
-const timerDisplay=document.getElementById("timer");
+        <audio id="bgMusic" loop preload="auto">
+            <source src="music.mp3" type="audio/mpeg">
+        </audio>
 
-// Quiz starten
-function startQuiz(level){
-    difficulty=level;
-    document.getElementById("difficultySelection").style.display="none";
-    quizContainer.style.display="block";
-    score=0; currentQuestion=0;
-    questions=shuffleArray(questionPool.filter(q=>q.difficulty===difficulty)).slice(0,20);
-    showQuestion();
-}
+        <div id="copyright">
+            &copy; 2026 Fanprojekt – Metal Gear Solid Inhalte & Musik gehören Konami.
+        </div>
+    </div>
 
-// Timer
-function startTimer(){
-    clearInterval(timer);
-    timeLeft=30;
-    timerDisplay.textContent=`⏱ ${timeLeft}s`;
-    timer=setInterval(()=>{
-        timeLeft--;
-        timerDisplay.textContent=`⏱ ${timeLeft}s`;
-        if(timeLeft<=0){ clearInterval(timer); markTimeOut(); }
-    },1000);
-}
+    <script>
+        "use strict";
 
-function markTimeOut(){
-    const buttons = answersContainer.querySelectorAll("button");
-    buttons.forEach(btn=>btn.disabled=true);
-    buttons.forEach(btn=>{ if(btn.dataset.correct==="true") btn.classList.add("correct"); });
-    nextButton.style.display="inline-block";
-}
+        const TIME_PER_QUESTION = 30;
+        const QUESTIONS_PER_ROUND = 20;
+        const HIGHSCORE_KEY = "mgs4QuizHighscoresV2";
 
-// Frage anzeigen
-function showQuestion(){
-    startTimer();
-    const q=questions[currentQuestion];
-    questionContainer.innerHTML=`<div class="question">${q.q}</div>`;
-    answersContainer.innerHTML="";
-    const answers=q.a.map((text,index)=>({text:index===q.correct?text:text, correct:index===q.correct}));
-    const shuffledAnswers=shuffleArray(answers);
-    shuffledAnswers.forEach(ansObj=>{
-        const btn=document.createElement("button");
-        btn.textContent=ansObj.text;
-        btn.dataset.correct=ansObj.correct;
-        btn.onclick=()=>checkAnswer(btn, ansObj.correct);
-        answersContainer.appendChild(btn);
-    });
-    nextButton.style.display="none";
-}
+        const LEVEL_LABELS = {
+            easy: "Easy",
+            medium: "Medium",
+            hard: "Hard"
+        };
 
-// Antwort prüfen
-function checkAnswer(button,isCorrect){
-    clearInterval(timer);
-    const buttons = answersContainer.querySelectorAll("button");
-    if(isCorrect){ button.classList.add("correct"); score += 1000; }
-    else{ button.classList.add("wrong"); buttons.forEach(b=>{if(b.dataset.correct==="true") b.classList.add("correct");}); }
-    buttons.forEach(b=>b.disabled=true);
-    nextButton.style.display="inline-block";
-}
+        const SCORE_BASE = {
+            easy: 500,
+            medium: 750,
+            hard: 1000
+        };
 
-// Nächste Frage
-function nextQuestion(){
-    currentQuestion++;
-    if(currentQuestion<questions.length){ showQuestion(); }
-    else{ endQuiz(); }
-}
+        const questionPool = [
+            // Easy – Grundlagen, Figuren, offensichtliche Storypunkte
+            {
+                difficulty: "easy",
+                text: "Wie wird Solid Snake in MGS4 meistens genannt?",
+                answers: ["Old Snake", "Naked Snake", "Solidus Snake", "Venom Snake"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "In welchem Jahr spielt die Haupthandlung von MGS4?",
+                answers: ["2014", "2005", "2024", "1999"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wer ist Snakes wichtigster technischer Partner?",
+                answers: ["Otacon", "Volgin", "The Boss", "Skull Face"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wie heißt Snakes mobiles Flugzeug-Hauptquartier?",
+                answers: ["Nomad", "Outer Heaven", "Mother Base", "Big Shell"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Welche Tarnfunktion nutzt Snakes Anzug in MGS4?",
+                answers: ["OctoCamo", "Active Sonar", "FoxCamo", "Solid Suit"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Welche kleine Roboter-Unterstützung steuert Otacon?",
+                answers: ["Metal Gear Mk. II", "Metal Gear ZEKE", "Metal Gear D", "TX-55"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wie heißt der Hauptgegner von MGS4?",
+                answers: ["Liquid Ocelot", "Psycho Mantis", "Vulcan Raven", "Decoy Octopus"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Welche Einheit wird von Meryl Silverburgh angeführt?",
+                answers: ["Rat Patrol Team 01", "Diamond Dogs", "Dead Cell", "FOX"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wie lautet Johnnys Spitzname im Team von Meryl?",
+                answers: ["Akiba", "Raikov", "Sigint", "Ocelot"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wer verkauft Snake Waffen und entfernt ID-Sperren von Waffen?",
+                answers: ["Drebin", "Roy Campbell", "Rosemary", "Mei Ling"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Was sind Gekkos in MGS4?",
+                answers: ["Unbemannte zweibeinige Kampfmaschinen", "Codec-Geräte", "Medizinische Nanomaschinen", "Ein Tarnanzug-Modell"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Welche bekannte Basis aus Metal Gear Solid 1 besucht Snake erneut?",
+                answers: ["Shadow Moses", "Groznyj Grad", "Camp Omega", "Mother Base"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Welcher Cyborg-Ninja hilft Snake mehrfach im Spiel?",
+                answers: ["Raiden", "Gray Fox", "Solidus", "Vamp"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wie heißt das Mädchen, das auf der Nomad lebt?",
+                answers: ["Sunny", "Emma", "Olga", "Cécile"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wer ist Big Mama in Wahrheit?",
+                answers: ["EVA", "Naomi Hunter", "The Boss", "Sniper Wolf"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Welche geheime Macht kontrolliert die Welt im Hintergrund?",
+                answers: ["Die Patriots", "FOXHOUND", "MSF", "Cobra Unit"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Was ist Outer Haven?",
+                answers: ["Eine riesige seegestützte Kriegsfestung", "Ein Dorf in Südamerika", "Snakes Tarnanzug", "Ein Codec-Kanal"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wie heißt die Boss-Einheit mit Laughing Octopus, Raging Raven, Crying Wolf und Screaming Mantis?",
+                answers: ["Beauty and the Beast Corps", "Dead Cell", "Cobra Unit", "FOX Unit"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Welches gesundheitliche Hauptproblem hat Snake in MGS4?",
+                answers: ["Beschleunigtes Altern", "Gedächtnisverlust", "Blindheit", "Parasitenbefall"],
+                correct: 0
+            },
+            {
+                difficulty: "easy",
+                text: "Wer ist Snakes früherer Kommandant und Kontakt in MGS4?",
+                answers: ["Roy Campbell", "Kaz Miller", "Zero", "Major Raikov"],
+                correct: 0
+            },
 
-// Quiz beenden
-function endQuiz(){
-    quizContainer.style.display="none";
-    scoreBoard.style.display="block";
-    document.getElementById("finalScore").textContent=score;
-    loadLocalLeaderboard();
-}
+            // Medium – Storystruktur, Systeme, Boss-Zuordnung
+            {
+                difficulty: "medium",
+                text: "Wofür steht SOP in MGS4?",
+                answers: ["Sons of the Patriots", "System of Peace", "Soldiers of Outer Paradise", "Snake Operation Program"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Wofür steht PMC im Kontext der Kriegswirtschaft?",
+                answers: ["Private Military Company", "Patriot Main Computer", "Portable Metal Cannon", "Public Mission Command"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "In welchem Akt beginnt Snake seine Mission im Nahen Osten?",
+                answers: ["Akt 1", "Akt 2", "Akt 4", "Akt 5"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "In welchem Akt reist Snake nach Südamerika?",
+                answers: ["Akt 2", "Akt 1", "Akt 3", "Akt 5"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welcher Akt spielt größtenteils in Osteuropa?",
+                answers: ["Akt 3", "Akt 1", "Akt 4", "Akt 5"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welcher Akt bringt Snake zurück nach Shadow Moses?",
+                answers: ["Akt 4", "Akt 2", "Akt 3", "Akt 5"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welcher Akt findet auf Outer Haven statt?",
+                answers: ["Akt 5", "Akt 1", "Akt 2", "Akt 4"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welcher B&B-Boss ist der erste große Beauty-and-the-Beast-Kampf?",
+                answers: ["Laughing Octopus", "Crying Wolf", "Screaming Mantis", "Raging Raven"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welche B&B-Bossin kämpft in Osteuropa mit Flugtechnik?",
+                answers: ["Raging Raven", "Laughing Octopus", "Crying Wolf", "Fortune"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welche B&B-Bossin jagt Snake in Shadow Moses?",
+                answers: ["Crying Wolf", "Screaming Mantis", "Laughing Octopus", "The Pain"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Wer ist der letzte Beauty-and-the-Beast-Boss auf Outer Haven?",
+                answers: ["Screaming Mantis", "Raging Raven", "Crying Wolf", "Vamp"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welche Wissenschaftlerin ist besonders mit FOXDIE und Nanomaschinen verbunden?",
+                answers: ["Naomi Hunter", "Mei Ling", "Para-Medic", "Amanda Valenciano"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Wie heißt EVAs Widerstandsbewegung in Osteuropa?",
+                answers: ["Paradise Lost Army", "Militaires Sans Frontières", "Outer Heaven", "Philanthropy"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Womit kann Snake Vamp im Bosskampf dauerhaft schwächen?",
+                answers: ["Mit der Spritze", "Mit einer Betäubungsgranate", "Mit einem Codec-Befehl", "Mit OctoCamo"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Was ermöglicht OctoCamo im Spiel hauptsächlich?",
+                answers: ["Anpassung an Oberflächen und Muster", "Teleportation", "Gedankenlesen", "Unendliche Munition"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Wer injiziert Snake zu Beginn neue Nanomaschinen?",
+                answers: ["Drebin", "Meryl", "Sunny", "Mei Ling"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Was kontrolliert das SOP-System bei Soldaten?",
+                answers: ["Kampfdaten, Waffenfreigaben und Emotionen", "Nur die Funkfrequenz", "Nur den Treibstoffverbrauch", "Nur die Kleidung"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welchen KI-Kern will Liquid Ocelot mit Outer Haven nutzen?",
+                answers: ["GW", "The Joy", "Mammal Pod", "Metal Gear ZEKE"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Wer heiratet Meryl im Epilog?",
+                answers: ["Johnny Sasaki", "Raiden", "Otacon", "Drebin"],
+                correct: 0
+            },
+            {
+                difficulty: "medium",
+                text: "Welche Spezialeinheit begegnet Snake wiederholt als Elite-Soldatinnen von Liquid Ocelot?",
+                answers: ["FROGs / Haven Troopers", "Cobra Unit", "Ocelot Unit", "Diamond Dogs"],
+                correct: 0
+            },
 
-// Highscore lokal speichern
-function saveScoreLocal(){
-    const name=document.getElementById("playerName").value||"Unbekannt";
-    let scores = JSON.parse(localStorage.getItem("mgs4Highscores") || "[]");
-    scores.push({name:name, score:score});
-    scores.sort((a,b)=>b.score-a.score);
-    localStorage.setItem("mgs4Highscores", JSON.stringify(scores));
-    loadLocalLeaderboard();
-}
+            // Hard – Detailwissen, Spoiler, Akttitel, KI-Systeme
+            {
+                difficulty: "hard",
+                text: "Wie heißen die fünf Patriots-KIs?",
+                answers: ["GW, TJ, TR, AL und JD", "GW, FOX, REX, RAY und ZEKE", "JD, EVA, SOP, MSF und FOX", "AI Pod, Mammal Pod, Reptile Pod, ZEKE und Sahelanthropus"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Welche Patriots-KI ist der zentrale Kern des Netzwerks?",
+                answers: ["JD", "GW", "AL", "TR"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wessen Körper wird in MGS4 zeitweise für Big Boss' Körper gehalten?",
+                answers: ["Solidus Snake", "Liquid Snake", "The Sorrow", "Gray Fox"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie wird Liquid Ocelots Liquid-Persönlichkeit im Kern erklärt?",
+                answers: ["Durch Selbsthypnose, Psychotherapie und Nanomaschinen", "Durch echte Geisterbesessenheit", "Durch eine KI im Codec", "Durch den Sorrow-Puppenfluch"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Welche Puppe ermöglicht Screaming Mantis die Kontrolle über lebende Personen?",
+                answers: ["Mantis-Puppe", "Sorrow-Puppe", "Snake-Puppe", "Raven-Puppe"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Welche Puppe ist bei Screaming Mantis mit der Kontrolle über Tote verbunden?",
+                answers: ["Sorrow-Puppe", "Mantis-Puppe", "Octopus-Puppe", "Wolf-Puppe"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Welches Metal Gear steuert Snake in Shadow Moses?",
+                answers: ["Metal Gear REX", "Metal Gear RAY", "Metal Gear ZEKE", "Sahelanthropus"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Gegen welches Metal Gear kämpft REX in MGS4?",
+                answers: ["Metal Gear RAY", "Metal Gear ZEKE", "TX-55", "Shagohod"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wer kämpft in Shadow Moses gegen Vamp, während Snake Gekkos abwehrt?",
+                answers: ["Raiden", "Meryl", "Drebin", "Roy Campbell"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie heißt Rose und Raidens Sohn?",
+                answers: ["John", "Jack", "David", "George"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie heißt Drebins Affe?",
+                answers: ["Little Gray", "Sunny Boy", "Jack Junior", "Metal Monkey"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie lautet der Titel von Akt 1?",
+                answers: ["Liquid Sun", "Solid Sun", "Twin Suns", "Old Sun"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie lautet der Titel von Akt 2?",
+                answers: ["Solid Sun", "Liquid Sun", "Third Sun", "Naked Sin"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie lautet der Titel von Akt 3?",
+                answers: ["Third Sun", "Old Sun", "Twin Suns", "Liquid Sun"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie lautet der Titel von Akt 4?",
+                answers: ["Twin Suns", "Solid Sun", "Old Sun", "Third Sun"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wie lautet der Titel von Akt 5?",
+                answers: ["Old Sun", "Liquid Sun", "Twin Suns", "Solid Sun"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Warum altert Snake in MGS4 so schnell?",
+                answers: ["Seine Klon-DNA hat eine künstlich verkürzte Lebensspanne", "Er wurde von Vamp gebissen", "OctoCamo entzieht ihm Lebensenergie", "Er benutzt zu oft den Codec"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Welches Programm beendet am Ende die Kontrolle der Patriots, ohne die ganze Zivilisation zu zerstören?",
+                answers: ["FOXALIVE", "FOXDIE", "S3 Plan", "Les Enfants Terribles"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Wodurch stirbt Big Boss am Ende von MGS4?",
+                answers: ["Durch FOXDIE", "Durch REX", "Durch Vamp", "Durch die Sorrow-Puppe"],
+                correct: 0
+            },
+            {
+                difficulty: "hard",
+                text: "Was ist Snakes letzte große Aufgabe im Mikrowellen-Korridor von Outer Haven?",
+                answers: ["Den Serverraum erreichen, damit Mk. III das System infiltrieren kann", "Einen Hubschrauber starten", "Shadow Moses sprengen", "RAY reparieren"],
+                correct: 0
+            }
+        ];
 
-// Highscore laden
-function loadLocalLeaderboard(){
-    let scores = JSON.parse(localStorage.getItem("mgs4Highscores") || "[]");
-    const list=document.getElementById("leaderBoard");
-    list.innerHTML="";
-    scores.slice(0,10).forEach(s=>{
-        const li=document.createElement("li");
-        li.textContent=`${s.name}: ${s.score} Punkte`;
-        list.appendChild(li);
-    });
-}
+        let selectedQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentDifficulty = "easy";
+        let score = 0;
+        let secondsLeft = TIME_PER_QUESTION;
+        let timerId = null;
+        let answerLocked = false;
+        let scoreSaved = false;
 
-// Zurück zur Index
-function goBack(){ window.location.href="index.html"; }
+        const difficultySelection = document.getElementById("difficultySelection");
+        const quizContainer = document.getElementById("quizContainer");
+        const scoreBoard = document.getElementById("scoreBoard");
+        const progressText = document.getElementById("progressText");
+        const timerDisplay = document.getElementById("timer");
+        const questionText = document.getElementById("questionText");
+        const answersContainer = document.getElementById("answersContainer");
+        const feedback = document.getElementById("feedback");
+        const nextButton = document.getElementById("nextButton");
+        const finalDifficulty = document.getElementById("finalDifficulty");
+        const finalScore = document.getElementById("finalScore");
+        const playerName = document.getElementById("playerName");
+        const saveScoreButton = document.getElementById("saveScoreButton");
+        const leaderBoard = document.getElementById("leaderBoard");
+        const bgMusic = document.getElementById("bgMusic");
 
-// Neustart Button → Schwierigkeitsauswahl
-function restartQuiz(){
-    scoreBoard.style.display="none";
-    document.getElementById("difficultySelection").style.display="block";
-    currentQuestion = 0;
-    score = 0;
-}
+        document.querySelectorAll("[data-difficulty]").forEach((button) => {
+            button.addEventListener("click", () => startQuiz(button.dataset.difficulty));
+        });
 
-// Array mischen
-function shuffleArray(array){
-    for(let i=array.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [array[i],array[j]]=[array[j],array[i]];
-    }
-    return array;
-}
-</script>
+        document.getElementById("backToStartButton").addEventListener("click", goBack);
+        document.getElementById("scoreBackButton").addEventListener("click", goBack);
+        document.getElementById("restartButton").addEventListener("click", restartQuiz);
+        nextButton.addEventListener("click", nextQuestion);
+        saveScoreButton.addEventListener("click", saveScoreLocal);
+
+        document.addEventListener("click", () => {
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(() => {});
+        }, { once: true });
+
+        validateQuestionPool();
+
+        function startQuiz(level) {
+            if (!LEVEL_LABELS[level]) {
+                console.error("Unbekannter Schwierigkeitsgrad:", level);
+                return;
+            }
+
+            clearTimer();
+            currentDifficulty = level;
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreSaved = false;
+            saveScoreButton.disabled = false;
+            playerName.value = "";
+
+            const filteredQuestions = questionPool.filter((question) => question.difficulty === level);
+            selectedQuestions = shuffleArray([...filteredQuestions]).slice(0, Math.min(QUESTIONS_PER_ROUND, filteredQuestions.length));
+
+            if (selectedQuestions.length === 0) {
+                alert("Für diesen Schwierigkeitsgrad wurden keine Fragen gefunden.");
+                return;
+            }
+
+            difficultySelection.classList.add("hidden");
+            scoreBoard.classList.add("hidden");
+            quizContainer.classList.remove("hidden");
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            clearTimer();
+            answerLocked = false;
+            feedback.textContent = "";
+            nextButton.classList.add("hidden");
+            answersContainer.replaceChildren();
+
+            const question = selectedQuestions[currentQuestionIndex];
+            progressText.textContent = `Frage ${currentQuestionIndex + 1} von ${selectedQuestions.length} · ${LEVEL_LABELS[currentDifficulty]}`;
+            questionText.textContent = question.text;
+
+            const shuffledAnswers = shuffleArray(question.answers.map((answer, index) => ({
+                text: answer,
+                isCorrect: index === question.correct
+            })));
+
+            shuffledAnswers.forEach((answer) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "answer-button";
+                button.textContent = answer.text;
+                button.dataset.correct = String(answer.isCorrect);
+                button.addEventListener("click", () => checkAnswer(button, answer.isCorrect));
+                answersContainer.appendChild(button);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            secondsLeft = TIME_PER_QUESTION;
+            updateTimerDisplay();
+
+            timerId = window.setInterval(() => {
+                secondsLeft -= 1;
+                updateTimerDisplay();
+
+                if (secondsLeft <= 0) {
+                    clearTimer();
+                    markTimeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            timerDisplay.textContent = `⏱ ${secondsLeft}s`;
+        }
+
+        function clearTimer() {
+            if (timerId !== null) {
+                window.clearInterval(timerId);
+                timerId = null;
+            }
+        }
+
+        function checkAnswer(clickedButton, isCorrect) {
+            if (answerLocked) return;
+
+            answerLocked = true;
+            clearTimer();
+
+            const buttons = answersContainer.querySelectorAll("button");
+            buttons.forEach((button) => button.disabled = true);
+
+            if (isCorrect) {
+                clickedButton.classList.add("correct");
+                const points = calculatePoints();
+                score += points;
+                feedback.textContent = `Richtig! +${points} Punkte`;
+            } else {
+                clickedButton.classList.add("wrong");
+                highlightCorrectAnswer();
+                feedback.textContent = "Falsch! Die richtige Antwort wurde markiert.";
+            }
+
+            nextButton.classList.remove("hidden");
+        }
+
+        function markTimeOut() {
+            if (answerLocked) return;
+
+            answerLocked = true;
+            answersContainer.querySelectorAll("button").forEach((button) => button.disabled = true);
+            highlightCorrectAnswer();
+            feedback.textContent = "Zeit abgelaufen! Die richtige Antwort wurde markiert.";
+            nextButton.classList.remove("hidden");
+        }
+
+        function highlightCorrectAnswer() {
+            answersContainer.querySelectorAll("button").forEach((button) => {
+                if (button.dataset.correct === "true") {
+                    button.classList.add("correct");
+                }
+            });
+        }
+
+        function calculatePoints() {
+            return SCORE_BASE[currentDifficulty] + (secondsLeft * 10);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex += 1;
+
+            if (currentQuestionIndex < selectedQuestions.length) {
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            clearTimer();
+            quizContainer.classList.add("hidden");
+            scoreBoard.classList.remove("hidden");
+            finalDifficulty.textContent = LEVEL_LABELS[currentDifficulty];
+            finalScore.textContent = String(score);
+            loadLocalLeaderboard();
+        }
+
+        function saveScoreLocal() {
+            if (scoreSaved) return;
+
+            const cleanName = playerName.value.trim() || "Unbekannt";
+            const scores = getScores();
+
+            scores.push({
+                name: cleanName,
+                score,
+                difficulty: currentDifficulty,
+                date: new Date().toLocaleDateString("de-DE")
+            });
+
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(scores.slice(0, 50)));
+
+            scoreSaved = true;
+            saveScoreButton.disabled = true;
+            loadLocalLeaderboard();
+        }
+
+        function loadLocalLeaderboard() {
+            const scores = getScores();
+            leaderBoard.replaceChildren();
+
+            const topScores = scores.slice(0, 10);
+
+            if (topScores.length === 0) {
+                const item = document.createElement("li");
+                item.textContent = "Noch keine Einträge vorhanden.";
+                leaderBoard.appendChild(item);
+                return;
+            }
+
+            topScores.forEach((entry) => {
+                const item = document.createElement("li");
+                const level = LEVEL_LABELS[entry.difficulty] || "Unbekannt";
+                item.textContent = `${entry.name}: ${entry.score} Punkte · ${level} · ${entry.date || "ohne Datum"}`;
+                leaderBoard.appendChild(item);
+            });
+        }
+
+        function getScores() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(HIGHSCORE_KEY) || "[]");
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                console.warn("Highscores konnten nicht gelesen werden:", error);
+                return [];
+            }
+        }
+
+        function restartQuiz() {
+            clearTimer();
+            scoreBoard.classList.add("hidden");
+            quizContainer.classList.add("hidden");
+            difficultySelection.classList.remove("hidden");
+            feedback.textContent = "";
+            answersContainer.replaceChildren();
+            questionText.textContent = "";
+            nextButton.classList.add("hidden");
+        }
+
+        function goBack() {
+            window.location.href = "index.html";
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i -= 1) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function validateQuestionPool() {
+            const seenTexts = new Set();
+
+            questionPool.forEach((question, index) => {
+                const questionNumber = index + 1;
+
+                if (!question.text || !Array.isArray(question.answers) || question.answers.length !== 4) {
+                    console.warn(`Frage ${questionNumber} ist unvollständig oder hat nicht genau 4 Antworten.`);
+                }
+
+                if (!LEVEL_LABELS[question.difficulty]) {
+                    console.warn(`Frage ${questionNumber} hat keinen gültigen Schwierigkeitsgrad.`);
+                }
+
+                if (!Number.isInteger(question.correct) || question.correct < 0 || question.correct >= question.answers.length) {
+                    console.warn(`Frage ${questionNumber} hat einen ungültigen correct-Wert.`);
+                }
+
+                const normalizedText = String(question.text).trim().toLowerCase();
+                if (seenTexts.has(normalizedText)) {
+                    console.warn(`Doppelte Frage gefunden: ${question.text}`);
+                }
+                seenTexts.add(normalizedText);
+            });
+        }
+    </script>
 </body>
 </html>
