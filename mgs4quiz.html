@@ -214,10 +214,45 @@
             text-align: left;
         }
 
-        #leaderBoard li {
-            margin: 8px 0;
-            padding: 8px 10px;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.18);
+$1        .music-panel {
+            width: min(760px, 100%);
+            margin: 0 auto 18px;
+            padding: 14px 16px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 14px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.72);
+            border: 1px solid rgba(255, 215, 0, 0.28);
+            border-radius: 14px;
+        }
+
+        #musicToggleButton {
+            width: auto;
+            min-width: 190px;
+            margin: 0;
+            padding: 10px 16px;
+        }
+
+        .volume-control {
+            display: grid;
+            gap: 7px;
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: left;
+        }
+
+        #musicVolume {
+            width: 100%;
+            accent-color: var(--gold);
+            cursor: pointer;
+        }
+
+        #musicTime {
+            min-width: 155px;
+            color: var(--gold);
+            font-size: 14px;
+            text-align: right;
         }
 
         #copyright {
@@ -226,13 +261,18 @@
             color: #ccc;
         }
 
-        @media (max-width: 620px) {
-            #overlay {
-                padding: 18px 10px;
+$1            .music-panel {
+                grid-template-columns: 1fr;
+                justify-items: stretch;
             }
 
-            .panel {
-                padding: 16px;
+            #musicToggleButton {
+                width: 100%;
+            }
+
+            #musicTime,
+            .volume-control {
+                text-align: center;
             }
 
             .quiz-topbar {
@@ -249,7 +289,17 @@
 <body>
     <div id="overlay">
         <main>
-            <h1>MGS4: Guns of the Patriots – Quiz</h1>
+            $1
+            <section id="musicControls" class="music-panel" aria-label="Musiksteuerung">
+                <button type="button" id="musicToggleButton">▶ Musik starten</button>
+
+                <label class="volume-control" for="musicVolume">
+                    Lautstärke: <span id="volumeValue">30%</span>
+                    <input type="range" id="musicVolume" min="0" max="100" value="30" step="1">
+                </label>
+
+                <div id="musicTime">Restzeit: --:--</div>
+            </section>
 
             <section id="difficultySelection" class="panel" aria-labelledby="difficultyTitle">
                 <h2 id="difficultyTitle">Schwierigkeitsgrad wählen</h2>
@@ -713,8 +763,10 @@
         const finalScore = document.getElementById("finalScore");
         const playerName = document.getElementById("playerName");
         const saveScoreButton = document.getElementById("saveScoreButton");
-        const leaderBoard = document.getElementById("leaderBoard");
-        const bgMusic = document.getElementById("bgMusic");
+$1        const musicToggleButton = document.getElementById("musicToggleButton");
+        const musicVolume = document.getElementById("musicVolume");
+        const volumeValue = document.getElementById("volumeValue");
+        const musicTime = document.getElementById("musicTime");
 
         document.querySelectorAll("[data-difficulty]").forEach((button) => {
             button.addEventListener("click", () => startQuiz(button.dataset.difficulty));
@@ -724,12 +776,18 @@
         document.getElementById("scoreBackButton").addEventListener("click", goBack);
         document.getElementById("restartButton").addEventListener("click", restartQuiz);
         nextButton.addEventListener("click", nextQuestion);
-        saveScoreButton.addEventListener("click", saveScoreLocal);
+$1        bgMusic.volume = Number(musicVolume.value) / 100;
+        updateMusicButton();
+        updateMusicVolumeLabel();
+        updateMusicTime();
 
-        document.addEventListener("click", () => {
-            bgMusic.volume = 0.3;
-            bgMusic.play().catch(() => {});
-        }, { once: true });
+        musicToggleButton.addEventListener("click", toggleMusic);
+        musicVolume.addEventListener("input", updateMusicVolume);
+        bgMusic.addEventListener("loadedmetadata", updateMusicTime);
+        bgMusic.addEventListener("durationchange", updateMusicTime);
+        bgMusic.addEventListener("timeupdate", updateMusicTime);
+        bgMusic.addEventListener("play", updateMusicButton);
+        bgMusic.addEventListener("pause", updateMusicButton);
 
         validateQuestionPool();
 
@@ -948,12 +1006,46 @@
             window.location.href = "index.html";
         }
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i -= 1) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+$1        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play().catch(() => {
+                    musicTime.textContent = "Musik konnte nicht gestartet werden.";
+                });
+            } else {
+                bgMusic.pause();
+                bgMusic.currentTime = 0;
+                updateMusicTime();
             }
-            return array;
+        }
+
+        function updateMusicVolume() {
+            bgMusic.volume = Number(musicVolume.value) / 100;
+            updateMusicVolumeLabel();
+        }
+
+        function updateMusicVolumeLabel() {
+            volumeValue.textContent = `${musicVolume.value}%`;
+        }
+
+        function updateMusicButton() {
+            musicToggleButton.textContent = bgMusic.paused ? "▶ Musik starten" : "■ Musik stoppen";
+        }
+
+        function updateMusicTime() {
+            if (!Number.isFinite(bgMusic.duration) || bgMusic.duration <= 0) {
+                musicTime.textContent = "Restzeit: --:--";
+                return;
+            }
+
+            const remaining = Math.max(0, bgMusic.duration - bgMusic.currentTime);
+            musicTime.textContent = `Restzeit: ${formatTime(remaining)} · ${formatTime(bgMusic.currentTime)} / ${formatTime(bgMusic.duration)}`;
+        }
+
+        function formatTime(totalSeconds) {
+            const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+            const minutes = Math.floor(safeSeconds / 60);
+            const seconds = safeSeconds % 60;
+            return `${minutes}:${String(seconds).padStart(2, "0")}`;
         }
 
         function validateQuestionPool() {
