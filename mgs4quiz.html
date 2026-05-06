@@ -40,7 +40,7 @@
 
         #overlay {
             min-height: 100vh;
-            padding: 24px 16px;
+            padding: 24px 16px 118px;
             background: var(--panel);
         }
 
@@ -65,6 +65,65 @@
         p {
             color: var(--text-muted);
             line-height: 1.5;
+        }
+
+        .release-countdown {
+            position: fixed;
+            left: 50%;
+            bottom: 12px;
+            z-index: 50;
+            width: min(860px, calc(100% - 24px));
+            padding: 10px 14px;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr auto;
+            gap: 12px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 14px;
+            box-shadow: 0 0 22px rgba(0, 0, 0, 0.75), 0 0 12px rgba(255, 215, 0, 0.18);
+            transform: translateX(-50%);
+            backdrop-filter: blur(6px);
+        }
+
+        .countdown-title {
+            color: var(--gold);
+            font-size: 13px;
+            line-height: 1.35;
+            text-align: left;
+        }
+
+        .countdown-status {
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.35;
+            text-align: center;
+        }
+
+        .countdown-values {
+            display: grid;
+            grid-template-columns: repeat(4, auto);
+            gap: 8px;
+        }
+
+        .countdown-values span {
+            min-width: 48px;
+            padding: 6px 8px;
+            display: grid;
+            gap: 2px;
+            color: var(--text-muted);
+            font-size: 10px;
+            line-height: 1.1;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.22);
+            border-radius: 9px;
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .countdown-values strong {
+            color: var(--gold);
+            font-size: 16px;
+            line-height: 1;
         }
 
         .panel,
@@ -387,7 +446,28 @@
 
         @media (max-width: 700px) {
             #overlay {
-                padding: 18px 10px;
+                padding: 18px 10px 150px;
+            }
+
+            .release-countdown {
+                bottom: 8px;
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 10px;
+            }
+
+            .countdown-title,
+            .countdown-status {
+                text-align: center;
+            }
+
+            .countdown-values {
+                grid-template-columns: repeat(4, 1fr);
+                width: 100%;
+            }
+
+            .countdown-values span {
+                min-width: 0;
             }
 
             .panel,
@@ -425,6 +505,17 @@
     <div id="overlay">
         <main>
             <h1>MGS4: Guns of the Patriots – Quiz</h1>
+
+            <aside id="releaseCountdown" class="release-countdown" aria-label="Countdown bis zur Master Collection Volume 2">
+                <div class="countdown-title">METAL GEAR SOLID: Master Collection Vol. 2</div>
+                <div id="countdownStatus" class="countdown-status">Release-Countdown wird geladen...</div>
+                <div class="countdown-values">
+                    <span><strong id="countdownDays">--</strong>Tage</span>
+                    <span><strong id="countdownHours">--</strong>Std</span>
+                    <span><strong id="countdownMinutes">--</strong>Min</span>
+                    <span><strong id="countdownSeconds">--</strong>Sek</span>
+                </div>
+            </aside>
 
             <section id="musicControls" class="music-panel" aria-label="Musiksteuerung">
                 <button type="button" id="musicToggleButton">▶ Musik starten</button>
@@ -546,6 +637,7 @@
     <script>
         "use strict";
 
+        const RELEASE_TARGET_UTC = Date.UTC(2026, 7, 27, 14, 0, 0);
         const TIME_PER_QUESTION = 30;
         const QUESTIONS_PER_ROUND = 20;
         const HIGHSCORE_KEY = "mgs4QuizHighscoresV3";
@@ -683,6 +775,11 @@
         const musicVolume = document.getElementById("musicVolume");
         const volumeValue = document.getElementById("volumeValue");
         const musicTime = document.getElementById("musicTime");
+        const countdownStatus = document.getElementById("countdownStatus");
+        const countdownDays = document.getElementById("countdownDays");
+        const countdownHours = document.getElementById("countdownHours");
+        const countdownMinutes = document.getElementById("countdownMinutes");
+        const countdownSeconds = document.getElementById("countdownSeconds");
 
         document.querySelectorAll("[data-difficulty]").forEach((button) => {
             button.addEventListener("click", () => startQuiz(button.dataset.difficulty));
@@ -713,8 +810,39 @@
         bgMusic.addEventListener("play", updateMusicButton);
         bgMusic.addEventListener("pause", updateMusicButton);
 
+        startReleaseCountdown();
         migrateLegacyScores();
         validateQuestionPool();
+
+        function startReleaseCountdown() {
+            updateReleaseCountdown();
+            window.setInterval(updateReleaseCountdown, 1000);
+        }
+
+        function updateReleaseCountdown() {
+            const distance = RELEASE_TARGET_UTC - Date.now();
+
+            if (distance <= 0) {
+                countdownStatus.textContent = "Veröffentlichung erreicht!";
+                countdownDays.textContent = "0";
+                countdownHours.textContent = "00";
+                countdownMinutes.textContent = "00";
+                countdownSeconds.textContent = "00";
+                return;
+            }
+
+            const totalSeconds = Math.floor(distance / 1000);
+            const days = Math.floor(totalSeconds / 86400);
+            const hours = Math.floor((totalSeconds % 86400) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            countdownStatus.textContent = "bis 27.08.2026 · 16:00 Uhr deutscher Sommerzeit";
+            countdownDays.textContent = String(days);
+            countdownHours.textContent = String(hours).padStart(2, "0");
+            countdownMinutes.textContent = String(minutes).padStart(2, "0");
+            countdownSeconds.textContent = String(seconds).padStart(2, "0");
+        }
 
         function showOnly(section) {
             difficultySelection.classList.add("hidden");
