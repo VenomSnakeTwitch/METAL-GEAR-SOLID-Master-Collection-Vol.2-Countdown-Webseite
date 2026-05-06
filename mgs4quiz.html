@@ -363,6 +363,30 @@
         border-radius: 14px;
         background: #050505;
         box-shadow: inset 0 0 25px rgba(255, 215, 0, 0.08), 0 0 18px rgba(0, 0, 0, 0.65);
+        aspect-ratio: 760 / 430;
+        display: grid;
+        place-items: center;
+    }
+
+    .game-canvas-wrap:fullscreen {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        border-radius: 0;
+        border: none;
+        background: #000;
+        padding: 0;
+    }
+
+    .game-canvas-wrap:fullscreen #stealthCanvas {
+        width: min(100vw, calc(100vh * 1.767));
+        height: min(100vh, calc(100vw / 1.767));
+        max-width: none;
+    }
+
+    #fullscreenGameButton {
+        border-color: #9fd4ff;
+        color: #9fd4ff;
     }
 
     #stealthCanvas {
@@ -376,6 +400,69 @@
         touch-action: none;
         user-select: none;
         -webkit-user-select: none;
+    }
+
+    @media (orientation: portrait) and (max-width: 900px) {
+        .game-canvas-wrap {
+            width: 100%;
+            max-height: 62vh;
+        }
+
+        #stealthCanvas {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+    @media (orientation: landscape) and (max-height: 520px) {
+        #overlay {
+            padding: 10px 8px 96px;
+        }
+
+        .panel {
+            width: min(1000px, 100%);
+            padding: 12px;
+        }
+
+        .game-canvas-wrap {
+            width: min(100%, calc(100vh * 1.767 - 20px));
+            max-height: calc(100vh - 155px);
+            margin: 0 auto;
+        }
+
+        #stealthCanvas {
+            width: 100%;
+            height: auto;
+        }
+
+        #miniGamePanel h2,
+        #miniGamePanel > p,
+        .level-select-wrap,
+        .game-help {
+            display: none;
+        }
+
+        .game-hud {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin: 8px 0;
+        }
+
+        .game-hud span {
+            padding: 7px;
+            font-size: 11px;
+        }
+
+        .button-grid {
+            margin-top: 10px;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .button-grid button {
+            width: 100%;
+            padding: 9px 8px;
+            font-size: 12px;
+        }
     }
 
     .game-help { font-size: 13px; }
@@ -531,7 +618,7 @@
                 <span id="gameStatus">Bereit</span>
             </div>
 
-            <div class="game-canvas-wrap">
+            <div id="gameCanvasWrap" class="game-canvas-wrap">
                 <canvas id="stealthCanvas" width="760" height="430" aria-label="Metal Gear Solid 4 Mini-Spiel"></canvas>
             </div>
 
@@ -542,6 +629,7 @@
                 <button type="button" id="startBossLevelButton" class="boss-button">⚔ Boss-Level starten</button>
                 <button type="button" id="fireWeaponButton" class="boss-button">🔥 Feuern</button>
                 <button type="button" id="switchWeaponButton" class="boss-button">🔁 Waffe wechseln</button>
+                <button type="button" id="fullscreenGameButton">⛶ Vollbild</button>
                 <button type="button" id="camoButton">🕶 Tarnung aktivieren</button>
                 <button type="button" class="secondary-button" id="miniGameMenuButton">← Zurück zum Hauptmenü</button>
             </div>
@@ -694,6 +782,7 @@
     const leaderboardFilter = $("leaderboardFilter"), leaderBoardTableBody = $("leaderBoardTableBody"), scoreSummary = $("scoreSummary");
     const bgMusic = $("bgMusic"), musicToggleButton = $("musicToggleButton"), musicVolume = $("musicVolume"), volumeValue = $("volumeValue"), musicTime = $("musicTime");
     const stealthCanvas = $("stealthCanvas"), ctx = stealthCanvas.getContext("2d");
+    const gameCanvasWrap = $("gameCanvasWrap");
     const miniGameLevelSelect = $("miniGameLevelSelect"), bossLevelSelect = $("bossLevelSelect"), levelInfo = $("levelInfo"), camoButton = $("camoButton");
     const gameLevel = $("gameLevel"), gameScore = $("gameScore"), gameLives = $("gameLives"), gameTimer = $("gameTimer"), gameAlert = $("gameAlert"), gameCamo = $("gameCamo"), gameStatus = $("gameStatus"), bossHealthHud = $("bossHealthHud"), weaponHud = $("weaponHud");
     const countdownStatus = $("countdownStatus"), countdownDays = $("countdownDays"), countdownHours = $("countdownHours"), countdownMinutes = $("countdownMinutes"), countdownSeconds = $("countdownSeconds");
@@ -716,6 +805,7 @@
     $("startBossLevelButton").addEventListener("click", startBossGame);
     $("fireWeaponButton").addEventListener("click", fireWeapon);
     $("switchWeaponButton").addEventListener("click", switchWeapon);
+    $("fullscreenGameButton").addEventListener("click", toggleGameFullscreen);
     $("miniGameMenuButton").addEventListener("click", showMainMenu);
     nextButton.addEventListener("click", nextQuestion);
     saveScoreButton.addEventListener("click", saveScoreLocal);
@@ -741,7 +831,10 @@
     stealthCanvas.addEventListener("touchstart", handleTouch, { passive: false });
     stealthCanvas.addEventListener("touchmove", handleTouch, { passive: false });
     stealthCanvas.addEventListener("touchend", (event) => { event.preventDefault(); mouseTarget = null; }, { passive: false });
-    [snakeSprite, gekkoSprite].forEach((sprite) => sprite.addEventListener("load", () => { if (!miniGamePanel.classList.contains("hidden")) drawIntro(); }));
+    [snakeSprite, gekkoSprite].forEach((sprite) => sprite.addEventListener("load", () => { if (!miniGamePanel.classList.contains("hidden")) redrawMiniGameScreen(); }));
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
+    window.addEventListener("resize", handleGameViewportChange);
+    window.addEventListener("orientationchange", handleGameViewportChange);
 
     updateMusicButton(); updateMusicVolumeLabel(); updateMusicTime(); startReleaseCountdown(); migrateLegacyScores();
 
@@ -922,6 +1015,32 @@
 
     function endGame(success, message) { stopGame(false); setCamouflage(false); if (success && currentGameMode === "stealth") saveGameProgress(selectedStealthLevel); gameMessage = success ? `${message} Rang: ${getMiniRank()}` : message; updateGameHud(); drawGame(); drawEndOverlay(success); }
     function getMiniRank() { const maxLives = currentGameMode === "boss" ? getBossLevel().lives : getStealthLevel().lives; const maxTime = currentGameMode === "boss" ? getBossLevel().time : getStealthLevel().time; if (gameLivesValue === maxLives && gameTimeLeft >= Math.floor(maxTime * 0.55)) return "Big Boss"; if (gameLivesValue >= Math.max(1, maxLives - 1) && gameTimeLeft >= Math.floor(maxTime * 0.35)) return "Foxhound"; if (gameLivesValue >= 1) return "Fox"; return "Rookie"; }
+
+    function redrawMiniGameScreen() {
+        if (miniGamePanel.classList.contains("hidden")) return;
+        gameRunning ? drawGame() : drawIntro();
+    }
+
+    function handleGameViewportChange() {
+        window.setTimeout(redrawMiniGameScreen, 150);
+    }
+
+    function toggleGameFullscreen() {
+        if (!document.fullscreenElement) {
+            gameCanvasWrap.requestFullscreen?.().catch(() => {
+                gameMessage = "Vollbild konnte nicht gestartet werden.";
+                updateGameHud();
+            });
+        } else {
+            document.exitFullscreen?.();
+        }
+    }
+
+    function updateFullscreenButton() {
+        const button = $("fullscreenGameButton");
+        button.textContent = document.fullscreenElement ? "⛶ Vollbild beenden" : "⛶ Vollbild";
+        redrawMiniGameScreen();
+    }
 
     function drawIntro() { drawBackground(); ctx.fillStyle = "rgba(0,0,0,0.72)"; ctx.fillRect(0,0,GAME_WIDTH,GAME_HEIGHT); ctx.textAlign = "center"; ctx.fillStyle = "#ffd700"; ctx.font = "24px Orbitron, sans-serif"; if (currentGameMode === "boss") { ctx.fillText(`Boss ${selectedBossLevel}: ${getBossLevel().name}`, GAME_WIDTH/2, 145); ctx.fillStyle = "#d8d8d8"; ctx.font = "14px Orbitron, sans-serif"; ctx.fillText("Besiege den Boss mit SOCOM, M4 oder RPG.", GAME_WIDTH/2, 195); ctx.fillText("J / Feuer-Button = schießen · 1/2/3 = Waffenwechsel.", GAME_WIDTH/2, 225); ctx.fillText("Kisten blockieren Schüsse und Bewegung. Bleib in Deckung.", GAME_WIDTH/2, 255); } else { ctx.fillText(`Level ${selectedStealthLevel}: ${getStealthLevel().name}`, GAME_WIDTH/2, 150); ctx.fillStyle = "#d8d8d8"; ctx.font = "14px Orbitron, sans-serif"; ctx.fillText("Sammle alle Intel-Daten und erreiche Outer Haven.", GAME_WIDTH/2, 195); ctx.fillText("Kisten blockieren deinen Weg und Sichtlinien.", GAME_WIDTH/2, 225); ctx.fillText("Nutze Tarnung gegen Kameras und Gekkos.", GAME_WIDTH/2, 255); } updateGameHud(); }
     function drawGame() { drawBackground(); drawCameraCones(); if (currentGameMode === "boss") drawBossMode(); else { drawGoal(); drawIntel(); drawGekkos(); } drawSnake(); }
