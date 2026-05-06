@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- FINAL FULL EXPORT: mgs4quiz_fixed_full.html -->
 <!-- mgs4quiz.html integriert aus test_levels_reworked.html · Landscape-Fix · Level-Rework · index.html-Rückkehr -->
 <html lang="de">
 <head>
@@ -437,15 +438,16 @@ html, body { height: 100%; }
 <section class="panel music"><button id="musicToggleButton">▶ Musik starten</button><label>Lautstärke: <span id="volumeValue">30%</span><input id="musicVolume" type="range" min="0" max="100" value="30"></label><div id="musicTime">Restzeit: --:--</div></section>
 <section class="panel codec"><div class="codec-face">CALL</div><div><div id="codecName">Otacon</div><div id="codecText">Snake, wähle einen Modus. Quiz, Daily Mission oder Mini-Spiel stehen bereit.</div></div></section>
 <section id="mainMenu" class="panel"><h2>Hauptmenü</h2><p>Testversion mit Quiz, Shop, Mini-Spiel, Boss-Leveln, Achievements, Daily Mission und Soundeffekten.</p><div class="grid"><button data-quiz="easy">Quiz Easy</button><button data-quiz="medium">Quiz Medium</button><button data-quiz="hard">Quiz Hard</button><button id="marathonButton" class="boss">Metal Gear Marathon</button><button id="dailyButton" class="blue">Daily Mission</button><button id="openGameButton">🎮 Mini-Spiel / Shop</button><button id="openLeaderboardButton">🏆 Bestenliste</button><button id="openAchievementsButton">🎖 Achievements</button><button id="openDebugButton" class="danger">⚙ Debug / Reset</button>
-        <button id="backToIndexButton" class="secondary">⬅ Zurück zur Startseite</button></div></section>
+        <button type="button" class="secondary" data-go-index="true">⬅ Zurück zur Startseite</button>
+        <button type="button" id="backToIndexButton" class="secondary" data-go-index="true">⬅ Zurück zur Startseite</button></div></section>
 <section id="quizPanel" class="panel hidden"><div class="statusrow"><div class="card" id="quizProgress">Frage 1</div><div class="card" id="quizTimer">⏱ 30s</div><div class="card" id="quizModeLabel">Modus</div><div class="card" id="quizScoreLabel">Punkte: 0</div></div><div id="jokerPanel" class="hidden"><button id="jokerButton">🃏 50:50-Joker</button><p id="jokerInfo">Nur in Hard/Marathon/Daily verfügbar.</p></div><div id="questionText"></div><div id="answersContainer" class="answers"></div><p id="quizFeedback"></p><div class="grid"><button id="nextQuestionButton" class="hidden">▶ Nächste Frage</button><button id="quitQuizButton" class="secondary">← Abbrechen</button></div></section>
 <section id="resultPanel" class="panel hidden"><h2>Mission ausgewertet</h2><p>Modus: <span id="finalMode"></span></p><p>Quiz-Punkte: <strong id="finalScore">0</strong></p><p>Shop-Punkte verdient: <strong id="finalShopPoints">0</strong></p><div class="rank"><span>Dein Rang:</span><strong id="finalRank">Rookie</strong><span id="finalRankDetail">0%</span></div><label>Name speichern:</label><br><br><input id="playerName" type="text" maxlength="24" placeholder="Dein Name"><div class="grid"><button id="saveScoreButton">✔ Speichern</button><button id="resultMenuButton" class="secondary">← Hauptmenü</button></div></section>
 <section id="leaderboardPanel" class="panel hidden"><h2>🏆 Bestenliste</h2><div class="tablewrap"><table><thead><tr><th>Platz</th><th>Name</th><th>Punkte</th><th>Modus</th><th>Rang</th><th>Datum</th></tr></thead><tbody id="leaderboardBody"></tbody></table></div><div class="grid"><button class="secondary menuBack">← Hauptmenü</button></div></section>
 <section id="achievementsPanel" class="panel hidden"><h2>🎖 Achievements</h2><div id="achievementList" class="achgrid"></div><div class="grid"><button class="secondary menuBack">← Hauptmenü</button></div></section>
 <section id="gamePanel" class="panel hidden"><h2>🎮 Shadow Moses Test-Spiel</h2><p>Stealth-Level, Boss-Level, Shop, Waffen, Items, On-Screen-Steuerung und Daily-Training.</p><div class="shopstatus"><strong>Verdiente Punkte: <span id="playerPointsDisplay">0</span></strong><span id="shopMessage">Schließe Missionen ab, um Punkte zu verdienen.</span><span id="itemHud">Items: -</span><span id="equipmentHud">Ausrüstung: -</span></div><canvas id="shopCanvas" width="760" height="110"></canvas><div class="options"><label><input id="timeLimitToggle" type="checkbox" checked>Mit Zeitlimit spielen</label><span>Wenn der Shop geöffnet ist, pausiert die Spielzeit automatisch. Ohne Zeitlimit gibt es keinen Zeitbonus.</span></div><div class="grid2 levelwrap"><div><h3>Stealth-Level</h3><div id="stealthLevelList" class="levelgrid"></div></div><div><h3>Boss-Level</h3><div id="bossLevelList" class="levelgrid"></div></div></div><div class="grid2 shopwrap"><div id="weaponShopPanel" class="hidden"><button id="closeWeaponShopButton" class="shopClose" type="button">✕ Waffen-Menü schließen</button><h3>🔫 Waffen-Menü</h3><div id="weaponShopList" class="shopgrid"></div></div><div id="itemShopPanel" class="hidden"><button id="closeItemShopButton" class="shopClose" type="button">✕ Item-Menü schließen</button><h3>🎒 Item-Menü</h3><div id="itemShopList" class="shopgrid"></div></div></div><div class="gamehud"><span id="gameLevel">Level: 1</span><span id="gameScore">Intel: 0/5</span><span id="gameLives">Leben: 3</span><span id="snakeHealthHud">HP: 100</span><span id="gameTimer">Zeit: 60s</span><span id="gameAlert">Phase: Normal</span><span id="gameCamo">Tarnung: 100</span><span id="bossHealthHud" class="hidden">Boss: 100%</span><span id="weaponHud">Waffe: -</span><span id="gameStatus">Bereit</span></div><div id="gameCanvasWrap" class="canvaswrap"><canvas id="gameCanvas" width="760" height="430"></canvas></div><p class="gamehelp">PC: WASD/Pfeiltasten, Maus, J zum Feuern, 1/2/3 Waffenwechsel. Mobile: Touch + On-Screen-Steuerung.</p><div class="controls"><div class="dpad"><button class="up" data-pad="w">▲</button><button class="left" data-pad="a">◀</button><button class="down" data-pad="s">▼</button><button class="right" data-pad="d">▶</button></div><div class="actions"><button id="startStealthButton">▶ Stealth</button><button id="startBossButton" class="boss">⚔ Boss</button><button id="fireButton">🔥 Feuer</button><button id="switchWeaponButton">🔁 Waffe</button><button id="camoButton" class="blue">🕶 Tarnung</button><button id="useDistractionButton">📦 Ablenkung</button><button id="openWeaponShopButton">🔫 Waffen</button><button id="openItemShopButton">🎒 Items</button><button id="fullscreenButton">⛶ Vollbild</button><button class="secondary menuBack">← Menü</button>
-          <button id="gameBackToIndexButton" class="secondary">⬅ Startseite</button></div></div></section>
+          <button type="button" id="gameBackToIndexButton" class="secondary" data-go-index="true">⬅ Startseite</button></div></div></section>
 <section id="debugPanel" class="panel hidden"><h2>⚙ Debug / Reset</h2><p>Zum Testen kannst du Fortschritte gezielt zurücksetzen oder Punkte hinzufügen.</p><div class="grid2"><button id="debugAddPoints">+2000 Shop-Punkte</button><button id="debugUnlockLevels">Alle Mini-Spiel-Level freischalten</button><button id="debugResetScores" class="danger">Quiz-Bestenliste löschen</button><button id="debugResetGame" class="danger">Mini-Spiel-Fortschritt löschen</button><button id="debugResetShop" class="danger">Shop/Punkte löschen</button><button id="debugResetAchievements" class="danger">Achievements löschen</button></div><div class="grid"><button class="secondary menuBack">← Hauptmenü</button></div></section>
-</main><audio id="bgMusic" loop preload="auto"><source src="music.mp3" type="audio/mpeg"></audio><div>&copy; 2026 Fanprojekt – Metal Gear Solid Inhalte & Musik gehören Konami.</div></div>
+</main><audio id="bgMusic" loop preload="auto" playsinline><source src="music.mp3" type="audio/mpeg"></audio><div>&copy; 2026 Fanprojekt – Metal Gear Solid Inhalte & Musik gehören Konami.</div></div>
 <script>
 "use strict";
 const GAME_BALANCE={quizQuestionCount:20,marathonQuestionCount:50,timerSeconds:30,pointsMultiplier:1,shopDiscount:1,enemySpeed:1,camoDrain:.24,camoRegen:.08,distractionSeconds:8,quizRewardMultiplier:.12,dailyBonus:750};
@@ -557,5 +559,105 @@ function drawGameSafe(){
   try{gameRunning?drawGame():drawIntro()}catch(e){}
 }
 function toggleMusic(){if(bgMusic.paused)bgMusic.play().catch(()=>$('musicTime').textContent='Musik konnte nicht gestartet werden.');else{bgMusic.pause();bgMusic.currentTime=0;updateMusicTime()}}function updateMusicVolume(){bgMusic.volume=+$('musicVolume').value/100;$('volumeValue').textContent=`${$('musicVolume').value}%`}function updateMusicUi(){updateMusicVolume();$('musicToggleButton').textContent=bgMusic.paused?'▶ Musik starten':'■ Musik stoppen'}function updateMusicTime(){if(!Number.isFinite(bgMusic.duration)){$('musicTime').textContent='Restzeit: --:--';return}let left=Math.max(0,bgMusic.duration-bgMusic.currentTime);$('musicTime').textContent=`Restzeit: ${fmt(left)} · ${fmt(bgMusic.currentTime)} / ${fmt(bgMusic.duration)}`}function fmt(s){s=Math.floor(s);return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
+
+/* --- FINAL FIX: index.html navigation + reliable music button --- */
+(function () {
+  const goToIndex = () => {
+    window.location.assign("index.html");
+  };
+
+  document.addEventListener("click", (event) => {
+    const indexButton = event.target.closest('[data-go-index="true"], #backToIndexButton, #gameBackToIndexButton, #debugBackToIndexButton');
+    if (indexButton) {
+      event.preventDefault();
+      goToIndex();
+    }
+  });
+
+  function setupReliableMusic() {
+    const audio = document.getElementById("bgMusic");
+    const toggle = document.getElementById("musicToggleButton");
+    const volume = document.getElementById("musicVolume");
+    const time = document.getElementById("musicTime");
+    const volumeValue = document.getElementById("volumeValue");
+
+    if (!audio || !toggle) return;
+
+    audio.src = "music.mp3";
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = volume ? Number(volume.value) / 100 : 0.3;
+
+    const formatTime = (seconds) => {
+      if (!Number.isFinite(seconds) || seconds < 0) return "--:--";
+      const safe = Math.floor(seconds);
+      return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
+    };
+
+    const updateTime = () => {
+      if (!time) return;
+      if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
+        time.textContent = "Restzeit: --:--";
+        return;
+      }
+      const remaining = Math.max(0, audio.duration - audio.currentTime);
+      time.textContent = `Restzeit: ${formatTime(remaining)} · ${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+    };
+
+    const updateButton = () => {
+      toggle.textContent = audio.paused ? "▶ Musik starten" : "■ Musik stoppen";
+    };
+
+    const updateVolume = () => {
+      if (!volume) return;
+      audio.volume = Number(volume.value) / 100;
+      if (volumeValue) volumeValue.textContent = `${volume.value}%`;
+    };
+
+    toggle.addEventListener("click", async (event) => {
+      event.preventDefault();
+      try {
+        if (audio.paused) {
+          audio.load();
+          await audio.play();
+        } else {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      } catch (error) {
+        if (time) {
+          time.textContent = "music.mp3 konnte nicht gestartet werden. Prüfe Datei/Name/Pfad.";
+        }
+        console.warn("Musik konnte nicht gestartet werden:", error);
+      }
+      updateButton();
+      updateTime();
+    }, true);
+
+    if (volume) {
+      volume.addEventListener("input", updateVolume, true);
+    }
+
+    audio.addEventListener("play", updateButton);
+    audio.addEventListener("pause", updateButton);
+    audio.addEventListener("loadedmetadata", updateTime);
+    audio.addEventListener("durationchange", updateTime);
+    audio.addEventListener("timeupdate", updateTime);
+    audio.addEventListener("error", () => {
+      if (time) time.textContent = "music.mp3 nicht gefunden oder nicht ladbar.";
+    });
+
+    updateVolume();
+    updateButton();
+    updateTime();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupReliableMusic);
+  } else {
+    setupReliableMusic();
+  }
+})();
+
 </script>
 </body></html>
