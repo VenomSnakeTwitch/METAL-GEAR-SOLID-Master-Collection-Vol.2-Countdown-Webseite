@@ -348,6 +348,41 @@
 
     .shop-status strong { color: var(--gold); }
 
+    #shopCanvas {
+        display: block;
+        width: 100%;
+        max-width: 760px;
+        height: auto;
+        margin: 14px auto;
+        border: 1px solid rgba(255, 215, 0, 0.28);
+        border-radius: 12px;
+        background: #050505;
+    }
+
+    .game-option-panel {
+        display: grid;
+        gap: 8px;
+        margin: 14px 0;
+        padding: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.24);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.42);
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .game-option-panel label {
+        color: var(--gold);
+        cursor: pointer;
+    }
+
+    .game-option-panel input {
+        transform: scale(1.2);
+        margin-right: 8px;
+        accent-color: var(--gold);
+    }
+
     .shop-panel {
         margin: 14px 0;
         padding: 14px;
@@ -921,6 +956,16 @@
                 <span id="shopMessage">Schließe Missionen ab, um Punkte zu verdienen.</span>
             </div>
 
+            <canvas id="shopCanvas" width="760" height="110" aria-label="Shop-Anzeige"></canvas>
+
+            <div class="game-option-panel">
+                <label for="timeLimitToggle">
+                    <input type="checkbox" id="timeLimitToggle" checked>
+                    Mit Zeitlimit spielen
+                </label>
+                <span>Ohne Zeitlimit läuft die Mission entspannter. Mit Zeitlimit wird es schwerer und du erhältst Zeitbonus-Punkte.</span>
+            </div>
+
             <div id="weaponShopPanel" class="shop-panel hidden">
                 <h3>Waffen-Menü</h3>
                 <p class="game-help">Gekaufte Waffen stehen dauerhaft zur Verfügung. In Stealth-Leveln helfen Betäubungswaffen gegen Gekkos, in Boss-Leveln verursachen Waffen Schaden.</p>
@@ -1113,7 +1158,7 @@
     let currentDifficulty = "easy", answerLocked = false, scoreSaved = false, jokersLeft = 0, jokerUsedThisQuestion = false;
 
     let currentGameMode = "stealth", selectedStealthLevel = 1, selectedBossLevel = 1, unlockedStealthLevel = 1;
-    let gameRunning = false, gameAnimationId = null, gameStartTime = 0, gameTimeLeft = 60, gameScoreValue = 0, gameLivesValue = 3, gameMessage = "Bereit";
+    let gameRunning = false, gameAnimationId = null, gameStartTime = 0, gamePausedMs = 0, shopPauseStartedAt = null, timeLimitEnabled = true, gameTimeLeft = 60, gameScoreValue = 0, gameLivesValue = 3, gameMessage = "Bereit";
     let alertPhase = "normal", alertCountdown = 0, cautionCountdown = 0;
     let camoToggle = false, camoEnergy = 100;
     let snake = { x: 45, y: 205, size: 20, speed: 3.1, spriteWidth: 44, spriteHeight: 72 };
@@ -1141,6 +1186,8 @@
     const stealthCanvas = $("stealthCanvas"), ctx = stealthCanvas.getContext("2d");
     const gameCanvasWrap = $("gameCanvasWrap");
     const miniGameLevelSelect = $("miniGameLevelSelect"), bossLevelSelect = $("bossLevelSelect"), levelInfo = $("levelInfo"), camoButton = $("camoButton");
+    const timeLimitToggle = $("timeLimitToggle");
+    const shopCanvas = $("shopCanvas"), shopCtx = shopCanvas.getContext("2d");
     const gameLevel = $("gameLevel"), gameScore = $("gameScore"), gameLives = $("gameLives"), snakeHealthHud = $("snakeHealthHud"), gameTimer = $("gameTimer"), gameAlert = $("gameAlert"), gameCamo = $("gameCamo"), gameStatus = $("gameStatus"), bossHealthHud = $("bossHealthHud"), weaponHud = $("weaponHud"), itemHud = $("itemHud");
     const playerPointsDisplay = $("playerPointsDisplay"), shopMessage = $("shopMessage"), weaponShopPanel = $("weaponShopPanel"), itemShopPanel = $("itemShopPanel"), weaponShopList = $("weaponShopList"), itemShopList = $("itemShopList");
     const countdownStatus = $("countdownStatus"), countdownDays = $("countdownDays"), countdownHours = $("countdownHours"), countdownMinutes = $("countdownMinutes"), countdownSeconds = $("countdownSeconds");
@@ -1166,6 +1213,11 @@
     $("openWeaponShopButton").addEventListener("click", toggleWeaponShop);
     $("openItemShopButton").addEventListener("click", toggleItemShop);
     $("useDistractionButton").addEventListener("click", useDistraction);
+    timeLimitToggle.addEventListener("change", () => {
+        timeLimitEnabled = timeLimitToggle.checked;
+        updateGameHud();
+        drawShopCanvas();
+    });
     $("fullscreenGameButton").addEventListener("click", toggleGameFullscreen);
     $("miniGameMenuButton").addEventListener("click", showMainMenu);
     nextButton.addEventListener("click", nextQuestion);
@@ -1328,6 +1380,9 @@
 
     function resetCommon() {
         stopGame(false);
+        timeLimitEnabled = timeLimitToggle.checked;
+        gamePausedMs = 0;
+        shopPauseStartedAt = null;
         gameRunning = false;
         gameScoreValue = 0;
         gameMessage = "Bereit";
@@ -1373,12 +1428,22 @@
     function gameLoop() {
         if (!gameRunning) return;
         const levelTime = currentGameMode === "boss" ? getBossLevel().time : getStealthLevel().time;
-        gameTimeLeft = Math.max(0, levelTime - Math.floor((performance.now() - gameStartTime) / 1000));
+        const now = performance.now();
+        const effectivePausedMs = gamePausedMs + (shopPauseStartedAt !== null ? now - shopPauseStartedAt : 0);
+        gameTimeLeft = timeLimitEnabled ? Math.max(0, levelTime - Math.floor((now - gameStartTime - effectivePausedMs) / 1000)) : Infinity;
+
+        if (isShopOpen()) {
+            drawGame();
+            updateGameHud();
+            gameAnimationId = requestAnimationFrame(gameLoop);
+            return;
+        }
+
         updateCamouflage(); updateAlertPhase(); updateMovement();
         if (currentGameMode === "boss") updateBossFight(); else updateStealthFight();
         if (!gameRunning) return;
         drawGame(); updateGameHud();
-        if (gameTimeLeft <= 0) { endGame(false, "Zeit abgelaufen! Mission gescheitert."); return; }
+        if (timeLimitEnabled && gameTimeLeft <= 0) { endGame(false, "Zeit abgelaufen! Mission gescheitert."); return; }
         gameAnimationId = requestAnimationFrame(gameLoop);
     }
 
@@ -1789,7 +1854,7 @@
     function drawBossHealthBar() { if (!boss) return; const w = 360, h = 14, x = (GAME_WIDTH-w)/2, y = 18, fill = Math.max(0,boss.health/boss.maxHealth); ctx.fillStyle = "rgba(0,0,0,0.75)"; ctx.fillRect(x,y,w,h); ctx.fillStyle = boss.color; ctx.fillRect(x,y,w*fill,h); ctx.strokeStyle = "#ffd700"; ctx.strokeRect(x,y,w,h); ctx.fillStyle = "#ffd700"; ctx.font = "11px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText(boss.name, GAME_WIDTH/2, y+31); }
     function drawEndOverlay(success) { ctx.fillStyle = "rgba(0,0,0,0.72)"; ctx.fillRect(0,0,GAME_WIDTH,GAME_HEIGHT); ctx.fillStyle = success ? "#ffd700" : "#ffb5b5"; ctx.font = "24px Orbitron, sans-serif"; ctx.textAlign = "center"; ctx.fillText(success ? "MISSION ERFÜLLT" : "MISSION GESCHEITERT", GAME_WIDTH/2, 165); ctx.fillStyle = "#d8d8d8"; ctx.font = "14px Orbitron, sans-serif"; ctx.fillText(gameMessage, GAME_WIDTH/2, 210); ctx.fillText(currentGameMode === "boss" ? "Starte den Bosskampf erneut oder wähle einen anderen Boss." : (success && selectedStealthLevel < stealthLevels.length ? `Level ${selectedStealthLevel + 1} wurde freigeschaltet.` : "Starte das Level für einen neuen Versuch."), GAME_WIDTH/2, 245); }
 
-    function updateGameHud() { gameLevel.textContent = currentGameMode === "boss" ? `Boss: ${selectedBossLevel}` : `Level: ${selectedStealthLevel}`; gameScore.textContent = currentGameMode === "boss" ? `Treffer: ${gameScoreValue}` : `Intel: ${gameScoreValue} / ${intelItems.length || 5}`; gameLives.textContent = `Leben: ${gameLivesValue}`; snakeHealthHud.textContent = `HP: ${Math.round(snakeHealthValue)}/${getMaxHealth()}`; gameTimer.textContent = `Zeit: ${gameTimeLeft}s`; gameCamo.textContent = `Tarnung: ${Math.round(camoEnergy)}/${getMaxCamo()}`; bossHealthHud.classList.toggle("hidden", currentGameMode !== "boss");
+    function updateGameHud() { gameLevel.textContent = currentGameMode === "boss" ? `Boss: ${selectedBossLevel}` : `Level: ${selectedStealthLevel}`; gameScore.textContent = currentGameMode === "boss" ? `Treffer: ${gameScoreValue}` : `Intel: ${gameScoreValue} / ${intelItems.length || 5}`; gameLives.textContent = `Leben: ${gameLivesValue}`; snakeHealthHud.textContent = `HP: ${Math.round(snakeHealthValue)}/${getMaxHealth()}`; gameTimer.textContent = `Zeit: ${formatGameTime(gameTimeLeft)}`; gameCamo.textContent = `Tarnung: ${Math.round(camoEnergy)}/${getMaxCamo()}`; bossHealthHud.classList.toggle("hidden", currentGameMode !== "boss");
         weaponHud.classList.remove("hidden");
         if (currentGameMode === "boss" && boss) {
             bossHealthHud.textContent = `Boss: ${Math.max(0, Math.ceil(boss.health / boss.maxHealth * 100))}%`;
@@ -1858,21 +1923,49 @@
     function getCamoDrainMultiplier() { return Math.max(0.55, 1 - (shopState.upgrades.camo * 0.18)); }
 
     function toggleWeaponShop() {
-        weaponShopPanel.classList.toggle("hidden");
+        const willOpen = weaponShopPanel.classList.contains("hidden");
+        weaponShopPanel.classList.toggle("hidden", !willOpen);
         itemShopPanel.classList.add("hidden");
+        updateShopPauseState();
         renderShop();
     }
 
     function toggleItemShop() {
-        itemShopPanel.classList.toggle("hidden");
+        const willOpen = itemShopPanel.classList.contains("hidden");
+        itemShopPanel.classList.toggle("hidden", !willOpen);
         weaponShopPanel.classList.add("hidden");
+        updateShopPauseState();
         renderShop();
+    }
+
+    function isShopOpen() {
+        return !weaponShopPanel.classList.contains("hidden") || !itemShopPanel.classList.contains("hidden");
+    }
+
+    function updateShopPauseState() {
+        if (!gameRunning) {
+            shopPauseStartedAt = null;
+            drawShopCanvas();
+            return;
+        }
+
+        if (isShopOpen() && shopPauseStartedAt === null) {
+            shopPauseStartedAt = performance.now();
+            setShopMessage("Shop geöffnet: Spielzeit pausiert.");
+        } else if (!isShopOpen() && shopPauseStartedAt !== null) {
+            gamePausedMs += performance.now() - shopPauseStartedAt;
+            shopPauseStartedAt = null;
+            setShopMessage("Shop geschlossen: Spielzeit läuft weiter.");
+        }
+
+        drawShopCanvas();
     }
 
     function renderShop() {
         renderWeaponShop();
         renderItemShop();
         updateShopHud();
+        drawShopCanvas();
     }
 
     function renderWeaponShop() {
@@ -1953,12 +2046,13 @@
         if (!playerPointsDisplay) return;
         playerPointsDisplay.textContent = String(shopState.points);
         itemHud.textContent = `Items: Ablenkung ${shopState.inventory.distraction || 0} · Notration ${shopState.inventory.ration_pack || 0}`;
+        drawShopCanvas();
     }
 
     function awardMissionPoints() {
         const base = currentGameMode === "boss" ? 300 + selectedBossLevel * 150 : 120 + selectedStealthLevel * 80;
         const hpBonus = Math.round(snakeHealthValue);
-        const timeBonus = gameTimeLeft * 4;
+        const timeBonus = timeLimitEnabled ? gameTimeLeft * 4 : 0;
         const lifeBonus = gameLivesValue * 45;
         const earned = base + hpBonus + timeBonus + lifeBonus;
         shopState.points += earned;
@@ -1980,6 +2074,44 @@
 
     function isDistractionActive() {
         return activeDistraction && activeDistraction.until > performance.now();
+    }
+
+    function drawShopCanvas() {
+        if (!shopCtx) return;
+        shopCtx.clearRect(0, 0, shopCanvas.width, shopCanvas.height);
+        shopCtx.fillStyle = "#050505";
+        shopCtx.fillRect(0, 0, shopCanvas.width, shopCanvas.height);
+
+        const gradient = shopCtx.createLinearGradient(0, 0, shopCanvas.width, 0);
+        gradient.addColorStop(0, "rgba(255, 215, 0, 0.18)");
+        gradient.addColorStop(0.5, "rgba(58, 167, 255, 0.16)");
+        gradient.addColorStop(1, "rgba(255, 184, 77, 0.18)");
+        shopCtx.fillStyle = gradient;
+        shopCtx.fillRect(0, 0, shopCanvas.width, shopCanvas.height);
+
+        shopCtx.strokeStyle = "rgba(255, 215, 0, 0.45)";
+        shopCtx.strokeRect(8, 8, shopCanvas.width - 16, shopCanvas.height - 16);
+
+        shopCtx.fillStyle = "#ffd700";
+        shopCtx.font = "18px Orbitron, sans-serif";
+        shopCtx.textAlign = "left";
+        shopCtx.fillText("SHOP / AUSRÜSTUNG", 24, 34);
+
+        shopCtx.fillStyle = "#d8d8d8";
+        shopCtx.font = "12px Orbitron, sans-serif";
+        const timeText = timeLimitEnabled ? (isShopOpen() && gameRunning ? "Zeitlimit: AN · Zeit pausiert im Shop" : "Zeitlimit: AN") : "Zeitlimit: AUS";
+        shopCtx.fillText(`Punkte: ${shopState.points}`, 24, 62);
+        shopCtx.fillText(timeText, 24, 84);
+
+        const bossWeapon = getCurrentBossWeapon().label;
+        const stealthWeapon = getCurrentStealthWeapon().label;
+        shopCtx.textAlign = "right";
+        shopCtx.fillStyle = "#9fd4ff";
+        shopCtx.fillText(`Stealth: ${stealthWeapon}`, shopCanvas.width - 24, 38);
+        shopCtx.fillStyle = "#ffcf8a";
+        shopCtx.fillText(`Boss: ${bossWeapon}`, shopCanvas.width - 24, 62);
+        shopCtx.fillStyle = "#31d66b";
+        shopCtx.fillText(`Items: Ablenkung ${shopState.inventory.distraction || 0} · Notration ${shopState.inventory.ration_pack || 0}`, shopCanvas.width - 24, 86);
     }
 
     function drawActiveDistraction() {
@@ -2008,6 +2140,10 @@
     function distance(a,b) { return Math.hypot(a.x-b.x, a.y-b.y); }
     function clamp(v,min,max) { return Math.min(max, Math.max(min, v)); }
     function shuffle(array) { for (let i=array.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [array[i],array[j]]=[array[j],array[i]]; } return array; }
+
+    function formatGameTime(value) {
+        return value === Infinity ? "∞" : `${value}s`;
+    }
 
     function toggleMusic() { if (bgMusic.paused) bgMusic.play().catch(() => musicTime.textContent = "Musik konnte nicht gestartet werden."); else { bgMusic.pause(); bgMusic.currentTime = 0; updateMusicTime(); } }
     function updateMusicVolume() { bgMusic.volume = Number(musicVolume.value)/100; updateMusicVolumeLabel(); }
