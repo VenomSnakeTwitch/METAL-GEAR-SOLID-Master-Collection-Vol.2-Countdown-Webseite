@@ -132,8 +132,14 @@
             border-radius: 5px;
         }
 
+        .music-controls button:hover {
+            background: gold;
+            color: black;
+        }
+
         .volume-slider {
             -webkit-appearance: none;
+            appearance: none;
             width: 150px;
             height: 8px;
             background: #222;
@@ -152,6 +158,15 @@
             cursor: pointer;
         }
 
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: gold;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
         #footer {
             position: fixed;
             bottom: 10px;
@@ -160,6 +175,41 @@
             font-size: 12px;
             z-index: 1002;
             opacity: 0.8;
+        }
+
+        @media (max-width: 900px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            .time-box {
+                min-width: 90px;
+                padding: 12px 14px;
+            }
+
+            .number {
+                font-size: 32px;
+            }
+
+            .label {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #mainMenu {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #menuButtons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            #overlay {
+                margin-top: 150px;
+            }
         }
     </style>
 </head>
@@ -181,6 +231,14 @@
     <h1>METAL GEAR SOLID Master Collection Vol. 2</h1>
 
     <div id="countdown">
+        <div class="time-box">
+            <div class="number" id="years">00</div>
+            <div class="label">Jahre</div>
+        </div>
+        <div class="time-box">
+            <div class="number" id="months">00</div>
+            <div class="label">Monate</div>
+        </div>
         <div class="time-box">
             <div class="number" id="days">00</div>
             <div class="label">Tage</div>
@@ -215,13 +273,18 @@
 </div>
 
 <script>
-    // ZIELZEIT: 27. August 2026, 14:00 UTC (entspricht 16:00 Uhr deutscher Sommerzeit)
+    // ZIELZEIT: 27. August 2026, 14:00 UTC
+    // Das entspricht 16:00 Uhr deutscher Sommerzeit.
     const targetDate = new Date(Date.UTC(2026, 7, 27, 14, 0, 0)).getTime();
 
     function updateUnit(id, value) {
         const el = document.getElementById(id);
+
+        if (!el) return;
+
         if (el.textContent !== value) {
             el.classList.add("blink");
+
             setTimeout(() => {
                 el.textContent = value;
                 el.classList.remove("blink");
@@ -229,24 +292,62 @@
         }
     }
 
+    function getLastDayOfMonthUTC(year, month) {
+        return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    }
+
     function updateCountdown() {
-        const now = new Date().getTime();
-        const distance = targetDate - now;
+        const now = new Date();
+        const target = new Date(targetDate);
+        const distance = target.getTime() - now.getTime();
 
         if (distance < 0) {
             document.getElementById("countdown").innerHTML = "<h2>MISSION COMPLETE - OUT NOW!</h2>";
             return;
         }
 
-        const d = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0');
-        const h = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-        const m = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-        const s = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+        let years = target.getUTCFullYear() - now.getUTCFullYear();
+        let months = target.getUTCMonth() - now.getUTCMonth();
+        let days = target.getUTCDate() - now.getUTCDate();
+        let hours = target.getUTCHours() - now.getUTCHours();
+        let minutes = target.getUTCMinutes() - now.getUTCMinutes();
+        let seconds = target.getUTCSeconds() - now.getUTCSeconds();
 
-        updateUnit("days", d);
-        updateUnit("hours", h);
-        updateUnit("minutes", m);
-        updateUnit("seconds", s);
+        if (seconds < 0) {
+            seconds += 60;
+            minutes--;
+        }
+
+        if (minutes < 0) {
+            minutes += 60;
+            hours--;
+        }
+
+        if (hours < 0) {
+            hours += 24;
+            days--;
+        }
+
+        if (days < 0) {
+            const previousMonth = target.getUTCMonth() - 1 < 0 ? 11 : target.getUTCMonth() - 1;
+            const previousMonthYear = previousMonth === 11 ? target.getUTCFullYear() - 1 : target.getUTCFullYear();
+            const daysInPreviousMonth = getLastDayOfMonthUTC(previousMonthYear, previousMonth);
+
+            days += daysInPreviousMonth;
+            months--;
+        }
+
+        if (months < 0) {
+            months += 12;
+            years--;
+        }
+
+        updateUnit("years", String(years).padStart(2, '0'));
+        updateUnit("months", String(months).padStart(2, '0'));
+        updateUnit("days", String(days).padStart(2, '0'));
+        updateUnit("hours", String(hours).padStart(2, '0'));
+        updateUnit("minutes", String(minutes).padStart(2, '0'));
+        updateUnit("seconds", String(seconds).padStart(2, '0'));
     }
 
     setInterval(updateCountdown, 1000);
@@ -255,14 +356,22 @@
     const audio = document.getElementById("bgMusic");
     audio.volume = 0.3;
 
-    // Startet Musik beim ersten Klick auf die Seite (Browser-Vorgabe)
+    // Startet Musik beim ersten Klick auf die Seite. Das ist wegen Browser-Vorgaben nötig.
     document.addEventListener("click", () => {
         if (audio.paused) audio.play().catch(() => {});
     }, { once: true });
 
-    function playAudio() { audio.play(); }
-    function pauseAudio() { audio.pause(); }
-    function setVolume(value) { audio.volume = value; }
+    function playAudio() {
+        audio.play();
+    }
+
+    function pauseAudio() {
+        audio.pause();
+    }
+
+    function setVolume(value) {
+        audio.volume = value;
+    }
 
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
