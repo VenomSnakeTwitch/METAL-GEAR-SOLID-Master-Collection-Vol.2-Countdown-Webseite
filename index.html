@@ -91,6 +91,14 @@
             margin-bottom: 30px;
         }
 
+        /* Neue Anzeige für die Wochen */
+        #weeksDisplay {
+            margin-bottom: 30px;
+            font-size: 18px;
+            color: white;
+            text-shadow: 0 0 5px gold;
+        }
+
         .time-box {
             background: rgba(0, 0, 0, 0.8);
             padding: 15px 20px;
@@ -178,38 +186,10 @@
         }
 
         @media (max-width: 900px) {
-            h1 {
-                font-size: 24px;
-            }
-
-            .time-box {
-                min-width: 90px;
-                padding: 12px 14px;
-            }
-
-            .number {
-                font-size: 32px;
-            }
-
-            .label {
-                font-size: 10px;
-            }
-        }
-
-        @media (max-width: 600px) {
-            #mainMenu {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            #menuButtons {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            #overlay {
-                margin-top: 150px;
-            }
+            h1 { font-size: 24px; }
+            .time-box { min-width: 90px; padding: 12px 14px; }
+            .number { font-size: 32px; }
+            .label { font-size: 10px; }
         }
     </style>
 </head>
@@ -257,6 +237,9 @@
         </div>
     </div>
 
+    <!-- Neue Anzeige hier eingefügt -->
+    <div id="weeksDisplay">Ungefähre Zeit bis zur Freischaltung: 0 Wochen</div>
+
     <div class="music-controls">
         <button onclick="playAudio()">▶ Play</button>
         <button onclick="pauseAudio()">⏸ Pause</button>
@@ -273,27 +256,18 @@
 </div>
 
 <script>
-    // ZIELZEIT: 27. August 2026, 14:00 UTC
-    // Das entspricht 16:00 Uhr deutscher Sommerzeit.
     const targetDate = new Date(Date.UTC(2026, 7, 27, 14, 0, 0)).getTime();
 
     function updateUnit(id, value) {
         const el = document.getElementById(id);
-
         if (!el) return;
-
         if (el.textContent !== value) {
             el.classList.add("blink");
-
             setTimeout(() => {
                 el.textContent = value;
                 el.classList.remove("blink");
             }, 150);
         }
-    }
-
-    function getLastDayOfMonthUTC(year, month) {
-        return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
     }
 
     function updateCountdown() {
@@ -302,10 +276,15 @@
         const distance = target.getTime() - now.getTime();
 
         if (distance < 0) {
-            document.getElementById("countdown").innerHTML = "<h2>MISSION COMPLETE - OUT NOW!</h2>";
+            document.getElementById("overlay").innerHTML = "<h1>MISSION COMPLETE - OUT NOW!</h1>";
             return;
         }
 
+        // Berechnung der Wochen für den neuen Text
+        const weeks = Math.floor(distance / (1000 * 60 * 60 * 24 * 7));
+        document.getElementById("weeksDisplay").textContent = "Ungefähre Zeit bis zur Freischaltung: " + weeks + " Wochen";
+
+        // Bestehende Countdown-Logik...
         let years = target.getUTCFullYear() - now.getUTCFullYear();
         let months = target.getUTCMonth() - now.getUTCMonth();
         let days = target.getUTCDate() - now.getUTCDate();
@@ -313,34 +292,14 @@
         let minutes = target.getUTCMinutes() - now.getUTCMinutes();
         let seconds = target.getUTCSeconds() - now.getUTCSeconds();
 
-        if (seconds < 0) {
-            seconds += 60;
-            minutes--;
+        if (seconds < 0) { seconds += 60; minutes--; }
+        if (minutes < 0) { minutes += 60; hours--; }
+        if (hours < 0) { hours += 24; days--; }
+        if (days < 0) { 
+            const prev = new Date(target.getUTCFullYear(), target.getUTCMonth(), 0).getUTCDate();
+            days += prev; months--; 
         }
-
-        if (minutes < 0) {
-            minutes += 60;
-            hours--;
-        }
-
-        if (hours < 0) {
-            hours += 24;
-            days--;
-        }
-
-        if (days < 0) {
-            const previousMonth = target.getUTCMonth() - 1 < 0 ? 11 : target.getUTCMonth() - 1;
-            const previousMonthYear = previousMonth === 11 ? target.getUTCFullYear() - 1 : target.getUTCFullYear();
-            const daysInPreviousMonth = getLastDayOfMonthUTC(previousMonthYear, previousMonth);
-
-            days += daysInPreviousMonth;
-            months--;
-        }
-
-        if (months < 0) {
-            months += 12;
-            years--;
-        }
+        if (months < 0) { months += 12; years--; }
 
         updateUnit("years", String(years).padStart(2, '0'));
         updateUnit("months", String(months).padStart(2, '0'));
@@ -353,33 +312,14 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
+    // Rest des Codes bleibt gleich...
     const audio = document.getElementById("bgMusic");
     audio.volume = 0.3;
-
-    // Startet Musik beim ersten Klick auf die Seite. Das ist wegen Browser-Vorgaben nötig.
-    document.addEventListener("click", () => {
-        if (audio.paused) audio.play().catch(() => {});
-    }, { once: true });
-
-    function playAudio() {
-        audio.play();
-    }
-
-    function pauseAudio() {
-        audio.pause();
-    }
-
-    function setVolume(value) {
-        audio.volume = value;
-    }
-
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-        }
-    }
+    document.addEventListener("click", () => { if (audio.paused) audio.play().catch(() => {}); }, { once: true });
+    function playAudio() { audio.play(); }
+    function pauseAudio() { audio.pause(); }
+    function setVolume(value) { audio.volume = value; }
+    function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); }
 </script>
 
 </body>
