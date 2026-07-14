@@ -415,16 +415,18 @@
     const bubble = document.getElementById("speechBubble");
     const img = document.getElementById("otterImg");
     
-    // Sprechblase sequentiell anzeigen
+        // Sprechblase sequentiell anzeigen
     setInterval(() => {
         bubble.textContent = sayings[currentIndex];
         bubble.style.display = "block";
         
-        // Index erhöhen oder bei Ende zurück auf 0 setzen
         currentIndex = (currentIndex + 1) % sayings.length;
         
+        // Anzeige-Dauer auf 10 Sekunden (10000ms)
         setTimeout(() => { bubble.style.display = "none"; }, 10000);
-    }, 8000);
+        
+    // Intervall auf 12 Sekunden (12000ms), damit kurz Pause ist
+    }, 12000);
 
     // GIF-Loop erzwingen (bleibt wie gehabt)
     setInterval(() => {
