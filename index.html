@@ -332,7 +332,7 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Otacon Sprechblasen-Logik mit 25 Sprüchen
+        // Otacon Sprechblasen-Logik (Sequentieller Loop)
     const sayings = [
         "Kept you waiting, huh?", 
         "Otacon hier, alles klar!", 
@@ -358,19 +358,78 @@
         "Das ist meine Spezialität!",
         "Einfach unglaublich...",
         "Wir schaffen das zusammen!",
-        "Tactical Espionage Action!"
+        "Tactical Espionage Action!",
+"Ich bin Wissenschaftler geworden, weil ich Roboter bauen wollte, wie die aus den japanischen Animes.",
+        "Ich habe mich nicht für die Wissenschaft entschieden, um Atomwaffen zu bauen.",
+        "Gigantische Roboter... das ist mein Traum.",
+        "Es ist ein Metal Gear. Die mächtigste Waffe, die jemals gebaut wurde.",
+        "Die Technologie ist da... ich brauche nur die Daten.",
+        "Es sind neuartige Nanomaschinen. Sie können das Aussehen des Nutzers verändern.",
+        "Der Mk. II ist im Grunde ein ferngesteuerter Roboter.",
+        "Ich habe ihn modifiziert, um eine Tarnfunktion einzubauen.",
+        "Mein Großvater hat am Manhattan-Projekt gearbeitet... das ist mein Erbe.",
+        "Wissenschaft sollte nicht der Zerstörung dienen.",
+        "Die Zukunft aufzubauen und die Vergangenheit am Leben zu erhalten, ist ein und dasselbe.",
+        "Wenn die Fackel von den Eltern an die Kinder weitergegeben wird... reicht das über die DNA hinaus.",
+        "Auch Informationen werden weitergegeben.",
+        "Alles, was ich will, ist, dass man sich an mich erinnert. Von anderen Menschen, von der Geschichte.",
+        "Die Patriots versuchen, den digitalen Informationsfluss zu kontrollieren.",
+        "Sie versuchen, die Wahrheit zu zensieren.",
+        "Wenn wir nichts unternehmen, wird die Zukunft genau so, wie sie es wollen.",
+        "Snake, wir müssen sie aufhalten.",
+        "Geschichte wird von den Siegern geschrieben.",
+        "Die Wahrheit liegt versteckt im digitalen Rauschen.",
+        "Snake, du hast schon genug für diese Welt getan.",
+        "Ich bin kein Held. Ich bin nur ein Zeuge.",
+        "Wir haben es vermieden, uns bei unseren echten Namen zu nennen... aber es ist Zeit, nicht mehr zu verstecken, wer wir sind.",
+        "Ich bin Hal Emmerich.",
+        "Snake, bitte... bleib einfach am Leben.",
+        "Du bist der einzige Freund, den ich habe, Snake.",
+        "Ich werde hier sein und dich unterstützen.",
+        "Wir sind so etwas wie eine Familie, nicht wahr?",
+        "Ich werde nicht zulassen, dass du stirbst, Snake. Nicht so.",
+        "Du bist nicht allein, Snake.",
+        "Keine Waffen mehr, keine Schlachten mehr.",
+        "Du kannst dich jetzt ausruhen.",
+        "Wir haben es geschafft, den Kreislauf der Gewalt zu durchbrechen.",
+        "Die Welt braucht keine Soldaten mehr.",
+        "Sie braucht Menschen, die wieder aufbauen können.",
+        "Krieg ist ein Geschäft, Snake. Und das Geschäft blüht.",
+        "Wir sind nur kleine Rädchen in einer großen Maschine.",
+        "Alles, was wir getan haben... war es das wert?",
+        "Wir sind nicht mehr die Menschen, die wir einmal waren.",
+        "Es gibt keinen sauberen Krieg.",
+        "Snake! Antwort!",
+        "Ich empfange ein seltsames Signal.",
+        "Warte, das stimmt nicht... lass mich das noch mal prüfen.",
+        "Der Codec ist sicher.",
+        "Ich sende dir jetzt die Kartendaten.",
+        "Pass auf! Das ist eine Falle!",
+        "Du hast es geschafft! Ich wusste, dass du es kannst.",
+        "Das ist schlimm... wirklich schlimm.",
+        "Ich tue mein Bestes, Snake!",
+        "Alles wird gut werden."
     ];
 
+    let currentIndex = 0; // Hier speichern wir, welcher Spruch als nächstes dran ist
     const bubble = document.getElementById("speechBubble");
     const img = document.getElementById("otterImg");
     
-    // Sprechblase zufällig anzeigen
+    // Sprechblase sequentiell anzeigen
     setInterval(() => {
-        const randomSaying = sayings[Math.floor(Math.random() * sayings.length)];
-        bubble.textContent = randomSaying;
+        bubble.textContent = sayings[currentIndex];
         bubble.style.display = "block";
+        
+        // Index erhöhen oder bei Ende zurück auf 0 setzen
+        currentIndex = (currentIndex + 1) % sayings.length;
+        
         setTimeout(() => { bubble.style.display = "none"; }, 3000);
     }, 8000);
+
+    // GIF-Loop erzwingen (bleibt wie gehabt)
+    setInterval(() => {
+        img.src = "otacon.gif?t=" + new Date().getTime();
+    }, 10000); 
 
     // GIF-Loop erzwingen
     setInterval(() => {
