@@ -175,7 +175,7 @@
             opacity: 0.8;
         }
 
-                /* Ottercon Styles */
+        /* Ottercon/Otacon Styles */
         #otterContainer {
             position: fixed;
             bottom: 20px;
@@ -192,14 +192,14 @@
             padding: 10px;
             border-radius: 10px;
             position: absolute;
-            /* Hier habe ich den Wert auf 140px erhöht */
-            bottom: 140px;
+            bottom: 130px;
             right: 0;
             width: 150px;
             font-size: 12px;
             font-family: sans-serif;
             display: none;
             border: 2px solid gold;
+            pointer-events: none;
         }
 
         @media (max-width: 900px) {
@@ -267,7 +267,7 @@
     </audio>
 </div>
 
-<!-- Ottercon Bereich -->
+<!-- Ottercon/Otacon Bereich -->
 <div id="otterContainer">
     <div id="speechBubble"></div>
     <img src="otacon.gif" id="otterImg" alt="Otacon">
@@ -332,16 +332,50 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Ottercon Sprechblasen-Logik
-    const sayings = ["Kept you waiting, huh?", "Otacon hier, alles klar!", "Snake, du schaffst das!", "Metal Gear?!", "Nur noch ein bisschen Geduld!"];
+    // Otacon Sprechblasen-Logik mit 25 Sprüchen
+    const sayings = [
+        "Kept you waiting, huh?", 
+        "Otacon hier, alles klar!", 
+        "Snake, du schaffst das!", 
+        "Metal Gear?!", 
+        "Nur noch ein bisschen Geduld!",
+        "Wir müssen das stoppen!",
+        "Ich hab das System gehackt!",
+        "Das ist eine Falle, Snake!",
+        "Ich kann das nicht glauben...",
+        "Hast du die Daten?",
+        "Pass auf dich auf!",
+        "Das wird legendär!",
+        "Ottercon im Einsatz!",
+        "Die Zeit rennt uns davon!",
+        "Was ist das für ein Gerät?",
+        "Ich unterstütze dich von hier!",
+        "Snake, hörst du mich?",
+        "Mission Update incoming!",
+        "Wir sind fast da!",
+        "Nicht aufgeben!",
+        "Versteck dich im Karton!",
+        "Das ist meine Spezialität!",
+        "Einfach unglaublich...",
+        "Wir schaffen das zusammen!",
+        "Tactical Espionage Action!"
+    ];
+
     const bubble = document.getElementById("speechBubble");
+    const img = document.getElementById("otterImg");
     
+    // Sprechblase zufällig anzeigen
     setInterval(() => {
         const randomSaying = sayings[Math.floor(Math.random() * sayings.length)];
         bubble.textContent = randomSaying;
         bubble.style.display = "block";
         setTimeout(() => { bubble.style.display = "none"; }, 3000);
     }, 8000);
+
+    // GIF-Loop erzwingen
+    setInterval(() => {
+        img.src = "otacon.gif?t=" + new Date().getTime();
+    }, 10000); 
 
     const audio = document.getElementById("bgMusic");
     audio.volume = 0.3;
